@@ -1,0 +1,39 @@
+{
+  "name": "new-my-okane",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.4.5",
+    "@iconify-json/lucide": "^1.2.105",
+    "@iconify-json/simple-icons": "^1.2.80",
+    "@nuxt/icon": "2.2.2",
+    "@nuxt/image": "2.0.0",
+    "@nuxt/ui": "^4.7.1",
+    "@nuxthub/core": "0.10.7",
+    "@nuxtjs/google-fonts": "3.2.0",
+    "@types/node": "^25.7.0",
+    "chart.js": "^4.5.1",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "nuxt": "^4.4.4",
+    "postgres": "^3.4.9",
+    "tailwindcss": "^4.2.4",
+    "vue-chartjs": "^5.3.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "eslint": "^10.3.0",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.2.7"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
