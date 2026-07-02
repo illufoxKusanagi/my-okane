@@ -1,7 +1,13 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 
-const db = drizzle(process.env.DATABASE_URL!, { schema });
+const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || "file:local.db";
+const authToken = process.env.TURSO_AUTH_TOKEN;
 
-export { db };
+const client = createClient({
+  url,
+  authToken,
+});
+
+export const db = drizzle({ client });

@@ -1,5 +1,5 @@
-import { db } from "hub:db";
-import { transactions } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { transactions } from "~~/server/db/schema";
 import { sql } from "drizzle-orm";
 
 export default defineEventHandler(async () => {
@@ -7,7 +7,7 @@ export default defineEventHandler(async () => {
     const summary = await db
       .select({
         type: transactions.type,
-        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)::int`,
+        total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(transactions)
       .groupBy(transactions.type);
@@ -15,7 +15,7 @@ export default defineEventHandler(async () => {
     let totalIncome = 0;
     let totalSpending = 0;
 
-    summary.forEach((item) => {
+    summary.forEach((item: { type: string; total: number }) => {
       if (item.type === "income") {
         totalIncome = item.total;
       } else if (item.type === "spending") {

@@ -1,25 +1,27 @@
-import { db } from "hub:db";
-import { transactions } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { transactions } from "~~/server/db/schema";
 import { sql, desc } from "drizzle-orm";
 
 export default defineEventHandler(async () => {
   try {
+    // In SQLite, dates stored via mode: 'timestamp' are unix epochs in seconds.
+    // We format using strftime('%Y-%m', datetime(transaction_date, 'unixepoch'))
     const results = await db
       .select({
-        month: sql<string>`TO_CHAR(${transactions.transactionDate}, 'YYYY-MM')`,
+        month: sql<string>`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
         type: transactions.type,
-        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)::int`,
+        total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(transactions)
       .groupBy(
-        sql`TO_CHAR(${transactions.transactionDate}, 'YYYY-MM')`,
+        sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
         transactions.type
       )
-      .orderBy(desc(sql`TO_CHAR(${transactions.transactionDate}, 'YYYY-MM')`));
+      .orderBy(desc(sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`));
 
     const formatted: Record<string, { income: number; spending: number }> = {};
 
-    results.forEach((row) => {
+    results.forEach((row: { month: string | null; type: string; total: number }) => {
       if (!row.month) return;
       if (!formatted[row.month]) {
         formatted[row.month] = { income: 0, spending: 0 };

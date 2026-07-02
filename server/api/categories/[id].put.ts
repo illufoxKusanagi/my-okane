@@ -1,5 +1,5 @@
-import { db } from "hub:db";
-import { categories } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { categories } from "~~/server/db/schema";
 import { validateUpdateCategory } from "~~/server/utils/validator";
 import { eq } from "drizzle-orm";
 

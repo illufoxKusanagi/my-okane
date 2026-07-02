@@ -1,5 +1,5 @@
-import { db } from "hub:db";
-import { transactions } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { transactions } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {

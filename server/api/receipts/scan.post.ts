@@ -1,5 +1,5 @@
-import { categories } from "hub:db:schema";
-import { db } from "hub:db";
+import { categories, type Category } from "~~/server/db/schema";
+import { db } from "~~/server/db";
 import { type ReceiptScanResult } from "../../utils/receiptTypes";
 
 export default defineEventHandler(async (event) => {
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   // Fetch all existing categories to pass to Gemini for classification
   const allCategories = await db.select().from(categories);
   const categoryListStr = allCategories
-    .map((c) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
+    .map((c: Category) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
     .join("\n");
 
   const prompt = `You are a professional receipt parser. Analyze the uploaded receipt image and extract details to create a transaction.

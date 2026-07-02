@@ -1,5 +1,5 @@
-import { categories } from "hub:db:schema";
-import { db } from "hub:db";
+import { categories } from "~~/server/db/schema";
+import { db } from "~~/server/db";
 import { validateCategory } from "~~/server/utils/validator";
 
 export default defineEventHandler(async (event) => {

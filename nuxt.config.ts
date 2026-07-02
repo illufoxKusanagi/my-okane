@@ -10,9 +10,6 @@ export default defineNuxtConfig({
   devtools: {
     enabled: true,
   },
-  hub: {
-    db: "postgresql",
-  },
   runtimeConfig: {
     geminiApiKey: process.env.GEMINI_API_KEY || "",
   },

@@ -1,5 +1,5 @@
-import { db } from "hub:db";
-import { transactions, categories } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { transactions, categories } from "~~/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
@@ -13,14 +13,14 @@ export default defineEventHandler(async (event) => {
         color: categories.color,
         icon: categories.icon,
         type: categories.type,
-        value: sql<number>`COALESCE(SUM(${transactions.amount}), 0)::int`,
+        value: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(categories)
       .leftJoin(transactions, eq(transactions.categoryId, categories.id))
       .groupBy(categories.id, categories.name, categories.color, categories.icon, categories.type);
 
     if (type === "income" || type === "spending") {
-      return results.filter((r) => r.type === type);
+      return results.filter((r: { type: string }) => r.type === type);
     }
 
     return results;

@@ -1,5 +1,5 @@
-import { db } from "hub:db";
-import { transactions } from "hub:db:schema";
+import { db } from "~~/server/db";
+import { transactions } from "~~/server/db/schema";
 import { validateUpdateTransaction } from "~~/server/utils/validator";
 import { eq } from "drizzle-orm";
 
