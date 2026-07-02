@@ -64,14 +64,15 @@ JSON schema target:
 
 Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdown code blocks like \`\`\`json.`;
 
-  try {
-    const response = await $fetch<{
+  // Helper function to call the Gemini API
+  const callGemini = async (model: string) => {
+    return await $fetch<{
       candidates?: {
         content?: {
           parts?: { text: string }[]
         }
       }[]
-    }>(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    }>(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
       method: "POST",
       body: {
         contents: [
@@ -92,25 +93,56 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
         }
       }
     });
+  };
 
-    const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!textResponse) {
-      throw createError({
-        statusCode: 502,
-        statusMessage: "Empty response from Gemini API."
-      });
+  let response;
+  try {
+    // Try first with gemini-2.0-flash
+    response = await callGemini("gemini-2.0-flash");
+  } catch (err: any) {
+    const isRateLimit = err.statusCode === 429 || err.status === 429 || (err.message && err.message.includes("429"));
+    if (isRateLimit) {
+      console.warn("Gemini 2.0 Flash rate limit (429) hit. Falling back to Gemini 1.5 Flash after a short delay...");
+      
+      // Wait 1.5 seconds before retrying to allow rate-limits to settle
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      try {
+        response = await callGemini("gemini-1.5-flash");
+      } catch (fallbackErr: any) {
+        const isFallbackRateLimit = fallbackErr.statusCode === 429 || fallbackErr.status === 429 || (fallbackErr.message && fallbackErr.message.includes("429"));
+        if (isFallbackRateLimit) {
+          throw createError({
+            statusCode: 429,
+            statusMessage: "Gemini API rate limit exceeded. Please wait a moment before trying to scan again."
+          });
+        }
+        throw fallbackErr;
+      }
+    } else {
+      throw err;
     }
+  }
 
+  const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!textResponse) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Empty response from Gemini API."
+    });
+  }
+
+  try {
     const parsedResult = JSON.parse(textResponse) as ReceiptScanResult;
     return {
       success: true,
       data: parsedResult
     };
-  } catch (err: any) {
-    console.error("Gemini OCR Scan Error:", err);
+  } catch (parseErr) {
+    console.error("Failed to parse Gemini JSON response:", textResponse);
     throw createError({
-      statusCode: err.statusCode || 500,
-      statusMessage: err.statusMessage || err.message || "Failed to scan receipt image."
+      statusCode: 502,
+      statusMessage: "Invalid JSON format returned by Gemini API."
     });
   }
 });
