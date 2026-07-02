@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import type { Transaction } from "~/composables/useFinance";
 import { useReceiptScan } from "~/composables/useReceiptScan";
 
@@ -13,6 +13,11 @@ const {
 
 const { isScanning, scanError, scan } = useReceiptScan();
 const fileInput = ref<HTMLInputElement | null>(null);
+
+const isMobile = ref(false);
+onMounted(() => {
+  isMobile.value = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+});
 
 const triggerFileSelect = () => {
   fileInput.value?.click();
@@ -220,7 +225,7 @@ const colorClassMap: Record<string, string> = {
       ref="fileInput"
       accept="image/*"
       class="hidden"
-      capture="environment"
+      :capture="isMobile ? 'environment' : undefined"
       @change="onFileSelected"
     />
 
