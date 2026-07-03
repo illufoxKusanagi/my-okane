@@ -17,6 +17,9 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const { transactions } = useFinance();
 
+const colorMode = useColorMode();
+const isDark = computed(() => colorMode.value === "dark");
+
 const monthlyData = computed(() => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const currentYear = new Date().getFullYear();
@@ -95,7 +98,7 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
         usePointStyle: true,
         pointStyle: "circle",
         padding: 20,
-        color: "hsl(var(--ui-text-muted, 0 0% 50%))",
+        color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
           family: "system-ui, sans-serif",
           size: 11
@@ -103,10 +106,10 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
       }
     },
     tooltip: {
-      backgroundColor: "hsl(var(--ui-bg-elevated, 0 0% 95%))",
-      titleColor: "hsl(var(--ui-text, 0 0% 10%))",
-      bodyColor: "hsl(var(--ui-text-muted, 0 0% 40%))",
-      borderColor: "hsl(var(--ui-border, 0 0% 90%))",
+      backgroundColor: isDark.value ? "#1f2937" : "#ffffff",
+      titleColor: isDark.value ? "#f3f4f6" : "#111827",
+      bodyColor: isDark.value ? "#9ca3af" : "#4b5563",
+      borderColor: isDark.value ? "#374151" : "#e5e7eb",
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -123,7 +126,7 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
         display: false
       },
       ticks: {
-        color: "hsl(var(--ui-text-muted, 0 0% 50%))",
+        color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
           size: 11
         }
@@ -131,10 +134,10 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
     },
     y: {
       grid: {
-        color: "rgba(156, 163, 175, 0.1)"
+        color: isDark.value ? "rgba(255, 255, 255, 0.05)" : "rgba(156, 163, 175, 0.1)"
       },
       ticks: {
-        color: "hsl(var(--ui-text-muted, 0 0% 50%))",
+        color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
           size: 11
         },
@@ -163,7 +166,7 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
     </template>
 
     <div class="w-full h-full relative">
-      <Bar :data="chartData" :options="chartOptions" />
+      <Bar :key="colorMode.value" :data="chartData" :options="chartOptions" />
     </div>
   </UCard>
 </template>

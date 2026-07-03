@@ -239,18 +239,20 @@ const colorClassMap: Record<string, string> = {
           <template #right>
             <div class="flex items-center gap-2">
               <UButton
-                label="Scan Receipt"
                 icon="i-lucide-camera"
                 color="neutral"
                 variant="outline"
                 @click="triggerFileSelect"
-              />
+              >
+                <span class="hidden sm:inline">Scan Receipt</span>
+              </UButton>
               <UButton
-                label="Add Transaction"
                 icon="i-lucide-plus"
                 color="primary"
                 @click="openAddModal"
-              />
+              >
+                <span class="hidden sm:inline">Add Transaction</span>
+              </UButton>
               <ColorModeButton />
             </div>
           </template>
@@ -310,9 +312,9 @@ const colorClassMap: Record<string, string> = {
               <div
                 v-for="tx in filteredTransactions"
                 :key="tx.id"
-                class="flex items-center justify-between p-5 rounded-2xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 group"
+                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 gap-3 sm:gap-4 group"
               >
-                <div class="flex items-center gap-4 flex-1 min-w-0">
+                <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                   <!-- Category Icon Badge -->
                   <div
                     :class="[
@@ -330,11 +332,11 @@ const colorClassMap: Record<string, string> = {
                   <!-- Transaction Info -->
                   <div class="flex-1 min-w-0">
                     <p
-                      class="font-bold text-neutral-850 dark:text-neutral-100 truncate"
+                      class="font-bold text-neutral-850 dark:text-neutral-100 truncate text-sm sm:text-base"
                     >
                       {{ tx.name }}
                     </p>
-                    <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center gap-2 mt-0.5 sm:mt-1">
                       <span class="text-xs text-neutral-500">
                         {{ formatDate(tx.transactionDate) }}
                       </span>
@@ -358,10 +360,10 @@ const colorClassMap: Record<string, string> = {
                 </div>
 
                 <!-- Amount and Actions -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800/50 pt-2 sm:pt-0">
                   <span
                     :class="[
-                      'text-lg font-extrabold tabular-nums',
+                      'text-base sm:text-lg font-extrabold tabular-nums',
                       tx.type === 'income'
                         ? 'text-emerald-500'
                         : 'text-rose-500',
@@ -372,7 +374,7 @@ const colorClassMap: Record<string, string> = {
                   </span>
 
                   <div
-                    class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    class="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
                   >
                     <UButton
                       icon="i-lucide-pencil"

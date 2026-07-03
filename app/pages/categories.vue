@@ -134,11 +134,12 @@ const handleDeleteConfirm = async () => {
           <template #right>
             <div class="flex items-center gap-2">
               <UButton
-                label="Add Category"
                 icon="i-lucide-plus"
                 color="primary"
                 @click="openCreateModal"
-              />
+              >
+                <span class="hidden sm:inline">Add Category</span>
+              </UButton>
               <ColorModeButton />
             </div>
           </template>
@@ -198,7 +199,7 @@ const handleDeleteConfirm = async () => {
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-neutral-100 dark:border-neutral-800/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div class="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-neutral-100 dark:border-neutral-800/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
               <UButton
                 icon="i-lucide-pencil"
                 size="xs"

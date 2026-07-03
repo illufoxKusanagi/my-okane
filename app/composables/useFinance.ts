@@ -161,6 +161,19 @@ export function useFinance() {
     "hsl(340 80% 55%)",
   ];
 
+  const chartColorMap: Record<string, string> = {
+    blue: "hsl(217, 91%, 60%)",
+    emerald: "hsl(142, 71%, 45%)",
+    amber: "hsl(38, 92%, 50%)",
+    rose: "hsl(347, 87%, 60%)",
+    purple: "hsl(271, 91%, 65%)",
+    pink: "hsl(328, 86%, 65%)",
+    yellow: "hsl(48, 96%, 53%)",
+    cyan: "hsl(189, 94%, 43%)",
+    indigo: "hsl(239, 84%, 67%)",
+    slate: "hsl(215, 16%, 47%)",
+  };
+
   const getSpendingByCategory = (): CategoryData[] => {
     const categoryMap = new Map<string, { value: number; color: string }>();
 
@@ -168,7 +181,8 @@ export function useFinance() {
       .filter((t) => t.type === "spending")
       .forEach((t) => {
         const catName = t.categoryName || "Uncategorized";
-        const catColor = (t.categoryColor || colors[categoryMap.size % colors.length]) as string;
+        const catColorName = t.categoryColor || "slate";
+        const catColor = (chartColorMap[catColorName] || colors[categoryMap.size % colors.length] || "hsl(215, 16%, 47%)") as string;
         const existing = categoryMap.get(catName) || { value: 0, color: catColor };
         categoryMap.set(catName, {
           value: existing.value + t.amount,
@@ -190,7 +204,8 @@ export function useFinance() {
       .filter((t) => t.type === "income")
       .forEach((t) => {
         const catName = t.categoryName || "Uncategorized";
-        const catColor = (t.categoryColor || colors[categoryMap.size % colors.length]) as string;
+        const catColorName = t.categoryColor || "slate";
+        const catColor = (chartColorMap[catColorName] || colors[categoryMap.size % colors.length] || "hsl(215, 16%, 47%)") as string;
         const existing = categoryMap.get(catName) || { value: 0, color: catColor };
         categoryMap.set(catName, {
           value: existing.value + t.amount,

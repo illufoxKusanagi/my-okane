@@ -62,6 +62,9 @@ const chartData = computed<ChartData<"doughnut">>(() => ({
   ],
 }));
 
+const colorMode = useColorMode();
+const isDark = computed(() => colorMode.value === "dark");
+
 const chartOptions = computed<ChartOptions<"doughnut">>(() => ({
   responsive: true,
   maintainAspectRatio: false,
@@ -69,10 +72,10 @@ const chartOptions = computed<ChartOptions<"doughnut">>(() => ({
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: "hsl(var(--ui-bg-elevated))",
-      titleColor: "hsl(var(--ui-text))",
-      bodyColor: "hsl(var(--ui-text-muted))",
-      borderColor: "hsl(var(--ui-border))",
+      backgroundColor: isDark.value ? "#1f2937" : "#ffffff",
+      titleColor: isDark.value ? "#f3f4f6" : "#111827",
+      bodyColor: isDark.value ? "#9ca3af" : "#4b5563",
+      borderColor: isDark.value ? "#374151" : "#e5e7eb",
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -102,10 +105,10 @@ const centerTextPlugin = {
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "hsl(var(--ui-text, 0 0% 10%))";
+    ctx.fillStyle = isDark.value ? "#f3f4f6" : "#111827";
     ctx.font = "bold 1.4rem system-ui, sans-serif";
     ctx.fillText(`Rp. ${computedCenterLabel.value}`, cx, cy - 10);
-    ctx.fillStyle = "hsl(var(--ui-text-muted, 0 0% 50%))";
+    ctx.fillStyle = isDark.value ? "#9ca3af" : "#6b7280";
     ctx.font = "0.8rem system-ui, sans-serif";
     ctx.fillText(props.centerSubLabel ?? "", cx, cy + 14);
     ctx.restore();
@@ -126,6 +129,7 @@ const centerTextPlugin = {
     <!-- Chart -->
     <div class="relative mx-auto w-full max-w-[240px] aspect-square">
       <Doughnut
+        :key="colorMode.value"
         :data="chartData"
         :options="chartOptions"
         :plugins="[centerTextPlugin]"

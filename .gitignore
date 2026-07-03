@@ -27,3 +27,4 @@ logs
 .env.sentry-build-plugin
 
 /docs
+    
