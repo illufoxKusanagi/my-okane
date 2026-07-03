@@ -1,6 +1,7 @@
 import { categories, type Category } from "~~/server/db/schema";
 import { db } from "~~/server/db";
 import { type ReceiptScanResult } from "../../utils/receiptTypes";
+import * as Sentry from "@sentry/nuxt";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -110,6 +111,7 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
       try {
         response = await callGemini("gemini-1.5-flash");
       } catch (fallbackErr: any) {
+        Sentry.captureException(fallbackErr);
         const isFallbackRateLimit = fallbackErr.statusCode === 429 || fallbackErr.status === 429 || (fallbackErr.message && fallbackErr.message.includes("429"));
         if (isFallbackRateLimit) {
           throw createError({
@@ -120,16 +122,19 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
         throw fallbackErr;
       }
     } else {
+      Sentry.captureException(err);
       throw err;
     }
   }
 
   const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!textResponse) {
-    throw createError({
+    const emptyErr = createError({
       statusCode: 502,
       statusMessage: "Empty response from Gemini API."
     });
+    Sentry.captureException(emptyErr);
+    throw emptyErr;
   }
 
   try {
@@ -138,8 +143,11 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
       success: true,
       data: parsedResult
     };
-  } catch (parseErr) {
+  } catch (parseErr: any) {
     console.error("Failed to parse Gemini JSON response:", textResponse);
+    Sentry.captureException(parseErr, {
+      extra: { textResponse }
+    });
     throw createError({
       statusCode: 502,
       statusMessage: "Invalid JSON format returned by Gemini API."

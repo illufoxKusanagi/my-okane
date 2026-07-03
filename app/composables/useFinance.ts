@@ -1,4 +1,5 @@
 import { ref, computed } from "vue";
+import * as Sentry from "@sentry/nuxt";
 
 export interface Transaction {
   id: number;
@@ -45,6 +46,7 @@ export function useFinance() {
       isInitialized.value = true;
     } catch (error) {
       console.error("Failed to fetch finance data:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -79,6 +81,7 @@ export function useFinance() {
       }
     } catch (error) {
       console.error("Failed to add transaction:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -92,6 +95,7 @@ export function useFinance() {
       }
     } catch (error) {
       console.error("Failed to delete transaction:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -106,6 +110,7 @@ export function useFinance() {
       }
     } catch (error) {
       console.error("Failed to add category:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -119,6 +124,7 @@ export function useFinance() {
       }
     } catch (error) {
       console.error("Failed to delete category:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -133,6 +139,7 @@ export function useFinance() {
       }
     } catch (error) {
       console.error("Failed to update category:", error);
+      Sentry.captureException(error);
     }
   };
 

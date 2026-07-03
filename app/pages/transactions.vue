@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import type { Transaction } from "~/composables/useFinance";
 import { useReceiptScan } from "~/composables/useReceiptScan";
+import * as Sentry from "@sentry/nuxt";
 
 const {
   transactions,
@@ -60,6 +61,7 @@ const onFileSelected = async (event: Event) => {
     }
   } catch (err: any) {
     alert(err.message || "Failed to scan receipt.");
+    Sentry.captureException(err);
   } finally {
     if (fileInput.value) {
       fileInput.value.value = "";
@@ -161,6 +163,7 @@ const handleSaveTransaction = async () => {
     isModalOpen.value = false;
   } catch (error) {
     console.error("Failed to save transaction:", error);
+    Sentry.captureException(error);
   }
 };
 
@@ -253,7 +256,7 @@ const colorClassMap: Record<string, string> = {
           </template>
         </UDashboardNavbar>
 
-        <UDashboardPanelContent class="h-full overflow-auto p-4">
+        <div class="h-full overflow-auto p-4">
           <UContainer class="py-6 flex flex-col gap-6 w-full">
             <!-- Filters Row -->
             <div
@@ -415,7 +418,7 @@ const colorClassMap: Record<string, string> = {
               />
             </div>
           </UContainer>
-        </UDashboardPanelContent>
+        </div>
 
         <!-- Create/Edit Modal -->
         <UModal v-model:open="isModalOpen">
