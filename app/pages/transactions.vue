@@ -244,14 +244,14 @@ const colorClassMap: Record<string, string> = {
                 variant="outline"
                 @click="triggerFileSelect"
               >
-                <span class="hidden sm:inline">Scan Receipt</span>
+                <span class="sr-only sm:not-sr-only">Scan Receipt</span>
               </UButton>
               <UButton
                 icon="i-lucide-plus"
                 color="primary"
                 @click="openAddModal"
               >
-                <span class="hidden sm:inline">Add Transaction</span>
+                <span class="sr-only sm:not-sr-only">Add Transaction</span>
               </UButton>
               <ColorModeButton />
             </div>
@@ -360,7 +360,9 @@ const colorClassMap: Record<string, string> = {
                 </div>
 
                 <!-- Amount and Actions -->
-                <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800/50 pt-2 sm:pt-0">
+                <div
+                  class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800/50 pt-2 sm:pt-0"
+                >
                   <span
                     :class="[
                       'text-base sm:text-lg font-extrabold tabular-nums',
