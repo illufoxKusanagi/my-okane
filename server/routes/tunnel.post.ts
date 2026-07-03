@@ -2,10 +2,15 @@ import { defineEventHandler, readRawBody } from "h3";
 
 const SENTRY_HOST = process.env.SENTRY_HOST!;
 const SENTRY_PROJECT_IDS_RAW = process.env.SENTRY_PROJECT_IDS;
-const KNOWN_PROJECT_IDS: string[] = SENTRY_PROJECT_IDS_RAW
-  ? JSON.parse(SENTRY_PROJECT_IDS_RAW).map(String)
-  : ["4511668334821376"];
-
+const KNOWN_PROJECT_IDS: string[] = (() => {
+  if (!SENTRY_PROJECT_IDS_RAW) return ["4511668334821376"];
+  try {
+    const parsed = JSON.parse(SENTRY_PROJECT_IDS_RAW);
+    return Array.isArray(parsed) ? parsed.map(String) : ["4511668334821376"];
+  } catch {
+    return ["4511668334821376"];
+  }
+})();
 export default defineEventHandler(async (event) => {
   const body = await readRawBody(event);
   if (!body) {
