@@ -41,7 +41,6 @@ const items: NavigationMenuItem[][] = [
     collapsible
     resizable
     :ui="{ footer: 'border-t border-default' }"
-    open
     :toggle="{
       color: 'primary',
       variant: 'soft',
