@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { type ReceiptScanResult } from "../../server/utils/receiptTypes";
+import * as Sentry from "@sentry/nuxt";
 
 const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.75): Promise<File> => {
   return new Promise((resolve, reject) => {
@@ -113,6 +114,14 @@ export function useReceiptScan() {
     } catch (err: any) {
       const msg = err.statusMessage || err.message || "An error occurred while scanning.";
       scanError.value = msg;
+      Sentry.captureException(err, {
+        tags: { feature: "receipt-scan" },
+        extra: {
+          statusCode: err.statusCode || err.status,
+          statusMessage: err.statusMessage,
+          originalFileSize: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        },
+      });
       throw err;
     } finally {
       isScanning.value = false;
