@@ -144,7 +144,7 @@ const handleDeleteConfirm = async () => {
           </template>
         </UDashboardNavbar>
 
-        <UDashboardPanelContent class="h-full overflow-auto p-4">
+        <div class="h-full overflow-auto p-4">
           <UContainer class="py-6 flex flex-col gap-6 w-full">
         <!-- Tabs -->
         <div class="flex border-b border-neutral-200 dark:border-neutral-800">
@@ -228,7 +228,7 @@ const handleDeleteConfirm = async () => {
           <UButton label="Add Category" icon="i-lucide-plus" size="sm" @click="openCreateModal" />
         </div>
       </UContainer>
-    </UDashboardPanelContent>
+    </div>
 
     <!-- Create/Edit Modal -->
     <UModal v-model:open="isModalOpen">

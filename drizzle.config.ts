@@ -8,7 +8,9 @@ export default defineConfig({
   out: "./server/db/migrations/turso",
   dialect: "turso",
   dbCredentials: {
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
+    url:
+      // process.env.TURSO_DATABASE_URL! ||
+      "postgresql://myokane:myokane@localhost:5432/myokane_db",
+    // authToken: process.env.TURSO_AUTH_TOKEN,
   },
 });

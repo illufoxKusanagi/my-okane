@@ -21,7 +21,7 @@ const incomeCategories = computed(() => getCategories("income"));
           </template>
         </UDashboardNavbar>
 
-        <UDashboardPanelContent class="h-full overflow-auto p-4">
+        <div class="h-full overflow-auto p-4">
           <UContainer class="flex flex-col gap-4">
             <!-- Income and Spending Summary Cards -->
             <div class="flex flex-col md:flex-row gap-4">
@@ -68,7 +68,7 @@ const incomeCategories = computed(() => getCategories("income"));
               />
             </div>
           </UContainer>
-        </UDashboardPanelContent>
+        </div>
       </UDashboardPanel>
     </UDashboardGroup>
   </div>
