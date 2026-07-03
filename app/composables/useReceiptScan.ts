@@ -4,8 +4,9 @@ import * as Sentry from "@sentry/nuxt";
 
 const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.75): Promise<File> => {
   return new Promise((resolve, reject) => {
-    // Only compress images
-    if (!file.type.startsWith("image/")) {
+    // Only compress images. Check file type or extension (for mobile uploads with generic MIME types)
+    const isImage = file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
+    if (!isImage) {
       return resolve(file);
     }
 
@@ -57,7 +58,7 @@ const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 
       );
     };
     img.onerror = (err) => {
-      reject(err);
+      reject(new Error("Failed to load image in browser for compression."));
     };
   });
 };
@@ -92,8 +93,10 @@ export function useReceiptScan() {
 
       console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
 
-      if (compressedFile.size > 10 * 1024 * 1024) {
-        throw new Error("File size exceeds 10MB limit.");
+      if (compressedFile.size > 3 * 1024 * 1024) {
+        throw new Error(
+          `Image is too large (${(compressedFile.size / 1024 / 1024).toFixed(2)}MB). Please choose a smaller file or reduce your camera's photo resolution.`
+        );
       }
 
       const base64Image = await fileToBase64(compressedFile);
