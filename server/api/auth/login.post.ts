@@ -1,7 +1,7 @@
 import { db } from "~~/server/db";
 import { users } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { checkRateLimit } from "~~/server/utils/rateLimiter";
