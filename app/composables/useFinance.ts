@@ -1,4 +1,4 @@
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, effectScope } from "vue";
 import * as Sentry from "@sentry/nuxt";
 
 export interface Transaction {
@@ -33,6 +33,7 @@ export interface CategoryData {
 const transactions = ref<Transaction[]>([]);
 const categories = ref<Category[]>([]);
 const isInitialized = ref(false);
+let isWatcherRegistered = false;
 
 export function useFinance() {
   const { user } = useUserSession();
@@ -64,15 +65,19 @@ export function useFinance() {
     fetchAll();
   }
 
-  // Watch for session changes
-  if (import.meta.client) {
-    watch(user, (newUser) => {
-      if (newUser) {
-        fetchAll();
-      } else {
-        reset();
-      }
+  // Watch for session changes only once per app instance
+  if (import.meta.client && !isWatcherRegistered) {
+    const scope = effectScope(true);
+    scope.run(() => {
+      watch(user, (newUser) => {
+        if (newUser) {
+          fetchAll();
+        } else {
+          reset();
+        }
+      });
     });
+    isWatcherRegistered = true;
   }
 
   const addTransaction = async (
@@ -125,7 +130,7 @@ export function useFinance() {
     date?: string | Date
   ) => {
     try {
-      const res = await $fetch<{ success: boolean }>((`/api/transactions/${id}`), {
+      const res = await $fetch<{ success: boolean; data: Transaction }>((`/api/transactions/${id}`), {
         method: "PUT",
         body: {
           name,

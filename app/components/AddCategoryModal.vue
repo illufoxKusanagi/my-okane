@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { Category } from "~/composables/useFinance";
 
 const props = defineProps({
   type: {
