@@ -8,6 +8,7 @@ const {
   transactions,
   categories,
   addTransaction,
+  updateTransaction,
   deleteTransaction,
   getCategories,
 } = useFinance();
@@ -139,25 +140,21 @@ const handleSaveTransaction = async () => {
 
   try {
     if (editingTransaction.value) {
-      await $fetch(`/api/transactions/${editingTransaction.value.id}`, {
-        method: "PUT",
-        body: {
-          name: txName.value,
-          type: txType.value,
-          amount: txAmount.value,
-          categoryId: txCategoryId.value,
-          notes: txNotes.value,
-        },
-      });
-      // Fetch all to refresh
-      const { fetchAll } = useFinance();
-      await fetchAll();
+      await updateTransaction(
+        editingTransaction.value.id,
+        txName.value,
+        txCategoryId.value,
+        txAmount.value,
+        txType.value,
+        txNotes.value
+      );
     } else {
       await addTransaction(
         txName.value,
         txCategoryId.value,
         txAmount.value,
         txType.value,
+        txNotes.value
       );
     }
     isModalOpen.value = false;

@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch, effectScope } from "vue";
 import * as Sentry from "@sentry/nuxt";
 
 export interface Transaction {
@@ -33,8 +33,12 @@ export interface CategoryData {
 const transactions = ref<Transaction[]>([]);
 const categories = ref<Category[]>([]);
 const isInitialized = ref(false);
+let isWatcherRegistered = false;
 
 export function useFinance() {
+  const { user } = useUserSession();
+  const toast = useToast();
+
   const fetchAll = async () => {
     try {
       const [txData, catData] = await Promise.all([
@@ -50,9 +54,30 @@ export function useFinance() {
     }
   };
 
+  const reset = () => {
+    transactions.value = [];
+    categories.value = [];
+    isInitialized.value = false;
+  };
+
   // Automatically initialize if not done yet
-  if (!isInitialized.value && import.meta.client) {
+  if (!isInitialized.value && import.meta.client && user.value) {
     fetchAll();
+  }
+
+  // Watch for session changes only once per app instance
+  if (import.meta.client && !isWatcherRegistered) {
+    const scope = effectScope(true);
+    scope.run(() => {
+      watch(user, (newUser) => {
+        if (newUser) {
+          fetchAll();
+        } else {
+          reset();
+        }
+      });
+    });
+    isWatcherRegistered = true;
   }
 
   const addTransaction = async (
@@ -76,12 +101,63 @@ export function useFinance() {
         },
       });
       if (res.success) {
-        // Refresh all data to ensure summary/categories/txs are updated and joined correctly
         await fetchAll();
+        toast.add({
+          title: "Transaction Added",
+          description: `Successfully added "${name}".`,
+          color: "success",
+        });
       }
     } catch (error) {
       console.error("Failed to add transaction:", error);
       Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Add Transaction",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
+    }
+  };
+
+  const updateTransaction = async (
+    id: number,
+    name: string,
+    categoryId: number,
+    amount: number,
+    type: "income" | "spending",
+    notes?: string | null,
+    date?: string | Date
+  ) => {
+    try {
+      const res = await $fetch<{ success: boolean; data: Transaction }>((`/api/transactions/${id}`), {
+        method: "PUT",
+        body: {
+          name,
+          categoryId,
+          amount,
+          type,
+          notes,
+          transactionDate: date,
+        },
+      });
+      if (res.success) {
+        await fetchAll();
+        toast.add({
+          title: "Transaction Updated",
+          description: `Successfully updated "${name}".`,
+          color: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update transaction:", error);
+      Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Update Transaction",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
     }
   };
 
@@ -92,10 +168,21 @@ export function useFinance() {
       });
       if (res.success) {
         await fetchAll();
+        toast.add({
+          title: "Transaction Deleted",
+          description: "Transaction has been deleted successfully.",
+          color: "success",
+        });
       }
     } catch (error) {
       console.error("Failed to delete transaction:", error);
       Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Delete Transaction",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
     }
   };
 
@@ -107,10 +194,21 @@ export function useFinance() {
       });
       if (res.success) {
         await fetchAll();
+        toast.add({
+          title: "Category Added",
+          description: `Successfully added "${name}".`,
+          color: "success",
+        });
       }
     } catch (error) {
       console.error("Failed to add category:", error);
       Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Add Category",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
     }
   };
 
@@ -121,10 +219,21 @@ export function useFinance() {
       });
       if (res.success) {
         await fetchAll();
+        toast.add({
+          title: "Category Deleted",
+          description: "Category has been deleted successfully.",
+          color: "success",
+        });
       }
     } catch (error) {
       console.error("Failed to delete category:", error);
       Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Delete Category",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
     }
   };
 
@@ -136,10 +245,21 @@ export function useFinance() {
       });
       if (res.success) {
         await fetchAll();
+        toast.add({
+          title: "Category Updated",
+          description: `Successfully updated "${name}".`,
+          color: "success",
+        });
       }
     } catch (error) {
       console.error("Failed to update category:", error);
       Sentry.captureException(error);
+      toast.add({
+        title: "Failed to Update Category",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        color: "error",
+      });
+      throw error;
     }
   };
 
@@ -239,6 +359,7 @@ export function useFinance() {
     isInitialized,
     fetchAll,
     addTransaction,
+    updateTransaction,
     deleteTransaction,
     addCategory,
     updateCategory,
@@ -249,5 +370,6 @@ export function useFinance() {
     getTotalSpending,
     getTotalIncome,
     getTransactionsByCategory,
+    reset,
   };
 }

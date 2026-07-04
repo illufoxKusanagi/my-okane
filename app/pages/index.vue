@@ -41,8 +41,8 @@ const incomeCategories = computed(() => getCategories("income"));
 
             <!-- Add Category Buttons -->
             <div class="flex flex-col md:flex-row gap-2">
-              <AddCategoryDrawer type="spending" />
-              <AddCategoryDrawer type="income" />
+              <AddCategoryModal type="spending" />
+              <AddCategoryModal type="income" />
             </div>
 
             <!-- Spending Details by Category -->

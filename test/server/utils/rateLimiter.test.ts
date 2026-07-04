@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { checkRateLimit, resetRateLimits } from "~~/server/utils/rateLimiter";
 import { type H3Event } from "h3";
 
@@ -33,6 +33,10 @@ describe("checkRateLimit utility", () => {
     mockCreateError.mockClear();
     mockGetRequestIP.mockClear();
     vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should allow requests under the limit", () => {
