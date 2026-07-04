@@ -1,6 +1,7 @@
 import { db } from "~~/server/db";
-import { transactions } from "~~/server/db/schema";
+import { transactions, categories } from "~~/server/db/schema";
 import { validateTransaction } from "~~/server/utils/validator";
+import { and, eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -16,6 +17,19 @@ export default defineEventHandler(async (event) => {
 
   try {
     const userId = await getAuthUserId(event);
+
+    const category = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, validation.data.categoryId), eq(categories.userId, userId)))
+      .limit(1);
+
+    if (category.length === 0) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Category not found or does not belong to the user",
+      });
+    }
 
     const newTransaction = await db
       .insert(transactions)
