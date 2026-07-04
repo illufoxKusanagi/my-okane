@@ -1,12 +1,14 @@
 import { db } from "~~/server/db";
 import { transactions, categories } from "~~/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const type = query.type as string | undefined;
 
   try {
+    const userId = await getAuthUserId(event);
+
     const results = await db
       .select({
         label: categories.name,
@@ -16,7 +18,11 @@ export default defineEventHandler(async (event) => {
         value: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(categories)
-      .leftJoin(transactions, eq(transactions.categoryId, categories.id))
+      .leftJoin(
+        transactions,
+        and(eq(transactions.categoryId, categories.id), eq(transactions.userId, userId))
+      )
+      .where(eq(categories.userId, userId))
       .groupBy(categories.id, categories.name, categories.color, categories.icon, categories.type);
 
     if (type === "income" || type === "spending") {

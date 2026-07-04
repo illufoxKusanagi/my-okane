@@ -1,5 +1,28 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import { computed } from "vue";
+
+const { user, clear } = useUserSession();
+
+const handleLogout = async () => {
+  try {
+    await $fetch("/api/auth/logout", { method: "POST" });
+    await clear();
+    await navigateTo("/login");
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
+
+const dropdownItems = computed(() => [
+  [
+    {
+      label: "Sign out",
+      icon: "i-lucide-log-out",
+      onSelect: handleLogout,
+    },
+  ],
+]);
 
 const items: NavigationMenuItem[][] = [
   [
@@ -90,17 +113,24 @@ const items: NavigationMenuItem[][] = [
     </template>
 
     <template #footer="{ collapsed }">
-      <UButton
-        :avatar="{
-          src: 'https://github.com/benjamincanac.png',
-          loading: 'lazy' as const,
-        }"
-        :label="collapsed ? undefined : 'Benjamin'"
-        color="neutral"
-        variant="ghost"
+      <UDropdownMenu
+        v-if="user"
+        :items="dropdownItems"
+        :content="{ align: 'start' }"
         class="w-full"
-        :block="collapsed"
-      />
+      >
+        <UButton
+          :avatar="{
+            src: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}`,
+            loading: 'lazy' as const,
+          }"
+          :label="collapsed ? undefined : user.name"
+          color="neutral"
+          variant="ghost"
+          class="w-full"
+          :block="collapsed"
+        />
+      </UDropdownMenu>
     </template>
   </UDashboardSidebar>
 </template>

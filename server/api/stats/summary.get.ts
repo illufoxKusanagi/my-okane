@@ -1,15 +1,18 @@
 import { db } from "~~/server/db";
 import { transactions } from "~~/server/db/schema";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   try {
+    const userId = await getAuthUserId(event);
+
     const summary = await db
       .select({
         type: transactions.type,
         total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(transactions)
+      .where(eq(transactions.userId, userId))
       .groupBy(transactions.type);
 
     let totalIncome = 0;

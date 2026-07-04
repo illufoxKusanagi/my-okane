@@ -1,7 +1,7 @@
 import { db } from "~~/server/db";
 import { categories } from "~~/server/db/schema";
 import { validateUpdateCategory } from "~~/server/utils/validator";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const idStr = event.context.params?.id;
@@ -32,6 +32,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const userId = await getAuthUserId(event);
+
     const updatedCategory = await db
       .update(categories)
       .set({
@@ -40,7 +42,7 @@ export default defineEventHandler(async (event) => {
         icon: validation.data.icon,
         color: validation.data.color,
       })
-      .where(eq(categories.id, id))
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)))
       .returning();
 
     if (updatedCategory.length === 0) {

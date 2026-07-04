@@ -7,7 +7,48 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxthub/core",
     "@sentry/nuxt/module",
+    "nuxt-auth-utils",
+    "@vite-pwa/nuxt",
   ],
+
+  pwa: {
+    registerType: "autoUpdate",
+    manifest: {
+      name: "My Okane",
+      short_name: "MyOkane",
+      description: "Isolated Multi-User Personal Finance Tracker",
+      theme_color: "#0f172a",
+      background_color: "#0f172a",
+      start_url: "/",
+      display: "standalone",
+      orientation: "portrait",
+      icons: [
+        {
+          src: "pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png"
+        },
+        {
+          src: "pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable"
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: "/"
+    },
+    devOptions: {
+      enabled: true,
+      type: "module"
+    }
+  },
 
   devtools: {
     enabled: true,
