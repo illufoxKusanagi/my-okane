@@ -63,12 +63,12 @@ const startViewTransition = (event: MouseEvent) => {
     -webkit-mask-size: 0;
   }
   10% {
-    mask-size: 40vmax;
-    -webkit-mask-size: 40vmax;
+    mask-size: 35vmax;
+    -webkit-mask-size: 35vmax;
   }
   90% {
-    mask-size: 40vmax;
-    -webkit-mask-size: 40vmax;
+    mask-size: 35vmax;
+    -webkit-mask-size: 35vmax;
   }
   100% {
     mask-size: 750vmax;
