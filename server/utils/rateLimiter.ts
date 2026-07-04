@@ -1,17 +1,17 @@
-import { type H3Event, getRequestIP } from "h3";
+import { type H3Event, getRequestIP, setResponseHeader, createError } from "h3";
 
 interface RateLimitConfig {
-  uniqueKey: string;     // Identifier for the route/action
-  windowMs: number;      // Sliding window size in milliseconds
-  limit: number;         // Max requests allowed in the window
-  message: string;       // Custom error message
+  uniqueKey: string; // Identifier for the route/action
+  windowMs: number; // Sliding window size in milliseconds
+  limit: number; // Max requests allowed in the window
+  message: string; // Custom error message
 }
 
 // Memory cache for IP and request timestamps
 const rateLimitMap = new Map<string, number[]>();
 
 // Cleanup stale records every 10 minutes to prevent memory bloat
-if (process.server) {
+if (import.meta.server) {
   setInterval(() => {
     const now = Date.now();
     for (const [key, timestamps] of rateLimitMap.entries()) {
@@ -40,7 +40,9 @@ export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
 
   if (timestamps.length >= config.limit) {
     const oldestTimestamp = timestamps[0];
-    const waitTimeMs = oldestTimestamp ? oldestTimestamp + config.windowMs - now : config.windowMs;
+    const waitTimeMs = oldestTimestamp
+      ? oldestTimestamp + config.windowMs - now
+      : config.windowMs;
     const retryAfter = Math.max(1, Math.ceil(waitTimeMs / 1000));
 
     setResponseHeader(event, "retry-after", retryAfter.toString() as any);
@@ -55,4 +57,11 @@ export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
   // Push new timestamp and save
   timestamps.push(now);
   rateLimitMap.set(mapKey, timestamps);
+}
+
+/**
+ * Resets all rate limits in memory. Useful for unit testing.
+ */
+export function resetRateLimits() {
+  rateLimitMap.clear();
 }
