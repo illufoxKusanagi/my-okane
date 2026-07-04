@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxthub/core",
     "@sentry/nuxt/module",
+    "nuxt-auth-utils",
   ],
 
   devtools: {

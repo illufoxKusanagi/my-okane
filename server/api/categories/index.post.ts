@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
       data: validation.error!.issues,
     });
   }
+  const userId = await getAuthUserId(event);
   const newCategory = await db
     .insert(categories)
     .values({
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
       type: validation.data.type,
       icon: validation.data.icon,
       color: validation.data.color,
+      userId: userId,
     })
     .returning();
   return { success: true, data: newCategory[0] };

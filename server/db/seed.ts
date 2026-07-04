@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
-import { categories, transactions } from "./schema";
+import { categories, transactions, users } from "./schema";
+import bcrypt from "bcrypt";
 
 const url = process.env.TURSO_DATABASE_URL || "";
 const authToken = process.env.TURSO_AUTH_TOKEN;
@@ -16,28 +17,43 @@ const db = drizzle({ client });
 async function main() {
   console.log("Seeding database...");
 
-  const initialCategories = [
-    // Spending Categories
-    { name: "Food", type: "spending", icon: "i-lucide-utensils", color: "amber" },
-    { name: "Transport", type: "spending", icon: "i-lucide-car", color: "blue" },
-    { name: "Utilities", type: "spending", icon: "i-lucide-lightbulb", color: "yellow" },
-    { name: "Entertainment", type: "spending", icon: "i-lucide-film", color: "purple" },
-    { name: "Shopping", type: "spending", icon: "i-lucide-shopping-bag", color: "pink" },
-    { name: "Others", type: "spending", icon: "i-lucide-circle-help", color: "slate" },
-
-    // Income Categories
-    { name: "Salary", type: "income", icon: "i-lucide-wallet", color: "emerald" },
-    { name: "Freelance", type: "income", icon: "i-lucide-briefcase", color: "cyan" },
-    { name: "Investments", type: "income", icon: "i-lucide-trending-up", color: "indigo" },
-    { name: "Others", type: "income", icon: "i-lucide-circle-help", color: "slate" },
-  ];
-
-  // 1. Clear existing transactions and categories
+  // 1. Clear existing transactions, categories, and users
   console.log("Clearing existing data...");
   await db.delete(transactions);
   await db.delete(categories);
+  await db.delete(users);
 
-  // 2. Insert categories and get the returned list with IDs
+  // 2. Create default user
+  console.log("Creating default user...");
+  const passwordHash = await bcrypt.hash("defaultpassword123", 10);
+  const userResult = await db.insert(users).values({
+    name: "Default User",
+    email: "default@myokane.com",
+    passwordHash,
+  }).returning();
+  const defaultUser = userResult[0];
+  if (!defaultUser) {
+    throw new Error("Failed to create default user");
+  }
+  const defaultUserId = defaultUser.id;
+
+  const initialCategories = [
+    // Spending Categories
+    { name: "Food", type: "spending", icon: "i-lucide-utensils", color: "amber", userId: defaultUserId },
+    { name: "Transport", type: "spending", icon: "i-lucide-car", color: "blue", userId: defaultUserId },
+    { name: "Utilities", type: "spending", icon: "i-lucide-lightbulb", color: "yellow", userId: defaultUserId },
+    { name: "Entertainment", type: "spending", icon: "i-lucide-film", color: "purple", userId: defaultUserId },
+    { name: "Shopping", type: "spending", icon: "i-lucide-shopping-bag", color: "pink", userId: defaultUserId },
+    { name: "Others", type: "spending", icon: "i-lucide-circle-help", color: "slate", userId: defaultUserId },
+
+    // Income Categories
+    { name: "Salary", type: "income", icon: "i-lucide-wallet", color: "emerald", userId: defaultUserId },
+    { name: "Freelance", type: "income", icon: "i-lucide-briefcase", color: "cyan", userId: defaultUserId },
+    { name: "Investments", type: "income", icon: "i-lucide-trending-up", color: "indigo", userId: defaultUserId },
+    { name: "Others", type: "income", icon: "i-lucide-circle-help", color: "slate", userId: defaultUserId },
+  ];
+
+  // 3. Insert categories and get the returned list with IDs
   console.log("Inserting categories...");
   const insertedCats = await db.insert(categories).values(initialCategories).returning();
 
@@ -56,7 +72,7 @@ async function main() {
     return id;
   };
 
-  // 3. Define initial mock transactions
+  // 4. Define initial mock transactions
   const initialTransactions = [
     // June 2026 Transactions
     {
@@ -66,6 +82,7 @@ async function main() {
       notes: "June payroll",
       transactionDate: new Date("2026-06-01T08:00:00Z"),
       categoryId: getCatId("Salary", "income"),
+      userId: defaultUserId,
     },
     {
       name: "Office Lunch",
@@ -74,6 +91,7 @@ async function main() {
       notes: "Nasi padang",
       transactionDate: new Date("2026-06-02T12:30:00Z"),
       categoryId: getCatId("Food", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Weekly Gasoline",
@@ -82,6 +100,7 @@ async function main() {
       notes: "Full tank",
       transactionDate: new Date("2026-06-03T18:00:00Z"),
       categoryId: getCatId("Transport", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Electricity & Water",
@@ -90,6 +109,7 @@ async function main() {
       notes: "Utilities bill",
       transactionDate: new Date("2026-06-05T09:00:00Z"),
       categoryId: getCatId("Utilities", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Weekend Cinema",
@@ -98,6 +118,7 @@ async function main() {
       notes: "2 tickets + popcorn",
       transactionDate: new Date("2026-06-10T19:30:00Z"),
       categoryId: getCatId("Entertainment", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Freelance Landing Page",
@@ -106,6 +127,7 @@ async function main() {
       notes: "Payment from client A",
       transactionDate: new Date("2026-06-15T10:00:00Z"),
       categoryId: getCatId("Freelance", "income"),
+      userId: defaultUserId,
     },
     {
       name: "Grocery Shopping",
@@ -114,6 +136,7 @@ async function main() {
       notes: "Monthly stock",
       transactionDate: new Date("2026-06-18T15:00:00Z"),
       categoryId: getCatId("Shopping", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Cafe Coffee",
@@ -122,6 +145,7 @@ async function main() {
       notes: "Starbucks meeting",
       transactionDate: new Date("2026-06-20T14:00:00Z"),
       categoryId: getCatId("Food", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Grab Car Ride",
@@ -130,6 +154,7 @@ async function main() {
       notes: "To office",
       transactionDate: new Date("2026-06-25T08:30:00Z"),
       categoryId: getCatId("Transport", "spending"),
+      userId: defaultUserId,
     },
 
     // July 2026 Transactions
@@ -140,6 +165,7 @@ async function main() {
       notes: "July payroll",
       transactionDate: new Date("2026-07-01T08:00:00Z"),
       categoryId: getCatId("Salary", "income"),
+      userId: defaultUserId,
     },
     {
       name: "Netflix Subscription",
@@ -148,6 +174,7 @@ async function main() {
       notes: "Premium plan",
       transactionDate: new Date("2026-07-01T10:00:00Z"),
       categoryId: getCatId("Entertainment", "spending"),
+      userId: defaultUserId,
     },
     {
       name: "Team Dinner",
@@ -156,6 +183,7 @@ async function main() {
       notes: "Shared cost",
       transactionDate: new Date("2026-07-02T19:00:00Z"),
       categoryId: getCatId("Food", "spending"),
+      userId: defaultUserId,
     },
   ];
 

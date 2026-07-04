@@ -15,6 +15,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const userId = await getAuthUserId(event);
+
     const newTransaction = await db
       .insert(transactions)
       .values({
@@ -24,6 +26,7 @@ export default defineEventHandler(async (event) => {
         categoryId: validation.data.categoryId,
         notes: validation.data.notes,
         transactionDate: validation.data.transactionDate,
+        userId: userId,
       })
       .returning();
 

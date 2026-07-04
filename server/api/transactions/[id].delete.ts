@@ -1,6 +1,6 @@
 import { db } from "~~/server/db";
 import { transactions } from "~~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const idStr = event.context.params?.id;
@@ -20,9 +20,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const userId = await getAuthUserId(event);
+
     const deleted = await db
       .delete(transactions)
-      .where(eq(transactions.id, id))
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
       .returning();
 
     if (deleted.length === 0) {

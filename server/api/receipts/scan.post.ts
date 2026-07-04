@@ -3,7 +3,19 @@ import { db } from "~~/server/db";
 import { type ReceiptScanResult } from "../../utils/receiptTypes";
 import * as Sentry from "@sentry/nuxt";
 
+import { eq } from "drizzle-orm";
+
+import { checkRateLimit } from "~~/server/utils/rateLimiter";
+
 export default defineEventHandler(async (event) => {
+  // Apply receipt scanning rate limit (Max 10 requests per hour)
+  checkRateLimit(event, {
+    uniqueKey: "receipt_scan",
+    windowMs: 60 * 60 * 1000,
+    limit: 10,
+    message: "Receipt scanning limit reached for this hour.",
+  });
+
   const config = useRuntimeConfig();
   const apiKey = config.geminiApiKey;
   if (!apiKey) {
@@ -39,8 +51,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Fetch all existing categories to pass to Gemini for classification
-  const allCategories = await db.select().from(categories);
+  // Fetch only user's categories to pass to Gemini for classification
+  const userId = await getAuthUserId(event);
+  const allCategories = await db.select().from(categories).where(eq(categories.userId, userId));
   const categoryListStr = allCategories
     .map((c: Category) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
     .join("\n");

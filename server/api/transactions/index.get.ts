@@ -4,6 +4,8 @@ import { eq, desc } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   try {
+    const userId = await getAuthUserId(event);
+
     const list = await db
       .select({
         id: transactions.id,
@@ -20,6 +22,7 @@ export default defineEventHandler(async (event) => {
       })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.transactionDate));
 
     return list;

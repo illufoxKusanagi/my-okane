@@ -1,7 +1,7 @@
 import { db } from "~~/server/db";
 import { transactions } from "~~/server/db/schema";
 import { validateUpdateTransaction } from "~~/server/utils/validator";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const idStr = event.context.params?.id;
@@ -32,6 +32,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const userId = await getAuthUserId(event);
+
     const updatedTransaction = await db
       .update(transactions)
       .set({
@@ -42,7 +44,7 @@ export default defineEventHandler(async (event) => {
         notes: validation.data.notes,
         transactionDate: validation.data.transactionDate,
       })
-      .where(eq(transactions.id, id))
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
       .returning();
 
     if (updatedTransaction.length === 0) {

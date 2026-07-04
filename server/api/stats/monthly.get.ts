@@ -1,9 +1,11 @@
 import { db } from "~~/server/db";
 import { transactions } from "~~/server/db/schema";
-import { sql, desc } from "drizzle-orm";
+import { sql, desc, eq } from "drizzle-orm";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   try {
+    const userId = await getAuthUserId(event);
+
     // In SQLite, dates stored via mode: 'timestamp' are unix epochs in seconds.
     // We format using strftime('%Y-%m', datetime(transaction_date, 'unixepoch'))
     const results = await db
@@ -13,6 +15,7 @@ export default defineEventHandler(async () => {
         total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
       })
       .from(transactions)
+      .where(eq(transactions.userId, userId))
       .groupBy(
         sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
         transactions.type
