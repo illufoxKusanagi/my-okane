@@ -8,8 +8,16 @@ export default defineNuxtConfig({
     "@nuxthub/core",
     "@sentry/nuxt/module",
     "nuxt-auth-utils",
-    "@vite-pwa/nuxt",
+    "@vite-pwa/nuxt"
   ],
+  app: {
+    head: {
+      link: [
+        { rel: "icon", type: "image/png", href: "/pwa-192x192.png" },
+        { rel: "apple-touch-icon", href: "/pwa-192x192.png" }
+      ]
+    }
+  },
 
   pwa: {
     registerType: "autoUpdate",
