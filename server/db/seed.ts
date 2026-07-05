@@ -2,7 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import { categories, transactions, users } from "./schema";
-import bcrypt from "bcryptjs";
+import { hashUserPassword } from "../utils/password";
 
 const url = process.env.TURSO_DATABASE_URL || "";
 const authToken = process.env.TURSO_AUTH_TOKEN;
@@ -25,7 +25,7 @@ async function main() {
 
   // 2. Create default user
   console.log("Creating default user...");
-  const passwordHash = await bcrypt.hash("defaultpassword123", 10);
+  const passwordHash = hashUserPassword("defaultpassword123");
   const userResult = await db.insert(users).values({
     name: "Default User",
     email: "default@myokane.com",
