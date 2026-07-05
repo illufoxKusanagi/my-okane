@@ -64,6 +64,9 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     geminiApiKey: process.env.GEMINI_API_KEY || "",
+    session: {
+      password: process.env.NUXT_SESSION_PASSWORD || ""
+    },
     public: {
       sentry: {
         dsn: process.env.NUXT_PUBLIC_SENTRY_DSN || ""

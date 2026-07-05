@@ -38,21 +38,12 @@ importers:
       '@sentry/nuxt':
         specifier: ^10
         version: 10.63.0(@cloudflare/workers-types@4.20260511.1)(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))(magicast@0.5.2)(nuxt@4.4.4(82309ac2ba5bf71540885dc34891cb7a))(rollup@4.60.2)(vue@3.5.33(typescript@6.0.3))
-      '@types/node':
-        specifier: ^25.7.0
-        version: 25.9.4
-      bcryptjs:
-        specifier: ^3.0.3
-        version: 3.0.3
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
-      drizzle-kit:
-        specifier: ^1.0.0-rc.4
-        version: 1.0.0-rc.4-ca0f029
       drizzle-orm:
         specifier: ^1.0.0-rc.4
         version: 1.0.0-rc.4-5d5b77c(@cloudflare/workers-types@4.20260511.1)(@electric-sql/pglite@0.4.5)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.1)(postgres@3.4.9)(zod@4.4.3)
@@ -84,12 +75,15 @@ importers:
       '@nuxt/test-utils':
         specifier: ^4.0.3
         version: 4.0.3(crossws@0.4.5(srvx@0.11.15))(happy-dom@20.10.6)(magicast@0.5.2)(typescript@6.0.3)(vite@7.3.2(@types/node@25.9.4)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.22.0)(yaml@2.8.3))(vitest@4.1.9(@opentelemetry/api@1.9.1)(@types/node@25.9.4)(happy-dom@20.10.6)(vite@7.3.2(@types/node@25.9.4)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.22.0)(yaml@2.8.3)))
-      '@types/bcryptjs':
-        specifier: ^3.0.0
-        version: 3.0.0
+      '@types/node':
+        specifier: ^25.7.0
+        version: 25.9.4
       '@vite-pwa/nuxt':
         specifier: ^1.1.1
         version: 1.1.1(magicast@0.5.2)(vite@7.3.2(@types/node@25.9.4)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(tsx@4.22.0)(yaml@2.8.3))(workbox-build@7.4.1)(workbox-window@7.4.1)
+      drizzle-kit:
+        specifier: ^1.0.0-rc.4
+        version: 1.0.0-rc.4-ca0f029
       eslint:
         specifier: ^10.3.0
         version: 10.3.0(jiti@2.6.1)
@@ -3419,10 +3413,6 @@ packages:
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
-  '@types/bcryptjs@3.0.0':
-    resolution: {integrity: sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==}
-    deprecated: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
-
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -4046,10 +4036,6 @@ packages:
   bcrypt@6.0.0:
     resolution: {integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==}
     engines: {node: '>= 18'}
-
-  bcryptjs@3.0.3:
-    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
-    hasBin: true
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -11158,10 +11144,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/bcryptjs@3.0.0':
-    dependencies:
-      bcryptjs: 3.0.3
-
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -11829,8 +11811,6 @@ snapshots:
       node-addon-api: 8.9.0
       node-gyp-build: 4.8.4
     optional: true
-
-  bcryptjs@3.0.3: {}
 
   bindings@1.5.0:
     dependencies:

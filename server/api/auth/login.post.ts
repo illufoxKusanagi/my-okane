@@ -1,8 +1,8 @@
 import { db } from "~~/server/db";
 import { users } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
+import * as Sentry from "@sentry/nuxt";
 
 import { checkRateLimit } from "~~/server/utils/rateLimiter";
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   });
 
   const body = await readBody(event);
-  
+
   const validation = loginSchema.safeParse(body);
   if (!validation.success) {
     throw createError({
@@ -48,8 +48,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // 2. Verify password
-    const match = await bcrypt.compare(password, user.passwordHash);
+    const match = verifyUserPassword(password, user.passwordHash);
     if (!match) {
       throw createError({
         statusCode: 401,
@@ -75,11 +74,16 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error: any) {
+    console.error("Login error:", error);
+    Sentry.captureException(error);
     if (error.statusCode) throw error;
     throw createError({
       statusCode: 500,
       statusMessage: "Login failed",
-      data: error,
+      data: {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
     });
   }
 });

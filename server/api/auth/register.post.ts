@@ -1,8 +1,8 @@
 import { db } from "~~/server/db";
 import { users, categories } from "~~/server/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
+import * as Sentry from "@sentry/nuxt";
 
 import { checkRateLimit } from "~~/server/utils/rateLimiter";
 
@@ -48,8 +48,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // 2. Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = hashUserPassword(password);
 
     // 3. Create user
     const userResult = await db
@@ -103,11 +102,16 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error: any) {
+    console.error("Registration error:", error);
+    Sentry.captureException(error);
     if (error.statusCode) throw error;
     throw createError({
       statusCode: 500,
       statusMessage: "Registration failed",
-      data: error,
+      data: {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
     });
   }
 });
