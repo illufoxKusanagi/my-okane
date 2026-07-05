@@ -4,10 +4,10 @@ import { scryptSync, randomBytes, timingSafeEqual } from "node:crypto";
  * Hashes a password using Node's built-in scrypt algorithm.
  * Returns a string formatted as salt:hash
  */
-export async function hashUserPassword(password: string): string {
+export function hashUserPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
   const derivedKey = scryptSync(password, salt, 64);
-  return await `${salt}:${derivedKey.toString("hex")}`;
+  return `${salt}:${derivedKey.toString("hex")}`;
 }
 
 /**
