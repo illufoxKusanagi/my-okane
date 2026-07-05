@@ -9,38 +9,28 @@ const categoryId = Number(route.params.id);
 
 const currentMonth = ref(new Date().toISOString().slice(0, 7));
 
-// 1. Fetch monthly budget data
 const { data: budgetData, refresh } = await useFetch("/api/budgets", {
   query: { month: currentMonth },
 });
 
-// 2. Fetch global finance data
-const {
-  transactions,
-  addTransaction,
-  deleteTransaction,
-  updateTransaction,
-} = useFinance();
+const { transactions, addTransaction, deleteTransaction, updateTransaction } =
+  useFinance();
 
-// Find current pocket
 const pocket = computed(() => {
   if (!budgetData.value) return null;
   return budgetData.value.pockets.find((p: any) => p.id === categoryId) || null;
 });
 
-// Filter transactions for this pocket and selected month
 const pocketTransactions = computed(() => {
   return transactions.value.filter((t) => {
     if (t.categoryId !== categoryId) return false;
-    
-    // Check if transaction matches current YYYY-MM
+
     const tDate = new Date(t.transactionDate);
     const yyyymm = tDate.toISOString().slice(0, 7);
     return yyyymm === currentMonth.value;
   });
 });
 
-// Mock pocket number
 const pocketNumber = computed(() => {
   const prefix = "5059";
   const mid = String(categoryId).padStart(4, "0");
@@ -48,7 +38,6 @@ const pocketNumber = computed(() => {
   return `${prefix} ${mid} ${suffix}`;
 });
 
-// Modal states
 const isBudgetModalOpen = ref(false);
 const budgetAmount = ref<number | null>(null);
 
@@ -69,9 +58,13 @@ const formatCurrency = (val: number) => {
 const formatMonthLabel = (monthStr: string) => {
   const parts = monthStr.split("-").map(Number);
   const year = parts[0] ?? new Date().getFullYear();
-  const month = parts[1] ?? (new Date().getMonth() + 1);
+  const month = parts[1] ?? new Date().getMonth() + 1;
   const date = new Date(Date.UTC(year, month - 1, 1));
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 };
 
 const formatDateLabel = (dateVal: string | Date) => {
@@ -134,7 +127,7 @@ const openTxModal = (tx?: Transaction) => {
 
 const handleSaveTransaction = async () => {
   if (!txName.value || !txAmount.value || !pocket.value) return;
-  
+
   const type = pocket.value.type === "income" ? "income" : "spending";
   try {
     if (editingTx.value) {
@@ -206,12 +199,18 @@ const colorClassMap: Record<string, string> = {
           </template>
         </UDashboardNavbar>
 
-        <div v-if="pocket" class="h-full overflow-auto p-4 md:p-6 bg-slate-50/30 dark:bg-neutral-950/20">
+        <div
+          v-if="pocket"
+          class="h-full overflow-auto p-4 md:p-6 bg-slate-50/30 dark:bg-neutral-950/20"
+        >
           <UContainer class="flex flex-col gap-6 max-w-2xl mx-auto">
-            
             <!-- Pocket Jago Card -->
-            <div class="flex flex-col items-center text-center p-8 rounded-3xl bg-primary-600 dark:bg-primary-950/30 text-white border border-primary-500/20 dark:border-primary-900/20 shadow-xl relative overflow-hidden">
-              <div class="absolute -right-20 -top-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
+            <div
+              class="flex flex-col items-center text-center p-8 rounded-3xl bg-primary-600 dark:bg-primary-950/30 text-white border border-primary-500/20 dark:border-primary-900/20 shadow-xl relative overflow-hidden"
+            >
+              <div
+                class="absolute -right-20 -top-20 w-48 h-48 bg-white/5 rounded-full blur-2xl"
+              ></div>
 
               <!-- Pocket Icon -->
               <div
@@ -226,14 +225,21 @@ const colorClassMap: Record<string, string> = {
               </div>
 
               <!-- Pocket Number (realistic) -->
-              <p class="text-xs opacity-75 font-mono mb-2 tracking-widest flex items-center gap-1">
+              <p
+                class="text-xs opacity-75 font-mono mb-2 tracking-widest flex items-center gap-1"
+              >
                 {{ pocketNumber }}
-                <UIcon name="i-lucide-copy" class="w-3.5 h-3.5 cursor-pointer hover:opacity-100" />
+                <UIcon
+                  name="i-lucide-copy"
+                  class="w-3.5 h-3.5 cursor-pointer hover:opacity-100"
+                />
               </p>
 
               <!-- Pocket Title -->
               <h2 class="text-2xl font-black mb-1">{{ pocket.name }}</h2>
-              <p class="text-xs uppercase tracking-wider opacity-85 mb-5">{{ pocket.type }} Pocket</p>
+              <p class="text-xs uppercase tracking-wider opacity-85 mb-5">
+                {{ pocket.type }} Pocket
+              </p>
 
               <!-- Main Large Balance -->
               <div class="mb-6">
@@ -252,16 +258,22 @@ const colorClassMap: Record<string, string> = {
               </div>
 
               <!-- Quick Action Row -->
-              <div class="flex flex-wrap items-center justify-center gap-3 mt-2 w-full max-w-sm pt-4 border-t border-white/10">
+              <div
+                class="flex flex-wrap items-center justify-center gap-3 mt-2 w-full max-w-sm pt-4 border-t border-white/10"
+              >
                 <UButton
-                  :label="pocket.type === 'spending' ? 'Deposit / Spend' : 'Add Income'"
+                  :label="
+                    pocket.type === 'spending'
+                      ? 'Deposit / Spend'
+                      : 'Add Income'
+                  "
                   icon="i-lucide-plus"
                   size="sm"
                   color="neutral"
                   class="bg-white text-primary-700 hover:bg-white/95"
                   @click="openTxModal()"
                 />
-                
+
                 <UButton
                   v-if="pocket.type === 'spending'"
                   label="Set Limit"
@@ -290,21 +302,35 @@ const colorClassMap: Record<string, string> = {
             >
               <div>
                 <p class="text-xs text-neutral-500">Budget Limit</p>
-                <p class="text-lg font-black text-neutral-800 dark:text-neutral-100">
-                  {{ pocket.budgetAmount > 0 ? formatCurrency(pocket.budgetAmount) : 'No Limit Set' }}
+                <p
+                  class="text-lg font-black text-neutral-800 dark:text-neutral-100"
+                >
+                  {{
+                    pocket.budgetAmount > 0
+                      ? formatCurrency(pocket.budgetAmount)
+                      : "No Limit Set"
+                  }}
                 </p>
               </div>
               <div>
                 <p class="text-xs text-neutral-500">
-                  {{ pocket.type === 'spending' ? 'Total Spent' : 'Total Income' }}
+                  {{
+                    pocket.type === "spending" ? "Total Spent" : "Total Income"
+                  }}
                 </p>
                 <p
                   :class="[
                     'text-lg font-black',
-                    pocket.type === 'spending' ? 'text-rose-500' : 'text-emerald-500',
+                    pocket.type === 'spending'
+                      ? 'text-rose-500'
+                      : 'text-emerald-500',
                   ]"
                 >
-                  {{ pocket.type === 'spending' ? formatCurrency(pocket.spent) : formatCurrency(pocket.earned) }}
+                  {{
+                    pocket.type === "spending"
+                      ? formatCurrency(pocket.spent)
+                      : formatCurrency(pocket.earned)
+                  }}
                 </p>
               </div>
             </div>
@@ -312,7 +338,9 @@ const colorClassMap: Record<string, string> = {
             <!-- Transaction History Listing -->
             <div class="flex flex-col gap-3">
               <div class="flex items-center justify-between">
-                <span class="text-sm font-black uppercase tracking-wider text-neutral-400">
+                <span
+                  class="text-sm font-black uppercase tracking-wider text-neutral-400"
+                >
                   Transactions ({{ formatMonthLabel(currentMonth) }})
                 </span>
                 <span class="text-xs text-neutral-500 font-mono">
@@ -321,7 +349,10 @@ const colorClassMap: Record<string, string> = {
               </div>
 
               <!-- List -->
-              <div v-if="pocketTransactions.length > 0" class="flex flex-col gap-3">
+              <div
+                v-if="pocketTransactions.length > 0"
+                class="flex flex-col gap-3"
+              >
                 <div
                   v-for="tx in pocketTransactions"
                   :key="tx.id"
@@ -331,7 +362,8 @@ const colorClassMap: Record<string, string> = {
                     <div
                       :class="[
                         'w-10 h-10 rounded-xl flex items-center justify-center border',
-                        colorClassMap[pocket.color || 'slate'] || colorClassMap.slate,
+                        colorClassMap[pocket.color || 'slate'] ||
+                          colorClassMap.slate,
                       ]"
                     >
                       <UIcon
@@ -340,7 +372,9 @@ const colorClassMap: Record<string, string> = {
                       />
                     </div>
                     <div>
-                      <h5 class="font-bold text-neutral-800 dark:text-neutral-100 leading-snug">
+                      <h5
+                        class="font-bold text-neutral-800 dark:text-neutral-100 leading-snug"
+                      >
                         {{ tx.name }}
                       </h5>
                       <p class="text-xxs text-neutral-500 leading-none mt-1">
@@ -353,14 +387,19 @@ const colorClassMap: Record<string, string> = {
                     <span
                       :class="[
                         'font-black text-sm',
-                        tx.type === 'spending' ? 'text-neutral-800 dark:text-neutral-200' : 'text-emerald-500',
+                        tx.type === 'spending'
+                          ? 'text-neutral-800 dark:text-neutral-200'
+                          : 'text-emerald-500',
                       ]"
                     >
-                      {{ tx.type === 'spending' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
+                      {{ tx.type === "spending" ? "-" : "+"
+                      }}{{ formatCurrency(tx.amount) }}
                     </span>
-                    
+
                     <!-- Hover Actions -->
-                    <div class="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                    <div
+                      class="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
+                    >
                       <UButton
                         icon="i-lucide-pencil"
                         size="xs"
@@ -390,11 +429,11 @@ const colorClassMap: Record<string, string> = {
                   class="w-8 h-8 text-neutral-400 mb-2"
                 />
                 <p class="text-sm font-semibold text-neutral-500">
-                  No transactions in this pocket for {{ formatMonthLabel(currentMonth) }}.
+                  No transactions in this pocket for
+                  {{ formatMonthLabel(currentMonth) }}.
                 </p>
               </div>
             </div>
-
           </UContainer>
         </div>
 
@@ -402,7 +441,9 @@ const colorClassMap: Record<string, string> = {
         <UModal v-model:open="isBudgetModalOpen">
           <template #content>
             <UContainer class="p-6 flex flex-col gap-5 w-full">
-              <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">
+              <h3
+                class="text-lg font-bold text-neutral-800 dark:text-neutral-100"
+              >
                 Configure Pocket Limit
               </h3>
               <div>
@@ -415,7 +456,9 @@ const colorClassMap: Record<string, string> = {
                   autofocus
                 />
               </div>
-              <div class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
+              <div
+                class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4"
+              >
                 <UButton
                   label="Cancel"
                   color="neutral"
@@ -436,8 +479,10 @@ const colorClassMap: Record<string, string> = {
         <UModal v-model:open="isTxModalOpen">
           <template #content>
             <UContainer class="p-6 flex flex-col gap-5 w-full">
-              <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">
-                {{ editingTx ? 'Edit Transaction' : 'Add Transaction' }}
+              <h3
+                class="text-lg font-bold text-neutral-800 dark:text-neutral-100"
+              >
+                {{ editingTx ? "Edit Transaction" : "Add Transaction" }}
               </h3>
               <div>
                 <p class="text-sm font-semibold mb-2">Name / Description</p>
@@ -465,7 +510,9 @@ const colorClassMap: Record<string, string> = {
                   class="w-full"
                 />
               </div>
-              <div class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
+              <div
+                class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4"
+              >
                 <UButton
                   label="Cancel"
                   color="neutral"
@@ -481,7 +528,6 @@ const colorClassMap: Record<string, string> = {
             </UContainer>
           </template>
         </UModal>
-
       </UDashboardPanel>
     </UDashboardGroup>
   </div>

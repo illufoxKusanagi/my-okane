@@ -3,19 +3,16 @@ import { ref, computed } from "vue";
 
 const currentMonth = ref(new Date().toISOString().slice(0, 7));
 
-// Fetch monthly budget data dynamically
 const { data: budgetData, refresh } = await useFetch("/api/budgets", {
   query: { month: currentMonth },
 });
 
 const { addCategory } = useFinance();
 
-// Modal state
 const isModalOpen = ref(false);
 const selectedCategoryId = ref<number | null>(null);
 const budgetAmount = ref<number | null>(null);
 
-// Create Pocket Form state
 const isCreatePocketModalOpen = ref(false);
 const pocketName = ref("");
 const pocketType = ref<"spending" | "income">("spending");
@@ -71,10 +68,15 @@ const handleCreatePocket = async () => {
       pocketName.value,
       pocketType.value,
       pocketIcon.value,
-      pocketColor.value
+      pocketColor.value,
     );
 
-    if (newCategory && pocketType.value === "spending" && pocketBudgetLimit.value !== null && pocketBudgetLimit.value > 0) {
+    if (
+      newCategory &&
+      pocketType.value === "spending" &&
+      pocketBudgetLimit.value !== null &&
+      pocketBudgetLimit.value > 0
+    ) {
       await $fetch("/api/budgets", {
         method: "POST",
         body: {
@@ -103,15 +105,19 @@ const formatCurrency = (val: number) => {
 const formatMonthLabel = (monthStr: string) => {
   const parts = monthStr.split("-").map(Number);
   const year = parts[0] ?? new Date().getFullYear();
-  const month = parts[1] ?? (new Date().getMonth() + 1);
+  const month = parts[1] ?? new Date().getMonth() + 1;
   const date = new Date(Date.UTC(year, month - 1, 1));
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 };
 
 const prevMonth = () => {
   const parts = currentMonth.value.split("-").map(Number);
   const year = parts[0] ?? new Date().getFullYear();
-  const month = parts[1] ?? (new Date().getMonth() + 1);
+  const month = parts[1] ?? new Date().getMonth() + 1;
   const date = new Date(Date.UTC(year, month - 2, 1));
   currentMonth.value = date.toISOString().slice(0, 7);
 };
@@ -119,21 +125,27 @@ const prevMonth = () => {
 const nextMonth = () => {
   const parts = currentMonth.value.split("-").map(Number);
   const year = parts[0] ?? new Date().getFullYear();
-  const month = parts[1] ?? (new Date().getMonth() + 1);
+  const month = parts[1] ?? new Date().getMonth() + 1;
   const date = new Date(Date.UTC(year, month, 1));
   currentMonth.value = date.toISOString().slice(0, 7);
 };
 
 const colorClassMap: Record<string, string> = {
-  amber: "text-amber-500 bg-amber-500/10 border-amber-500/20 dark:border-amber-900/30",
+  amber:
+    "text-amber-500 bg-amber-500/10 border-amber-500/20 dark:border-amber-900/30",
   blue: "text-blue-500 bg-blue-500/10 border-blue-500/20 dark:border-blue-900/30",
-  yellow: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20 dark:border-yellow-900/30",
-  purple: "text-purple-500 bg-purple-500/10 border-purple-500/20 dark:border-purple-900/30",
+  yellow:
+    "text-yellow-500 bg-yellow-500/10 border-yellow-500/20 dark:border-yellow-900/30",
+  purple:
+    "text-purple-500 bg-purple-500/10 border-purple-500/20 dark:border-purple-900/30",
   pink: "text-pink-500 bg-pink-500/10 border-pink-500/20 dark:border-pink-900/30",
-  slate: "text-slate-500 bg-slate-500/10 border-slate-500/20 dark:border-slate-900/30",
-  emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20 dark:border-emerald-900/30",
+  slate:
+    "text-slate-500 bg-slate-500/10 border-slate-500/20 dark:border-slate-900/30",
+  emerald:
+    "text-emerald-500 bg-emerald-500/10 border-emerald-500/20 dark:border-emerald-900/30",
   cyan: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20 dark:border-cyan-900/30",
-  indigo: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20 dark:border-indigo-900/30",
+  indigo:
+    "text-indigo-500 bg-indigo-500/10 border-indigo-500/20 dark:border-indigo-900/30",
   rose: "text-rose-500 bg-rose-500/10 border-rose-500/20 dark:border-rose-900/30",
 };
 
@@ -218,7 +230,9 @@ const getProgressColor = (spent: number, limit: number) => {
                   icon="i-lucide-sliders-horizontal"
                   color="neutral"
                   variant="outline"
-                  @click="openBudgetModal(null, budgetData?.globalBudget?.amount)"
+                  @click="
+                    openBudgetModal(null, budgetData?.globalBudget?.amount)
+                  "
                 />
               </div>
             </div>
@@ -276,8 +290,12 @@ const getProgressColor = (spent: number, limit: number) => {
                     <div
                       class="flex items-center gap-2 text-neutral-500 dark:text-neutral-400"
                     >
-                      <UIcon name="i-lucide-sliders-horizontal" class="w-5 h-5" />
-                      <span class="text-sm font-semibold tracking-wide uppercase"
+                      <UIcon
+                        name="i-lucide-sliders-horizontal"
+                        class="w-5 h-5"
+                      />
+                      <span
+                        class="text-sm font-semibold tracking-wide uppercase"
                         >Overall Monthly Limit</span
                       >
                     </div>
@@ -298,7 +316,8 @@ const getProgressColor = (spent: number, limit: number) => {
                       class="text-3xl font-extrabold text-neutral-800 dark:text-neutral-100 mb-4"
                     >
                       {{ formatCurrency(budgetData.globalBudget.remaining) }}
-                      <span class="text-xs font-medium text-neutral-500 block mt-1"
+                      <span
+                        class="text-xs font-medium text-neutral-500 block mt-1"
                         >remaining of
                         {{
                           formatCurrency(budgetData.globalBudget.amount)
@@ -361,9 +380,7 @@ const getProgressColor = (spent: number, limit: number) => {
               </div>
 
               <!-- Pockets Grid -->
-              <div
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-              >
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div
                   v-for="pocket in budgetData.pockets"
                   :key="pocket.id"
@@ -421,7 +438,9 @@ const getProgressColor = (spent: number, limit: number) => {
                           <p class="text-xs text-neutral-500">remaining</p>
                         </template>
                         <template v-else>
-                          <p class="text-sm font-semibold text-neutral-400 py-1">
+                          <p
+                            class="text-sm font-semibold text-neutral-400 py-1"
+                          >
                             No limit set
                           </p>
                         </template>
@@ -446,12 +465,16 @@ const getProgressColor = (spent: number, limit: number) => {
                   >
                     <div class="flex justify-between text-xxs mb-1 opacity-80">
                       <span>Spent: {{ formatCurrency(pocket.spent) }}</span>
-                      <span>Limit: {{ formatCurrency(pocket.budgetAmount) }}</span>
+                      <span
+                        >Limit: {{ formatCurrency(pocket.budgetAmount) }}</span
+                      >
                     </div>
                     <UProgress
                       :model-value="pocket.spent"
                       :max="pocket.budgetAmount"
-                      :color="getProgressColor(pocket.spent, pocket.budgetAmount)"
+                      :color="
+                        getProgressColor(pocket.spent, pocket.budgetAmount)
+                      "
                       size="xs"
                     />
                   </div>
@@ -520,7 +543,9 @@ const getProgressColor = (spent: number, limit: number) => {
         <UModal v-model:open="isCreatePocketModalOpen">
           <template #content>
             <UContainer class="p-6 flex flex-col gap-5 w-full">
-              <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">
+              <h3
+                class="text-lg font-bold text-neutral-800 dark:text-neutral-100"
+              >
                 Create New Pocket (Category)
               </h3>
 
@@ -547,7 +572,9 @@ const getProgressColor = (spent: number, limit: number) => {
               </div>
 
               <div v-if="pocketType === 'spending'">
-                <p class="text-sm font-semibold mb-2">Monthly Budget Limit (Optional)</p>
+                <p class="text-sm font-semibold mb-2">
+                  Monthly Budget Limit (Optional)
+                </p>
                 <UInput
                   v-model="pocketBudgetLimit"
                   type="number"
@@ -601,7 +628,9 @@ const getProgressColor = (spent: number, limit: number) => {
                 </div>
               </div>
 
-              <div class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4">
+              <div
+                class="flex justify-end gap-3 mt-4 border-t border-neutral-100 dark:border-neutral-800 pt-4"
+              >
                 <UButton
                   label="Cancel"
                   color="neutral"

@@ -94,7 +94,6 @@ const chartOptions = computed<ChartOptions<"doughnut">>(() => ({
   },
 }));
 
-// Plugin to draw center text on the canvas
 const centerTextPlugin = {
   id: "centerText",
   afterDraw(chart: ChartJS) {

@@ -70,32 +70,26 @@ const onFileSelected = async (event: Event) => {
   }
 };
 
-// Search and filter state
 const searchQuery = ref("");
 const selectedType = ref<"all" | "income" | "spending">("all");
 const selectedCategoryId = ref<number | "all">("all");
 
-// Edit/Add modal state
 const isModalOpen = ref(false);
 const editingTransaction = ref<Transaction | null>(null);
 
-// Form state
 const txName = ref("");
 const txType = ref<"income" | "spending">("spending");
 const txAmount = ref(30000);
 const txCategoryId = ref<number | undefined>(undefined);
 const txNotes = ref("");
 
-// Delete confirmation modal state
 const isDeleteConfirmOpen = ref(false);
 const transactionToDelete = ref<Transaction | null>(null);
 
-// Filtered categories for the form based on type selection
 const formCategories = computed(() => {
   return getCategories(txType.value);
 });
 
-// Watch type change in form to set first category
 watch(txType, (newType) => {
   const cats = getCategories(newType);
   if (cats.length > 0) {
@@ -105,7 +99,6 @@ watch(txType, (newType) => {
   }
 });
 
-// Filter transactions based on query, type, and category
 const filteredTransactions = computed(() => {
   return transactions.value.filter((t) => {
     const matchesSearch = t.name
@@ -131,10 +124,6 @@ const openAddModal = () => {
   isModalOpen.value = true;
 };
 
-// Open Edit modal (We don't have PUT backend for transaction, but we can do delete then insert, OR we can implement the PUT endpoint if needed! Let's check if PUT endpoint /api/transactions/[id].put.ts is available.)
-// Wait, yes, in server/api/transactions/[id].put.ts we have implemented the update transaction endpoint!
-// Wait! Let's check useFinance.ts to see if updateTransaction exists. No, let's check. Ah, we didn't add it to useFinance.ts.
-// Let's add it directly or do it manually here, or we can use $fetch inside this page. Let's write updateTransaction manually in useFinance.ts later or just use $fetch. Let's define a function here:
 const handleSaveTransaction = async () => {
   if (!txName.value.trim() || !txCategoryId.value) return;
 
@@ -146,7 +135,7 @@ const handleSaveTransaction = async () => {
         txCategoryId.value,
         txAmount.value,
         txType.value,
-        txNotes.value
+        txNotes.value,
       );
     } else {
       await addTransaction(
@@ -154,7 +143,7 @@ const handleSaveTransaction = async () => {
         txCategoryId.value,
         txAmount.value,
         txType.value,
-        txNotes.value
+        txNotes.value,
       );
     }
     isModalOpen.value = false;
@@ -187,7 +176,6 @@ const handleDeleteConfirm = async () => {
   }
 };
 
-// Date formatter
 const formatDate = (dateStr: string | Date) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString("id-ID", {
