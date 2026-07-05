@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     const userId = await getAuthUserId(event);
 
     // In SQLite, dates stored via mode: 'timestamp' are unix epochs in seconds.
-    // We format using strftime('%Y-%m', datetime(transaction_date, 'unixepoch'))
+    // So format it using strftime('%Y-%m', datetime(transaction_date, 'unixepoch'))
     const results = await db
       .select({
         month: sql<string>`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
@@ -18,26 +18,32 @@ export default defineEventHandler(async (event) => {
       .where(eq(transactions.userId, userId))
       .groupBy(
         sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
-        transactions.type
+        transactions.type,
       )
-      .orderBy(desc(sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`));
+      .orderBy(
+        desc(
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
+        ),
+      );
 
     const formatted: Record<string, { income: number; spending: number }> = {};
 
-    results.forEach((row: { month: string | null; type: string; total: number }) => {
-      if (!row.month) return;
-      if (!formatted[row.month]) {
-        formatted[row.month] = { income: 0, spending: 0 };
-      }
-      const data = formatted[row.month];
-      if (data) {
-        if (row.type === "income") {
-          data.income = row.total;
-        } else if (row.type === "spending") {
-          data.spending = row.total;
+    results.forEach(
+      (row: { month: string | null; type: string; total: number }) => {
+        if (!row.month) return;
+        if (!formatted[row.month]) {
+          formatted[row.month] = { income: 0, spending: 0 };
         }
-      }
-    });
+        const data = formatted[row.month];
+        if (data) {
+          if (row.type === "income") {
+            data.income = row.total;
+          } else if (row.type === "spending") {
+            data.spending = row.total;
+          }
+        }
+      },
+    );
 
     return Object.entries(formatted)
       .map(([month, data]) => ({

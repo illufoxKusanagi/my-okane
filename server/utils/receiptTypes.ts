@@ -1,9 +1,9 @@
 export interface ReceiptScanResult {
   storeName: string;
   totalAmount: number;
-  transactionDate: string; // ISO 8601 string or YYYY-MM-DD
+  transactionDate: string;
   items: { name: string; price: number }[];
-  suggestedCategory: string; // Needs to match one of user's categories
+  suggestedCategory: string;
   suggestedTransactionName: string;
   confidence: "high" | "medium" | "low";
 }

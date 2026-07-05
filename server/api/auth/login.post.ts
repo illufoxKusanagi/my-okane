@@ -7,12 +7,11 @@ import * as Sentry from "@sentry/nuxt";
 import { checkRateLimit } from "~~/server/utils/rateLimiter";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
 export default defineEventHandler(async (event) => {
-  // Apply login rate limit (Max 5 requests per 15 minutes)
   checkRateLimit(event, {
     uniqueKey: "auth_login",
     windowMs: 15 * 60 * 1000,
@@ -33,7 +32,6 @@ export default defineEventHandler(async (event) => {
   const { email, password } = validation.data;
 
   try {
-    // 1. Fetch user
     const userResult = await db
       .select()
       .from(users)
@@ -56,7 +54,6 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // 3. Establish session
     await setUserSession(event, {
       user: {
         id: user.id,

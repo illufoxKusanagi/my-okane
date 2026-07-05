@@ -17,20 +17,21 @@ const db = drizzle({ client });
 async function main() {
   console.log("Seeding database...");
 
-  // 1. Clear existing transactions, categories, and users
   console.log("Clearing existing data...");
   await db.delete(transactions);
   await db.delete(categories);
   await db.delete(users);
 
-  // 2. Create default user
   console.log("Creating default user...");
   const passwordHash = hashUserPassword("defaultpassword123");
-  const userResult = await db.insert(users).values({
-    name: "Default User",
-    email: "default@myokane.com",
-    passwordHash,
-  }).returning();
+  const userResult = await db
+    .insert(users)
+    .values({
+      name: "Default User",
+      email: "default@myokane.com",
+      passwordHash,
+    })
+    .returning();
   const defaultUser = userResult[0];
   if (!defaultUser) {
     throw new Error("Failed to create default user");
@@ -38,32 +39,90 @@ async function main() {
   const defaultUserId = defaultUser.id;
 
   const initialCategories = [
-    // Spending Categories
-    { name: "Food", type: "spending", icon: "i-lucide-utensils", color: "amber", userId: defaultUserId },
-    { name: "Transport", type: "spending", icon: "i-lucide-car", color: "blue", userId: defaultUserId },
-    { name: "Utilities", type: "spending", icon: "i-lucide-lightbulb", color: "yellow", userId: defaultUserId },
-    { name: "Entertainment", type: "spending", icon: "i-lucide-film", color: "purple", userId: defaultUserId },
-    { name: "Shopping", type: "spending", icon: "i-lucide-shopping-bag", color: "pink", userId: defaultUserId },
-    { name: "Others", type: "spending", icon: "i-lucide-circle-help", color: "slate", userId: defaultUserId },
+    {
+      name: "Food",
+      type: "spending",
+      icon: "i-lucide-utensils",
+      color: "amber",
+      userId: defaultUserId,
+    },
+    {
+      name: "Transport",
+      type: "spending",
+      icon: "i-lucide-car",
+      color: "blue",
+      userId: defaultUserId,
+    },
+    {
+      name: "Utilities",
+      type: "spending",
+      icon: "i-lucide-lightbulb",
+      color: "yellow",
+      userId: defaultUserId,
+    },
+    {
+      name: "Entertainment",
+      type: "spending",
+      icon: "i-lucide-film",
+      color: "purple",
+      userId: defaultUserId,
+    },
+    {
+      name: "Shopping",
+      type: "spending",
+      icon: "i-lucide-shopping-bag",
+      color: "pink",
+      userId: defaultUserId,
+    },
+    {
+      name: "Others",
+      type: "spending",
+      icon: "i-lucide-circle-help",
+      color: "slate",
+      userId: defaultUserId,
+    },
 
-    // Income Categories
-    { name: "Salary", type: "income", icon: "i-lucide-wallet", color: "emerald", userId: defaultUserId },
-    { name: "Freelance", type: "income", icon: "i-lucide-briefcase", color: "cyan", userId: defaultUserId },
-    { name: "Investments", type: "income", icon: "i-lucide-trending-up", color: "indigo", userId: defaultUserId },
-    { name: "Others", type: "income", icon: "i-lucide-circle-help", color: "slate", userId: defaultUserId },
+    {
+      name: "Salary",
+      type: "income",
+      icon: "i-lucide-wallet",
+      color: "emerald",
+      userId: defaultUserId,
+    },
+    {
+      name: "Freelance",
+      type: "income",
+      icon: "i-lucide-briefcase",
+      color: "cyan",
+      userId: defaultUserId,
+    },
+    {
+      name: "Investments",
+      type: "income",
+      icon: "i-lucide-trending-up",
+      color: "indigo",
+      userId: defaultUserId,
+    },
+    {
+      name: "Others",
+      type: "income",
+      icon: "i-lucide-circle-help",
+      color: "slate",
+      userId: defaultUserId,
+    },
   ];
 
-  // 3. Insert categories and get the returned list with IDs
   console.log("Inserting categories...");
-  const insertedCats = await db.insert(categories).values(initialCategories).returning();
+  const insertedCats = await db
+    .insert(categories)
+    .values(initialCategories)
+    .returning();
 
-  // Create a map of "Name:Type" -> ID
   const catMap = new Map<string, number>();
   for (const cat of insertedCats) {
     catMap.set(`${cat.name}:${cat.type}`, cat.id);
   }
 
-  // Helper helper to get Category ID
   const getCatId = (name: string, type: string): number => {
     const id = catMap.get(`${name}:${type}`);
     if (id === undefined) {
@@ -72,9 +131,7 @@ async function main() {
     return id;
   };
 
-  // 4. Define initial mock transactions
   const initialTransactions = [
-    // June 2026 Transactions
     {
       name: "Monthly Salary",
       type: "income",
@@ -156,8 +213,6 @@ async function main() {
       categoryId: getCatId("Transport", "spending"),
       userId: defaultUserId,
     },
-
-    // July 2026 Transactions
     {
       name: "Monthly Salary",
       type: "income",

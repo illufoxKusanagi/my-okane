@@ -8,7 +8,6 @@ import { eq } from "drizzle-orm";
 import { checkRateLimit } from "~~/server/utils/rateLimiter";
 
 export default defineEventHandler(async (event) => {
-  // Apply receipt scanning rate limit (Max 10 requests per hour)
   checkRateLimit(event, {
     uniqueKey: "receipt_scan",
     windowMs: 60 * 60 * 1000,
@@ -34,7 +33,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Parse the data URL if present
   let base64Data = body.image;
   let mimeType = "image/jpeg";
 
@@ -51,9 +49,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Fetch only user's categories to pass to Gemini for classification
   const userId = await getAuthUserId(event);
-  const allCategories = await db.select().from(categories).where(eq(categories.userId, userId));
+  const allCategories = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.userId, userId));
   const categoryListStr = allCategories
     .map((c: Category) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
     .join("\n");
@@ -79,7 +79,6 @@ JSON schema target:
 
 Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdown code blocks like \`\`\`json.`;
 
-  // Helper function to call the Gemini API
   const callGemini = async (model: string) => {
     return await $fetch<{
       candidates?: {
@@ -126,7 +125,6 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
         "Gemini 2.0 Flash rate limit (429) hit. Falling back to Gemini 1.5 Flash after a short delay...",
       );
 
-      // Wait 1.5 seconds before retrying to allow rate-limits to settle
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       try {

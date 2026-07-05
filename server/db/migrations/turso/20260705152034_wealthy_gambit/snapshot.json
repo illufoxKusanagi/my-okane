@@ -1,0 +1,407 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "06d6d25e-525f-4ff9-a7f1-58d0046a5b85",
+  "prevIds": [
+    "15a7d980-2de4-43c4-b534-47f31859d9b8"
+  ],
+  "ddl": [
+    {
+      "name": "budgets",
+      "entityType": "tables"
+    },
+    {
+      "name": "categories",
+      "entityType": "tables"
+    },
+    {
+      "name": "transactions",
+      "entityType": "tables"
+    },
+    {
+      "name": "users",
+      "entityType": "tables"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "category_id",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "month",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "budgets"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "'i-lucide-folder'",
+      "generated": null,
+      "name": "icon",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": "'blue'",
+      "generated": null,
+      "name": "color",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "categories"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transaction_name",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transaction_type",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "notes",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "transaction_date",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "category_id",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "transactions"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "email",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "password_hash",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "(unixepoch())",
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_budgets_user_id_users_id_fk",
+      "entityType": "fks",
+      "table": "budgets"
+    },
+    {
+      "columns": [
+        "category_id"
+      ],
+      "tableTo": "categories",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_budgets_category_id_categories_id_fk",
+      "entityType": "fks",
+      "table": "budgets"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_categories_user_id_users_id_fk",
+      "entityType": "fks",
+      "table": "categories"
+    },
+    {
+      "columns": [
+        "category_id"
+      ],
+      "tableTo": "categories",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_transactions_category_id_categories_id_fk",
+      "entityType": "fks",
+      "table": "transactions"
+    },
+    {
+      "columns": [
+        "user_id"
+      ],
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_transactions_user_id_users_id_fk",
+      "entityType": "fks",
+      "table": "transactions"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "budgets_pk",
+      "table": "budgets",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "categories_pk",
+      "table": "categories",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "transactions_pk",
+      "table": "transactions",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "users_pk",
+      "table": "users",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "email"
+      ],
+      "nameExplicit": false,
+      "name": "users_email_unique",
+      "entityType": "uniques",
+      "table": "users"
+    }
+  ],
+  "renames": []
+}

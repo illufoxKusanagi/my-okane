@@ -199,6 +199,7 @@ export function useFinance() {
           description: `Successfully added "${name}".`,
           color: "success",
         });
+        return res.data;
       }
     } catch (error) {
       console.error("Failed to add category:", error);
