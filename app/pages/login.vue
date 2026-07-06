@@ -1,12 +1,18 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 sm:px-6 lg:px-8">
+  <div
+    class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 sm:px-6 lg:px-8"
+  >
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
         <!-- Logo/Icon -->
-        <div class="inline-flex items-center justify-center p-3 bg-primary-500/10 rounded-2xl mb-4">
+        <div
+          class="inline-flex items-center justify-center p-3 bg-primary-500/10 rounded-2xl mb-4"
+        >
           <UIcon name="i-lucide-wallet" class="h-10 w-10 text-primary-500" />
         </div>
-        <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2
+          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+        >
           Welcome Back
         </h2>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
@@ -81,39 +87,38 @@
 
 <script setup>
 definePageMeta({
-  layout: false
-})
+  layout: false,
+});
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
-const errorMessage = ref('')
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const errorMessage = ref("");
 
-const { fetch: fetchSession } = useUserSession()
+const { fetch: fetchSession } = useUserSession();
 
 async function handleLogin() {
-  if (loading.value) return
-  loading.value = true
-  errorMessage.value = ''
+  if (loading.value) return;
+  loading.value = true;
+  errorMessage.value = "";
 
   try {
-    await $fetch('/api/auth/login', {
-      method: 'POST',
+    await $fetch("/api/auth/login", {
+      method: "POST",
       body: {
         email: email.value,
-        password: password.value
-      }
-    })
+        password: password.value,
+      },
+    });
 
-    // Fetch the updated session state
-    await fetchSession()
+    await fetchSession();
 
-    // Redirect to home/dashboard
-    await navigateTo('/')
+    await navigateTo("/");
   } catch (err) {
-    errorMessage.value = err.data?.statusMessage || 'Invalid email or password.'
+    errorMessage.value =
+      err.data?.statusMessage || "Invalid email or password.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

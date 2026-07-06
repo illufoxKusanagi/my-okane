@@ -8,12 +8,11 @@ import { checkRateLimit } from "~~/server/utils/rateLimiter";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export default defineEventHandler(async (event) => {
-  // Apply register rate limit (Max 3 requests per hour)
   checkRateLimit(event, {
     uniqueKey: "auth_register",
     windowMs: 60 * 60 * 1000,
@@ -22,7 +21,7 @@ export default defineEventHandler(async (event) => {
   });
 
   const body = await readBody(event);
-  
+
   const validation = registerSchema.safeParse(body);
   if (!validation.success) {
     throw createError({
@@ -34,7 +33,6 @@ export default defineEventHandler(async (event) => {
   const { name, email, password } = validation.data;
 
   try {
-    // 1. Check if user already exists
     const existing = await db
       .select()
       .from(users)
@@ -50,7 +48,6 @@ export default defineEventHandler(async (event) => {
 
     const passwordHash = hashUserPassword(password);
 
-    // 3. Create user
     const userResult = await db
       .insert(users)
       .values({
@@ -68,23 +65,81 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // 4. Seed default categories for this user
     const defaultCategories = [
-      { name: "Food", type: "spending", icon: "i-lucide-utensils", color: "amber", userId: newUser.id },
-      { name: "Transport", type: "spending", icon: "i-lucide-car", color: "blue", userId: newUser.id },
-      { name: "Utilities", type: "spending", icon: "i-lucide-lightbulb", color: "yellow", userId: newUser.id },
-      { name: "Entertainment", type: "spending", icon: "i-lucide-film", color: "purple", userId: newUser.id },
-      { name: "Shopping", type: "spending", icon: "i-lucide-shopping-bag", color: "pink", userId: newUser.id },
-      { name: "Others", type: "spending", icon: "i-lucide-circle-help", color: "slate", userId: newUser.id },
-      { name: "Salary", type: "income", icon: "i-lucide-wallet", color: "emerald", userId: newUser.id },
-      { name: "Freelance", type: "income", icon: "i-lucide-briefcase", color: "cyan", userId: newUser.id },
-      { name: "Investments", type: "income", icon: "i-lucide-trending-up", color: "indigo", userId: newUser.id },
-      { name: "Others", type: "income", icon: "i-lucide-circle-help", color: "slate", userId: newUser.id },
+      {
+        name: "Food",
+        type: "spending",
+        icon: "i-lucide-utensils",
+        color: "amber",
+        userId: newUser.id,
+      },
+      {
+        name: "Transport",
+        type: "spending",
+        icon: "i-lucide-car",
+        color: "blue",
+        userId: newUser.id,
+      },
+      {
+        name: "Utilities",
+        type: "spending",
+        icon: "i-lucide-lightbulb",
+        color: "yellow",
+        userId: newUser.id,
+      },
+      {
+        name: "Entertainment",
+        type: "spending",
+        icon: "i-lucide-film",
+        color: "purple",
+        userId: newUser.id,
+      },
+      {
+        name: "Shopping",
+        type: "spending",
+        icon: "i-lucide-shopping-bag",
+        color: "pink",
+        userId: newUser.id,
+      },
+      {
+        name: "Others",
+        type: "spending",
+        icon: "i-lucide-circle-help",
+        color: "slate",
+        userId: newUser.id,
+      },
+      {
+        name: "Salary",
+        type: "income",
+        icon: "i-lucide-wallet",
+        color: "emerald",
+        userId: newUser.id,
+      },
+      {
+        name: "Freelance",
+        type: "income",
+        icon: "i-lucide-briefcase",
+        color: "cyan",
+        userId: newUser.id,
+      },
+      {
+        name: "Investments",
+        type: "income",
+        icon: "i-lucide-trending-up",
+        color: "indigo",
+        userId: newUser.id,
+      },
+      {
+        name: "Others",
+        type: "income",
+        icon: "i-lucide-circle-help",
+        color: "slate",
+        userId: newUser.id,
+      },
     ];
 
     await db.insert(categories).values(defaultCategories);
 
-    // 5. Establish session
     await setUserSession(event, {
       user: {
         id: newUser.id,

@@ -32,6 +32,11 @@ const items: NavigationMenuItem[][] = [
       to: "/",
     },
     {
+      label: "Budgets",
+      icon: "i-lucide-piggy-bank",
+      to: "/budgets",
+    },
+    {
       label: "Transactions",
       icon: "i-lucide-arrow-right-left",
       to: "/transactions",

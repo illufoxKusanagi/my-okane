@@ -5,24 +5,19 @@ import type { Category } from "~/composables/useFinance";
 const { categories, addCategory, updateCategory, deleteCategory } =
   useFinance();
 
-// Tabs state
 const currentTab = ref<"spending" | "income">("spending");
 
-// Drawer/Modal state for Create/Edit
 const isModalOpen = ref(false);
 const editingCategory = ref<Category | null>(null);
 
-// Form fields
 const categoryName = ref("");
 const categoryType = ref<"spending" | "income">("spending");
 const categoryColor = ref("blue");
 const categoryIcon = ref("i-lucide-folder");
 
-// Confirmation modal for deleting
 const isDeleteConfirmOpen = ref(false);
 const categoryToDelete = ref<Category | null>(null);
 
-// Lists of icons and colors to select from
 const availableIcons = [
   "i-lucide-folder",
   "i-lucide-utensils",
@@ -73,7 +68,6 @@ const colorClassMap: Record<string, string> = {
   rose: "text-rose-500 bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/30",
 };
 
-// Filtered categories based on selected tab
 const filteredCategories = computed(() => {
   return categories.value.filter((c) => c.type === currentTab.value);
 });

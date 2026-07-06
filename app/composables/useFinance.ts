@@ -29,7 +29,6 @@ export interface CategoryData {
   color: string;
 }
 
-// Global shared state to avoid multiple requests across components
 const transactions = ref<Transaction[]>([]);
 const categories = ref<Category[]>([]);
 const isInitialized = ref(false);
@@ -60,12 +59,10 @@ export function useFinance() {
     isInitialized.value = false;
   };
 
-  // Automatically initialize if not done yet
   if (!isInitialized.value && import.meta.client && user.value) {
     fetchAll();
   }
 
-  // Watch for session changes only once per app instance
   if (import.meta.client && !isWatcherRegistered) {
     const scope = effectScope(true);
     scope.run(() => {
@@ -86,20 +83,23 @@ export function useFinance() {
     amount: number,
     type: "income" | "spending",
     notes?: string | null,
-    date?: string | Date
+    date?: string | Date,
   ) => {
     try {
-      const res = await $fetch<{ success: boolean; data: Transaction }>("/api/transactions", {
-        method: "POST",
-        body: {
-          name,
-          categoryId,
-          amount,
-          type,
-          notes,
-          transactionDate: date,
+      const res = await $fetch<{ success: boolean; data: Transaction }>(
+        "/api/transactions",
+        {
+          method: "POST",
+          body: {
+            name,
+            categoryId,
+            amount,
+            type,
+            notes,
+            transactionDate: date,
+          },
         },
-      });
+      );
       if (res.success) {
         await fetchAll();
         toast.add({
@@ -113,7 +113,8 @@ export function useFinance() {
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Add Transaction",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
@@ -127,20 +128,23 @@ export function useFinance() {
     amount: number,
     type: "income" | "spending",
     notes?: string | null,
-    date?: string | Date
+    date?: string | Date,
   ) => {
     try {
-      const res = await $fetch<{ success: boolean; data: Transaction }>((`/api/transactions/${id}`), {
-        method: "PUT",
-        body: {
-          name,
-          categoryId,
-          amount,
-          type,
-          notes,
-          transactionDate: date,
+      const res = await $fetch<{ success: boolean; data: Transaction }>(
+        `/api/transactions/${id}`,
+        {
+          method: "PUT",
+          body: {
+            name,
+            categoryId,
+            amount,
+            type,
+            notes,
+            transactionDate: date,
+          },
         },
-      });
+      );
       if (res.success) {
         await fetchAll();
         toast.add({
@@ -154,7 +158,8 @@ export function useFinance() {
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Update Transaction",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
@@ -163,9 +168,12 @@ export function useFinance() {
 
   const deleteTransaction = async (id: number) => {
     try {
-      const res = await $fetch<{ success: boolean }>((`/api/transactions/${id}`), {
-        method: "DELETE",
-      });
+      const res = await $fetch<{ success: boolean }>(
+        `/api/transactions/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (res.success) {
         await fetchAll();
         toast.add({
@@ -179,19 +187,28 @@ export function useFinance() {
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Delete Transaction",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
     }
   };
 
-  const addCategory = async (name: string, type: "income" | "spending", icon?: string, color?: string) => {
+  const addCategory = async (
+    name: string,
+    type: "income" | "spending",
+    icon?: string,
+    color?: string,
+  ) => {
     try {
-      const res = await $fetch<{ success: boolean; data: Category }>("/api/categories", {
-        method: "POST",
-        body: { name, type, icon, color },
-      });
+      const res = await $fetch<{ success: boolean; data: Category }>(
+        "/api/categories",
+        {
+          method: "POST",
+          body: { name, type, icon, color },
+        },
+      );
       if (res.success) {
         await fetchAll();
         toast.add({
@@ -199,13 +216,15 @@ export function useFinance() {
           description: `Successfully added "${name}".`,
           color: "success",
         });
+        return res.data;
       }
     } catch (error) {
       console.error("Failed to add category:", error);
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Add Category",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
@@ -214,7 +233,7 @@ export function useFinance() {
 
   const deleteCategory = async (id: number) => {
     try {
-      const res = await $fetch<{ success: boolean }>((`/api/categories/${id}`), {
+      const res = await $fetch<{ success: boolean }>(`/api/categories/${id}`, {
         method: "DELETE",
       });
       if (res.success) {
@@ -230,16 +249,23 @@ export function useFinance() {
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Delete Category",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
     }
   };
 
-  const updateCategory = async (id: number, name: string, type: "income" | "spending", icon?: string, color?: string) => {
+  const updateCategory = async (
+    id: number,
+    name: string,
+    type: "income" | "spending",
+    icon?: string,
+    color?: string,
+  ) => {
     try {
-      const res = await $fetch<{ success: boolean }>((`/api/categories/${id}`), {
+      const res = await $fetch<{ success: boolean }>(`/api/categories/${id}`, {
         method: "PUT",
         body: { name, type, icon, color },
       });
@@ -256,7 +282,8 @@ export function useFinance() {
       Sentry.captureException(error);
       toast.add({
         title: "Failed to Update Category",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
         color: "error",
       });
       throw error;
@@ -264,12 +291,13 @@ export function useFinance() {
   };
 
   const getCategories = (type?: "income" | "spending") => {
-    if (type === "income") return categories.value.filter((c) => c.type === "income");
-    if (type === "spending") return categories.value.filter((c) => c.type === "spending");
+    if (type === "income")
+      return categories.value.filter((c) => c.type === "income");
+    if (type === "spending")
+      return categories.value.filter((c) => c.type === "spending");
     return categories.value;
   };
 
-  // Helper colors for charts/UI if not defined in category
   const colors = [
     "hsl(220 70% 50%)",
     "hsl(160 60% 45%)",
@@ -302,8 +330,13 @@ export function useFinance() {
       .forEach((t) => {
         const catName = t.categoryName || "Uncategorized";
         const catColorName = t.categoryColor || "slate";
-        const catColor = (chartColorMap[catColorName] || colors[categoryMap.size % colors.length] || "hsl(215, 16%, 47%)") as string;
-        const existing = categoryMap.get(catName) || { value: 0, color: catColor };
+        const catColor = (chartColorMap[catColorName] ||
+          colors[categoryMap.size % colors.length] ||
+          "hsl(215, 16%, 47%)") as string;
+        const existing = categoryMap.get(catName) || {
+          value: 0,
+          color: catColor,
+        };
         categoryMap.set(catName, {
           value: existing.value + t.amount,
           color: existing.color,
@@ -325,8 +358,13 @@ export function useFinance() {
       .forEach((t) => {
         const catName = t.categoryName || "Uncategorized";
         const catColorName = t.categoryColor || "slate";
-        const catColor = (chartColorMap[catColorName] || colors[categoryMap.size % colors.length] || "hsl(215, 16%, 47%)") as string;
-        const existing = categoryMap.get(catName) || { value: 0, color: catColor };
+        const catColor = (chartColorMap[catColorName] ||
+          colors[categoryMap.size % colors.length] ||
+          "hsl(215, 16%, 47%)") as string;
+        const existing = categoryMap.get(catName) || {
+          value: 0,
+          color: catColor,
+        };
         categoryMap.set(catName, {
           value: existing.value + t.amount,
           color: existing.color,

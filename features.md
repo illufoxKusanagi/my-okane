@@ -1,8 +1,0 @@
-- Transaction CRUD: Add/create, edit, delete, and search transactions with amount, date, notes.
-- Category Management: Create, edit, nest, color-code categories (e.g., Food, Rent, Savings).
-- Budgeting & Alerts: Per-category monthly budgets with threshold alerts and overspend notifications.
-- Reports & Charts: Time-series, category breakdown (pie), monthly trends, and exportable CSV/PDF.
-- Recurring Transactions & Rules: Schedule recurring income/expenses and auto-categorize by rules.
-- Import/Export & Bank Sync: CSV import/export and optional Plaid/OFX sync for account aggregation.
-- Goals & Savings Pots: Create savings goals and track progress toward targets.
-- Security & Backup: PIN/biometric lock, encrypted local backup, and optional cloud sync.

@@ -2,10 +2,16 @@ import { ref } from "vue";
 import { type ReceiptScanResult } from "../../server/utils/receiptTypes";
 import * as Sentry from "@sentry/nuxt";
 
-const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.75): Promise<File> => {
+const compressImage = (
+  file: File,
+  maxWidth = 1200,
+  maxHeight = 1200,
+  quality = 0.75,
+): Promise<File> => {
   return new Promise((resolve, reject) => {
-    // Only compress images. Check file type or extension (for mobile uploads with generic MIME types)
-    const isImage = file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
+    const isImage =
+      file.type.startsWith("image/") ||
+      /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name);
     if (!isImage) {
       return resolve(file);
     }
@@ -18,7 +24,6 @@ const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 
       let width = img.width;
       let height = img.height;
 
-      // Calculate new dimensions to maintain aspect ratio
       if (width > height) {
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
@@ -54,7 +59,7 @@ const compressImage = (file: File, maxWidth = 1200, maxHeight = 1200, quality = 
           resolve(compressedFile);
         },
         "image/jpeg",
-        quality
+        quality,
       );
     };
     img.onerror = (err) => {
@@ -83,29 +88,38 @@ export function useReceiptScan() {
     scanResult.value = null;
 
     try {
-      console.log(`Original file size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-      
-      // 1. Compress image to prevent Payload Too Large (413) errors
+      console.log(
+        `Original file size: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+      );
+
       const compressedFile = await compressImage(file).catch((err) => {
-        console.warn("Failed to compress image, falling back to original file:", err);
+        console.warn(
+          "Failed to compress image, falling back to original file:",
+          err,
+        );
         return file;
       });
 
-      console.log(`Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+      console.log(
+        `Compressed file size: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
+      );
 
       if (compressedFile.size > 3 * 1024 * 1024) {
         throw new Error(
-          `Image is too large (${(compressedFile.size / 1024 / 1024).toFixed(2)}MB). Please choose a smaller file or reduce your camera's photo resolution.`
+          `Image is too large (${(compressedFile.size / 1024 / 1024).toFixed(2)}MB). Please choose a smaller file or reduce your camera's photo resolution.`,
         );
       }
 
       const base64Image = await fileToBase64(compressedFile);
 
-      const response = await $fetch<{ success: boolean; data: ReceiptScanResult }>("/api/receipts/scan", {
+      const response = await $fetch<{
+        success: boolean;
+        data: ReceiptScanResult;
+      }>("/api/receipts/scan", {
         method: "POST",
         body: {
-          image: base64Image
-        }
+          image: base64Image,
+        },
       });
 
       if (response.success && response.data) {
@@ -115,7 +129,8 @@ export function useReceiptScan() {
         throw new Error("Failed to scan receipt.");
       }
     } catch (err: any) {
-      const msg = err.statusMessage || err.message || "An error occurred while scanning.";
+      const msg =
+        err.statusMessage || err.message || "An error occurred while scanning.";
       scanError.value = msg;
       Sentry.captureException(err, {
         tags: { feature: "receipt-scan" },
@@ -135,6 +150,6 @@ export function useReceiptScan() {
     isScanning,
     scanResult,
     scanError,
-    scan
+    scan,
   };
 }

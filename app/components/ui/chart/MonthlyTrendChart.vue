@@ -10,10 +10,17 @@ import {
   CategoryScale,
   LinearScale,
   type ChartData,
-  type ChartOptions
+  type ChartOptions,
 } from "chart.js";
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+);
 
 const { transactions } = useFinance();
 
@@ -21,16 +28,27 @@ const colorMode = useColorMode();
 const isDark = computed(() => colorMode.value === "dark");
 
 const monthlyData = computed(() => {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const currentYear = new Date().getFullYear();
-  
-  // Initialize map for 12 months
+
   const statsMap = new Map<string, { income: number; spending: number }>();
   months.forEach((m) => {
     statsMap.set(m, { income: 0, spending: 0 });
   });
 
-  // Aggregate transactions
   transactions.value.forEach((t) => {
     const d = new Date(t.transactionDate || new Date());
     if (d.getFullYear() === currentYear) {
@@ -45,14 +63,11 @@ const monthlyData = computed(() => {
     }
   });
 
-  // Convert map to arrays
   const labels: string[] = [];
   const incomeValues: number[] = [];
   const spendingValues: number[] = [];
 
-  // Let's only display months that have data, or the last 6 months
   const currentMonthIdx = new Date().getMonth();
-  // Show last 6 months (including current month)
   for (let i = 5; i >= 0; i--) {
     const idx = (currentMonthIdx - i + 12) % 12;
     const mName = months[idx] || "Jan";
@@ -74,7 +89,7 @@ const chartData = computed<ChartData<"bar">>(() => ({
       backgroundColor: "rgba(16, 185, 129, 0.8)", // Emerald-500
       borderRadius: 6,
       borderWidth: 0,
-      maxBarThickness: 16
+      maxBarThickness: 16,
     },
     {
       label: "Spending",
@@ -82,9 +97,9 @@ const chartData = computed<ChartData<"bar">>(() => ({
       backgroundColor: "rgba(244, 63, 94, 0.8)", // Rose-500
       borderRadius: 6,
       borderWidth: 0,
-      maxBarThickness: 16
-    }
-  ]
+      maxBarThickness: 16,
+    },
+  ],
 }));
 
 const chartOptions = computed<ChartOptions<"bar">>(() => ({
@@ -101,9 +116,9 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
         color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
           family: "system-ui, sans-serif",
-          size: 11
-        }
-      }
+          size: 11,
+        },
+      },
     },
     tooltip: {
       backgroundColor: isDark.value ? "#1f2937" : "#ffffff",
@@ -116,30 +131,32 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
       callbacks: {
         label: (ctx) => {
           return ` ${ctx.dataset.label}: Rp. ${(ctx.parsed.y ?? 0).toLocaleString()}`;
-        }
-      }
-    }
+        },
+      },
+    },
   },
   scales: {
     x: {
       grid: {
-        display: false
+        display: false,
       },
       ticks: {
         color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
-          size: 11
-        }
-      }
+          size: 11,
+        },
+      },
     },
     y: {
       grid: {
-        color: isDark.value ? "rgba(255, 255, 255, 0.05)" : "rgba(156, 163, 175, 0.1)"
+        color: isDark.value
+          ? "rgba(255, 255, 255, 0.05)"
+          : "rgba(156, 163, 175, 0.1)",
       },
       ticks: {
         color: isDark.value ? "#9ca3af" : "#4b5563",
         font: {
-          size: 11
+          size: 11,
         },
         callback: (value) => {
           if (Number(value) >= 1000000) {
@@ -149,10 +166,10 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
             return `${(Number(value) / 1000).toFixed(0)}k`;
           }
           return value;
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 }));
 </script>
 
@@ -161,7 +178,9 @@ const chartOptions = computed<ChartOptions<"bar">>(() => ({
     <template #header>
       <div class="flex flex-col gap-1">
         <p class="font-semibold text-base text-highlighted">Cash Flow Trend</p>
-        <p class="text-sm text-muted">Comparison of income vs spending for the last 6 months</p>
+        <p class="text-sm text-muted">
+          Comparison of income vs spending for the last 6 months
+        </p>
       </div>
     </template>
 

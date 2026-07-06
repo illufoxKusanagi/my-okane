@@ -1,16 +1,14 @@
 import { type H3Event, getRequestIP, setResponseHeader, createError } from "h3";
 
 interface RateLimitConfig {
-  uniqueKey: string; // Identifier for the route/action
-  windowMs: number; // Sliding window size in milliseconds
-  limit: number; // Max requests allowed in the window
-  message: string; // Custom error message
+  uniqueKey: string;
+  windowMs: number;
+  limit: number;
+  message: string;
 }
 
-// Memory cache for IP and request timestamps
 const rateLimitMap = new Map<string, number[]>();
 
-// Cleanup stale records every 10 minutes to prevent memory bloat
 if (import.meta.server) {
   setInterval(() => {
     const now = Date.now();
@@ -23,10 +21,6 @@ if (import.meta.server) {
   }, 600000).unref();
 }
 
-/**
- * Checks the rate limit for a client IP.
- * Throws a 429 Too Many Requests if the limit is exceeded.
- */
 export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
   const ip = getRequestIP(event, { xForwardedFor: true }) || "127.0.0.1";
   const mapKey = `${ip}:${config.uniqueKey}`;
@@ -34,7 +28,6 @@ export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
 
   let timestamps = rateLimitMap.get(mapKey) || [];
 
-  // Remove timestamps outside of the current window
   const cutoff = now - config.windowMs;
   timestamps = timestamps.filter((t) => t > cutoff);
 
@@ -54,14 +47,10 @@ export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
     });
   }
 
-  // Push new timestamp and save
   timestamps.push(now);
   rateLimitMap.set(mapKey, timestamps);
 }
 
-/**
- * Resets all rate limits in memory. Useful for unit testing.
- */
 export function resetRateLimits() {
   rateLimitMap.clear();
 }
