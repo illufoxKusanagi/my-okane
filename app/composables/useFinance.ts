@@ -29,12 +29,11 @@ export interface CategoryData {
   color: string;
 }
 
-const transactions = ref<Transaction[]>([]);
-const categories = ref<Category[]>([]);
-const isInitialized = ref(false);
-let isWatcherRegistered = false;
-
 export function useFinance() {
+  const transactions = useState<Transaction[]>("finance:transactions", () => []);
+  const categories = useState<Category[]>("finance:categories", () => []);
+  const isInitialized = useState<boolean>("finance:isInitialized", () => false);
+
   const { user } = useUserSession();
   const toast = useToast();
 
@@ -63,18 +62,18 @@ export function useFinance() {
     fetchAll();
   }
 
-  if (import.meta.client && !isWatcherRegistered) {
-    const scope = effectScope(true);
-    scope.run(() => {
-      watch(user, (newUser) => {
+  if (import.meta.client) {
+    watch(
+      user,
+      (newUser) => {
         if (newUser) {
           fetchAll();
         } else {
           reset();
         }
-      });
-    });
-    isWatcherRegistered = true;
+      },
+      { immediate: true },
+    );
   }
 
   const addTransaction = async (

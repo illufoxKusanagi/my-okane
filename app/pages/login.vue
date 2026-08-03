@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
@@ -24,14 +24,14 @@
         <form @submit.prevent="handleLogin" class="space-y-6">
           <UAlert
             v-if="errorMessage"
-            color="red"
+            color="error"
             variant="soft"
             icon="i-lucide-alert-circle"
             :title="errorMessage"
             class="mb-4"
           />
 
-          <UFormField label="Email address" name="email" required>
+          <UFormField label="Email address" name="email" required class="w-full">
             <UInput
               v-model="email"
               type="email"
@@ -40,24 +40,32 @@
               autocomplete="email"
               required
               size="lg"
+              class="w-full"
             />
           </UFormField>
 
-          <UFormField label="Password" name="password" required>
-            <template #label>
-              <div class="flex justify-between items-center w-full">
-                <span>Password</span>
-              </div>
-            </template>
+          <UFormField label="Password" name="password" required class="w-full">
             <UInput
               v-model="password"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               placeholder="••••••••"
               icon="i-lucide-lock"
               autocomplete="current-password"
               required
               size="lg"
-            />
+              class="w-full"
+            >
+              <template #trailing>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  aria-label="Toggle password visibility"
+                  @click="showPassword = !showPassword"
+                />
+              </template>
+            </UInput>
           </UFormField>
 
           <UButton
@@ -85,13 +93,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 definePageMeta({
   layout: false,
 });
 
 const email = ref("");
 const password = ref("");
+const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref("");
 
@@ -114,9 +123,9 @@ async function handleLogin() {
     await fetchSession();
 
     await navigateTo("/");
-  } catch (err) {
+  } catch (err: any) {
     errorMessage.value =
-      err.data?.statusMessage || "Invalid email or password.";
+      err.data?.message || err.data?.statusMessage || "Invalid email or password.";
   } finally {
     loading.value = false;
   }

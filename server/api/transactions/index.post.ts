@@ -31,6 +31,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    if (category[0]?.type !== validation.data.type) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Category type (${category[0]?.type}) does not match transaction type (${validation.data.type})`,
+      });
+    }
+
     const newTransaction = await db
       .insert(transactions)
       .values({

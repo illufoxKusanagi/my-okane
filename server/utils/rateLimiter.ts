@@ -22,7 +22,7 @@ if (import.meta.server) {
 }
 
 export function checkRateLimit(event: H3Event, config: RateLimitConfig) {
-  const ip = getRequestIP(event, { xForwardedFor: true }) || "127.0.0.1";
+  const ip = getRequestIP(event, { xForwardedFor: false }) || "127.0.0.1";
   const mapKey = `${ip}:${config.uniqueKey}`;
   const now = Date.now();
 
