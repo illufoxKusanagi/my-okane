@@ -1,24 +1,24 @@
 <script setup lang="ts">
 const props = defineProps<{
   globalBudget: {
-    amount: number;
-    spent: number;
-    remaining: number;
-  } | null;
-}>();
+    amount: number
+    spent: number
+    remaining: number
+  } | null
+}>()
 
 const emit = defineEmits<{
-  "set-budget": [currentAmount: number];
-}>();
+  'set-budget': [currentAmount: number]
+}>()
 
-const { formatCurrency, getProgressColor } = useFormatters();
+const { formatCurrency, getProgressColor } = useFormatters()
 
 const progressPct = computed(() => {
-  if (!props.globalBudget || props.globalBudget.amount <= 0) return 0;
+  if (!props.globalBudget || props.globalBudget.amount <= 0) return 0
   return Math.round(
-    (props.globalBudget.spent / props.globalBudget.amount) * 100,
-  );
-});
+    (props.globalBudget.spent / props.globalBudget.amount) * 100
+  )
+})
 </script>
 
 <template>
@@ -30,10 +30,11 @@ const progressPct = computed(() => {
         <div
           class="flex items-center gap-2 text-neutral-500 dark:text-neutral-400"
         >
-          <UIcon name="i-lucide-sliders-horizontal" class="w-5 h-5" />
-          <span class="text-sm font-semibold tracking-wide uppercase"
-            >Overall Monthly Limit</span
-          >
+          <UIcon
+            name="i-lucide-sliders-horizontal"
+            class="w-5 h-5"
+          />
+          <span class="text-sm font-semibold tracking-wide uppercase">Overall Monthly Limit</span>
         </div>
         <UButton
           v-if="globalBudget"
@@ -50,9 +51,7 @@ const progressPct = computed(() => {
           class="text-3xl font-extrabold text-neutral-800 dark:text-neutral-100 mb-4"
         >
           {{ formatCurrency(globalBudget.remaining) }}
-          <span class="text-xs font-medium text-neutral-500 block mt-1"
-            >remaining of {{ formatCurrency(globalBudget.amount) }}</span
-          >
+          <span class="text-xs font-medium text-neutral-500 block mt-1">remaining of {{ formatCurrency(globalBudget.amount) }}</span>
         </h2>
       </template>
       <template v-else>
@@ -69,7 +68,10 @@ const progressPct = computed(() => {
       </template>
     </div>
 
-    <div v-if="globalBudget" class="w-full">
+    <div
+      v-if="globalBudget"
+      class="w-full"
+    >
       <div class="flex justify-between text-xs mb-1 font-semibold">
         <span class="text-neutral-500">Progress</span>
         <span class="text-neutral-700 dark:text-neutral-300">

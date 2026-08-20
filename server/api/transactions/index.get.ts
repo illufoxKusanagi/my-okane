@@ -1,10 +1,10 @@
-import { db } from "~~/server/db";
-import { transactions, categories } from "~~/server/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { db } from '~~/server/db'
+import { transactions, categories } from '~~/server/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
-    const userId = await getAuthUserId(event);
+    const userId = await getAuthUserId(event)
 
     const list = await db
       .select({
@@ -18,19 +18,19 @@ export default defineEventHandler(async (event) => {
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,
-        createdAt: transactions.createdAt,
+        createdAt: transactions.createdAt
       })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
-      .orderBy(desc(transactions.transactionDate));
+      .orderBy(desc(transactions.transactionDate))
 
-    return list;
+    return list
   } catch (error) {
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to fetch transactions",
-      data: error,
-    });
+      statusMessage: 'Failed to fetch transactions',
+      data: error
+    })
   }
-});
+})

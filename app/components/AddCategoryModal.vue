@@ -1,51 +1,54 @@
 <script setup lang="ts">
-import AppModal from "~/components/ui/AppModal.vue";
-import ColorIconPicker from "~/components/ui/ColorIconPicker.vue";
-import { colorClassMap } from "~/constants/ui";
+import AppModal from '~/components/ui/AppModal.vue'
+import ColorIconPicker from '~/components/ui/ColorIconPicker.vue'
+import { colorClassMap } from '~/constants/ui'
 
 const props = withDefaults(
   defineProps<{
-    type?: "income" | "spending";
+    type?: 'income' | 'spending'
   }>(),
   {
-    type: "spending",
-  },
-);
+    type: 'spending'
+  }
+)
 
-const { addCategory, getCategories } = useFinance();
+const { addCategory, getCategories } = useFinance()
 
-const categories = computed(() => getCategories(props.type));
-const newCategoryName = ref("");
-const selectedColor = ref("blue");
-const selectedIcon = ref("i-lucide-folder");
-const isOpen = ref(false);
-const isSaving = ref(false);
+const categories = computed(() => getCategories(props.type))
+const newCategoryName = ref('')
+const selectedColor = ref('blue')
+const selectedIcon = ref('i-lucide-folder')
+const isOpen = ref(false)
+const isSaving = ref(false)
 
 const handleAddCategory = async () => {
-  if (!newCategoryName.value.trim() || isSaving.value) return;
-  isSaving.value = true;
+  if (!newCategoryName.value.trim() || isSaving.value) return
+  isSaving.value = true
   try {
     await addCategory(
       newCategoryName.value,
       props.type,
       selectedIcon.value,
-      selectedColor.value,
-    );
-    newCategoryName.value = "";
-    selectedColor.value = "blue";
-    selectedIcon.value = "i-lucide-folder";
-    isOpen.value = false;
+      selectedColor.value
+    )
+    newCategoryName.value = ''
+    selectedColor.value = 'blue'
+    selectedIcon.value = 'i-lucide-folder'
+    isOpen.value = false
   } catch (error) {
-    console.error("Failed to add category:", error);
+    console.error('Failed to add category:', error)
   } finally {
-    isSaving.value = false;
+    isSaving.value = false
   }
-};
+}
 </script>
 
 <template>
   <div>
-    <UButton color="neutral" @click="isOpen = true">
+    <UButton
+      color="neutral"
+      @click="isOpen = true"
+    >
       Add {{ type === "income" ? "Income" : "Spending" }} Category
     </UButton>
 

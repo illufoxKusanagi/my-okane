@@ -1,49 +1,49 @@
-import { db } from "~~/server/db";
-import { categories } from "~~/server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { db } from '~~/server/db'
+import { categories } from '~~/server/db/schema'
+import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const idStr = event.context.params?.id;
+  const idStr = event.context.params?.id
   if (!idStr) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Category ID is required",
-    });
+      statusMessage: 'Category ID is required'
+    })
   }
 
-  const id = parseInt(idStr, 10);
+  const id = parseInt(idStr, 10)
   if (isNaN(id)) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Invalid Category ID",
-    });
+      statusMessage: 'Invalid Category ID'
+    })
   }
 
   try {
-    const userId = await getAuthUserId(event);
+    const userId = await getAuthUserId(event)
 
     const deleted = await db
       .delete(categories)
       .where(and(eq(categories.id, id), eq(categories.userId, userId)))
-      .returning();
+      .returning()
 
     if (deleted.length === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Category not found",
-      });
+        statusMessage: 'Category not found'
+      })
     }
 
     return {
       success: true,
-      data: deleted[0],
-    };
-  } catch (error: any) {
-    if (error.statusCode) throw error;
+      data: deleted[0]
+    }
+  } catch (error: unknown) {
+    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to delete category",
-      data: error,
-    });
+      statusMessage: 'Failed to delete category',
+      data: error instanceof Error ? error.message : String(error)
+    })
   }
-});
+})

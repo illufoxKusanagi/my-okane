@@ -1,62 +1,62 @@
-import { categories, type Category } from "~~/server/db/schema";
-import { db } from "~~/server/db";
-import { type ReceiptScanResult } from "../../utils/receiptTypes";
-import * as Sentry from "@sentry/nuxt";
+import { categories, type Category } from '~~/server/db/schema'
+import { db } from '~~/server/db'
+import type { ReceiptScanResult } from '../../utils/receiptTypes'
+import * as Sentry from '@sentry/nuxt'
 
-import { eq } from "drizzle-orm";
+import { eq } from 'drizzle-orm'
 
-import { checkRateLimit } from "~~/server/utils/rateLimiter";
+import { checkRateLimit } from '~~/server/utils/rateLimiter'
 
 export default defineEventHandler(async (event) => {
   checkRateLimit(event, {
-    uniqueKey: "receipt_scan",
+    uniqueKey: 'receipt_scan',
     windowMs: 60 * 60 * 1000,
     limit: 10,
-    message: "Receipt scanning limit reached for this hour.",
-  });
+    message: 'Receipt scanning limit reached for this hour.'
+  })
 
-  const config = useRuntimeConfig();
-  const apiKey = config.geminiApiKey;
+  const config = useRuntimeConfig()
+  const apiKey = config.geminiApiKey
   if (!apiKey) {
     throw createError({
       statusCode: 500,
       statusMessage:
-        "Gemini API key is not configured. Please add GEMINI_API_KEY to your .env file.",
-    });
+        'Gemini API key is not configured. Please add GEMINI_API_KEY to your .env file.'
+    })
   }
 
-  const body = await readBody(event);
+  const body = await readBody(event)
   if (!body || !body.image) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Missing image data in request body.",
-    });
+      statusMessage: 'Missing image data in request body.'
+    })
   }
 
-  let base64Data = body.image;
-  let mimeType = "image/jpeg";
+  let base64Data = body.image
+  let mimeType = 'image/jpeg'
 
-  if (base64Data.startsWith("data:")) {
-    const match = base64Data.match(/^data:([^;]+);base64,(.+)$/);
+  if (base64Data.startsWith('data:')) {
+    const match = base64Data.match(/^data:([^;]+);base64,(.+)$/)
     if (match) {
-      mimeType = match[1];
-      base64Data = match[2];
+      mimeType = match[1]
+      base64Data = match[2]
     } else {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid data URL format.",
-      });
+        statusMessage: 'Invalid data URL format.'
+      })
     }
   }
 
-  const userId = await getAuthUserId(event);
+  const userId = await getAuthUserId(event)
   const allCategories = await db
     .select()
     .from(categories)
-    .where(eq(categories.userId, userId));
+    .where(eq(categories.userId, userId))
   const categoryListStr = allCategories
     .map((c: Category) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
-    .join("\n");
+    .join('\n')
 
   const prompt = `You are a professional receipt parser. Analyze the uploaded receipt image and extract details to create a transaction.
 You must return a valid JSON object matching the schema below.
@@ -77,19 +77,19 @@ JSON schema target:
   "confidence": "high" | "medium" | "low"
 }
 
-Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdown code blocks like \`\`\`json.`;
+Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdown code blocks like \`\`\`json.`
 
   const callGemini = async (model: string) => {
     return await $fetch<{
       candidates?: {
         content?: {
-          parts?: { text: string }[];
-        };
-      }[];
+          parts?: { text: string }[]
+        }
+      }[]
     }>(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
-        method: "POST",
+        method: 'POST',
         body: {
           contents: [
             {
@@ -98,80 +98,82 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
                 {
                   inlineData: {
                     mimeType: mimeType,
-                    data: base64Data,
-                  },
-                },
-              ],
-            },
+                    data: base64Data
+                  }
+                }
+              ]
+            }
           ],
           generationConfig: {
-            responseMimeType: "application/json",
-          },
-        },
-      },
-    );
-  };
+            responseMimeType: 'application/json'
+          }
+        }
+      }
+    )
+  }
 
-  let response;
+  let response
   try {
-    response = await callGemini("gemini-3.6-flash");
-  } catch (err: any) {
-    const isRateLimit =
-      err.statusCode === 429 ||
-      err.status === 429 ||
-      (err.message && err.message.includes("429"));
+    response = await callGemini('gemini-3.6-flash')
+  } catch (err: unknown) {
+    const error = err as { statusCode?: number, status?: number, message?: string }
+    const isRateLimit
+      = error.statusCode === 429
+        || error.status === 429
+        || (error.message && error.message.includes('429'))
     if (isRateLimit) {
       console.warn(
-        "Gemini 3.6 Flash rate limit (429) hit. Falling back to Gemini 3.5 Flash...",
-      );
+        'Gemini 3.6 Flash rate limit (429) hit. Falling back to Gemini 3.5 Flash...'
+      )
 
       try {
-        response = await callGemini("gemini-3.5-flash");
-      } catch (fallbackErr: any) {
-        Sentry.captureException(fallbackErr);
-        const isFallbackRateLimit =
-          fallbackErr.statusCode === 429 ||
-          fallbackErr.status === 429 ||
-          (fallbackErr.message && fallbackErr.message.includes("429"));
+        response = await callGemini('gemini-3.5-flash')
+      } catch (fallbackErr: unknown) {
+        Sentry.captureException(fallbackErr)
+        const fbError = fallbackErr as { statusCode?: number, status?: number, message?: string }
+        const isFallbackRateLimit
+          = fbError.statusCode === 429
+            || fbError.status === 429
+            || (fbError.message && fbError.message.includes('429'))
         if (isFallbackRateLimit) {
           throw createError({
             statusCode: 429,
             statusMessage:
-              "Gemini API rate limit exceeded. Please wait a moment before trying to scan again.",
-          });
+              'Gemini API rate limit exceeded. Please wait a moment before trying to scan again.'
+          })
         }
-        throw fallbackErr;
+        throw fallbackErr
       }
     } else {
-      Sentry.captureException(err);
-      throw err;
+      Sentry.captureException(err)
+      throw err
     }
   }
 
-  const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text;
+  const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text
   if (!textResponse) {
     const emptyErr = createError({
       statusCode: 502,
-      statusMessage: "Empty response from Gemini API.",
-    });
-    Sentry.captureException(emptyErr);
-    throw emptyErr;
+      statusMessage: 'Empty response from Gemini API.'
+    })
+    Sentry.captureException(emptyErr)
+    throw emptyErr
   }
 
   try {
-    const parsedResult = JSON.parse(textResponse) as ReceiptScanResult;
+    const parsedResult = JSON.parse(textResponse) as ReceiptScanResult
     return {
       success: true,
-      data: parsedResult,
-    };
-  } catch (parseErr: any) {
-    console.error("Failed to parse Gemini JSON response:", textResponse);
+      data: parsedResult
+    }
+  } catch (parseErr: unknown) {
+    console.error('Failed to parse Gemini JSON response:', textResponse)
     Sentry.captureException(parseErr, {
-      extra: { textResponse },
-    });
+      extra: { textResponse }
+    })
     throw createError({
       statusCode: 502,
-      statusMessage: "Invalid JSON format returned by Gemini API.",
-    });
+      statusMessage: 'Invalid JSON format returned by Gemini API.'
+    })
   }
-});
+})

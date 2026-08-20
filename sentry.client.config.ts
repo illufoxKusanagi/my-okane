@@ -1,11 +1,11 @@
-import * as Sentry from "@sentry/nuxt";
+import * as Sentry from '@sentry/nuxt'
 
-if (process.env.NODE_ENV !== "test") {
+if (process.env.NODE_ENV !== 'test') {
   Sentry.init({
     // If set up, you can use your runtime config here
     dsn: useRuntimeConfig().public.sentry.dsn,
     // To avoid adblocker, use this
-    tunnel: "/tunnel",
+    tunnel: '/tunnel',
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
     tracesSampleRate: 1.0,
@@ -32,6 +32,6 @@ if (process.env.NODE_ENV !== "test") {
     },
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: false,
-  });
+    debug: false
+  })
 }

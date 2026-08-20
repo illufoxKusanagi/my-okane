@@ -2,38 +2,37 @@
 import {
   availableColors,
   availableIcons,
-  colorHexMap,
-} from "~/constants/ui";
+  colorHexMap
+} from '~/constants/ui'
 
 const props = withDefaults(
   defineProps<{
-    color?: string;
-    icon?: string;
-    showColor?: boolean;
-    showIcon?: boolean;
+    color?: string
+    icon?: string
+    showColor?: boolean
+    showIcon?: boolean
   }>(),
   {
-    color: "blue",
-    icon: "i-lucide-folder",
+    color: 'blue',
+    icon: 'i-lucide-folder',
     showColor: true,
-    showIcon: true,
-  },
-);
+    showIcon: true
+  }
+)
 
 const emit = defineEmits<{
-  (e: "update:color", val: string): void;
-  (e: "update:icon", val: string): void;
-}>();
+  (e: 'update:color' | 'update:icon', val: string): void
+}>()
 
 const selectedColor = computed({
   get: () => props.color,
-  set: (val: string) => emit("update:color", val),
-});
+  set: (val: string) => emit('update:color', val)
+})
 
 const selectedIcon = computed({
   get: () => props.icon,
-  set: (val: string) => emit("update:icon", val),
-});
+  set: (val: string) => emit('update:icon', val)
+})
 </script>
 
 <template>
@@ -48,15 +47,15 @@ const selectedIcon = computed({
           v-for="c in availableColors"
           :key="c"
           type="button"
-          @click="selectedColor = c"
           :class="[
             'w-8 h-8 rounded-full border-2 transition-all duration-200 relative min-h-[32px] min-w-[32px]',
             selectedColor === c
               ? 'border-primary scale-110 shadow-sm'
-              : 'border-transparent opacity-85 hover:opacity-100',
+              : 'border-transparent opacity-85 hover:opacity-100'
           ]"
           :style="{ backgroundColor: colorHexMap[c] || '#3b82f6' }"
           :aria-label="`Select color ${c}`"
+          @click="selectedColor = c"
         >
           <UIcon
             v-if="selectedColor === c"
@@ -79,16 +78,19 @@ const selectedIcon = computed({
           v-for="ic in availableIcons"
           :key="ic"
           type="button"
-          @click="selectedIcon = ic"
           :class="[
             'flex items-center justify-center p-2 rounded-lg border transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 min-h-[44px]',
             selectedIcon === ic
               ? 'border-primary text-primary bg-primary/5'
-              : 'border-transparent text-neutral-600 dark:text-neutral-400',
+              : 'border-transparent text-neutral-600 dark:text-neutral-400'
           ]"
           :aria-label="`Select icon ${ic}`"
+          @click="selectedIcon = ic"
         >
-          <UIcon :name="ic" class="w-6 h-6" />
+          <UIcon
+            :name="ic"
+            class="w-6 h-6"
+          />
         </button>
       </div>
     </div>

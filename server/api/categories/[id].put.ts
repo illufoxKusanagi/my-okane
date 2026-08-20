@@ -1,38 +1,38 @@
-import { db } from "~~/server/db";
-import { categories } from "~~/server/db/schema";
-import { validateUpdateCategory } from "~~/server/utils/validator";
-import { and, eq } from "drizzle-orm";
+import { db } from '~~/server/db'
+import { categories } from '~~/server/db/schema'
+import { validateUpdateCategory } from '~~/server/utils/validator'
+import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const idStr = event.context.params?.id;
+  const idStr = event.context.params?.id
   if (!idStr) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Category ID is required",
-    });
+      statusMessage: 'Category ID is required'
+    })
   }
 
-  const id = parseInt(idStr, 10);
+  const id = parseInt(idStr, 10)
   if (isNaN(id)) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Invalid Category ID",
-    });
+      statusMessage: 'Invalid Category ID'
+    })
   }
 
-  const body = await readBody(event);
-  const validation = validateUpdateCategory(body);
+  const body = await readBody(event)
+  const validation = validateUpdateCategory(body)
 
   if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Validation failed",
-      data: validation.error.issues,
-    });
+      statusMessage: 'Validation failed',
+      data: validation.error.issues
+    })
   }
 
   try {
-    const userId = await getAuthUserId(event);
+    const userId = await getAuthUserId(event)
 
     const updatedCategory = await db
       .update(categories)
@@ -40,28 +40,28 @@ export default defineEventHandler(async (event) => {
         name: validation.data.name,
         type: validation.data.type,
         icon: validation.data.icon,
-        color: validation.data.color,
+        color: validation.data.color
       })
       .where(and(eq(categories.id, id), eq(categories.userId, userId)))
-      .returning();
+      .returning()
 
     if (updatedCategory.length === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Category not found",
-      });
+        statusMessage: 'Category not found'
+      })
     }
 
     return {
       success: true,
-      data: updatedCategory[0],
-    };
-  } catch (error: any) {
-    if (error.statusCode) throw error;
+      data: updatedCategory[0]
+    }
+  } catch (error: unknown) {
+    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to update category",
-      data: error,
-    });
+      statusMessage: 'Failed to update category',
+      data: error instanceof Error ? error.message : String(error)
+    })
   }
-});
+})

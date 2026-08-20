@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue'
 
-const colorMode = useColorMode();
-const isTransitioning = ref(false);
+const colorMode = useColorMode()
+const isTransitioning = ref(false)
 
 const nextTheme = computed(() =>
-  colorMode.value === "dark" ? "light" : "dark",
-);
+  colorMode.value === 'dark' ? 'light' : 'dark'
+)
 
 const switchTheme = () => {
-  colorMode.preference = nextTheme.value;
-};
+  colorMode.preference = nextTheme.value
+}
 
-const startViewTransition = async (event: MouseEvent) => {
-  if (isTransitioning.value) return;
+const startViewTransition = async () => {
+  if (isTransitioning.value) return
 
   if (!document.startViewTransition) {
-    switchTheme();
-    return;
+    switchTheme()
+    return
   }
 
-  isTransitioning.value = true;
+  isTransitioning.value = true
 
   try {
     const transition = document.startViewTransition(() => {
-      switchTheme();
-    });
+      switchTheme()
+    })
     // Wait for native browser view transition animations to finish playing
-    await transition.finished;
+    await transition.finished
   } catch (error) {
-    console.error("View transition failed:", error);
+    console.error('View transition failed:', error)
   } finally {
-    isTransitioning.value = false;
+    isTransitioning.value = false
   }
-};
+}
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const startViewTransition = async (event: MouseEvent) => {
 
 <style>
 :root {
-  --theme-transition-duration: 6.83s;
+  --theme-transition-duration: 0.4s;
 }
 
 ::view-transition-group(root) {

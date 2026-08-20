@@ -8,7 +8,10 @@
         <div
           class="inline-flex items-center justify-center p-3 bg-primary-500/10 rounded-2xl mb-4"
         >
-          <UIcon name="i-lucide-wallet" class="h-10 w-10 text-primary-500" />
+          <UIcon
+            name="i-lucide-wallet"
+            class="h-10 w-10 text-primary-500"
+          />
         </div>
         <h2
           class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
@@ -21,7 +24,10 @@
       </div>
 
       <UCard class="shadow-xl ring-1 ring-slate-200 dark:ring-slate-800">
-        <form @submit.prevent="handleRegister" class="space-y-6">
+        <form
+          class="space-y-6"
+          @submit.prevent="handleRegister"
+        >
           <UAlert
             v-if="errorMessage"
             color="error"
@@ -31,7 +37,12 @@
             class="mb-4"
           />
 
-          <UFormField label="Full Name" name="name" required class="w-full">
+          <UFormField
+            label="Full Name"
+            name="name"
+            required
+            class="w-full"
+          >
             <UInput
               v-model="name"
               type="text"
@@ -43,7 +54,12 @@
             />
           </UFormField>
 
-          <UFormField label="Email address" name="email" required class="w-full">
+          <UFormField
+            label="Email address"
+            name="email"
+            required
+            class="w-full"
+          >
             <UInput
               v-model="email"
               type="email"
@@ -55,7 +71,12 @@
             />
           </UFormField>
 
-          <UFormField label="Password" name="password" required class="w-full">
+          <UFormField
+            label="Password"
+            name="password"
+            required
+            class="w-full"
+          >
             <UInput
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
@@ -105,43 +126,44 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: false,
-});
+  layout: false
+})
 
-const name = ref("");
-const email = ref("");
-const password = ref("");
-const showPassword = ref(false);
-const loading = ref(false);
-const errorMessage = ref("");
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
 
-const { fetch: fetchSession } = useUserSession();
+const { fetch: fetchSession } = useUserSession()
 
 async function handleRegister() {
-  if (loading.value) return;
-  loading.value = true;
-  errorMessage.value = "";
+  if (loading.value) return
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    await $fetch("/api/auth/register", {
-      method: "POST",
+    await $fetch('/api/auth/register', {
+      method: 'POST',
       body: {
         name: name.value,
         email: email.value,
-        password: password.value,
-      },
-    });
+        password: password.value
+      }
+    })
 
-    await fetchSession();
+    await fetchSession()
 
-    await navigateTo("/");
-  } catch (err: any) {
-    errorMessage.value =
-      err.data?.message ||
-      err.data?.statusMessage ||
-      "Registration failed. Please check your inputs.";
+    await navigateTo('/')
+  } catch (err: unknown) {
+    const error = err as { data?: { message?: string, statusMessage?: string } }
+    errorMessage.value
+      = error.data?.message
+        || error.data?.statusMessage
+        || 'Registration failed. Please check your inputs.'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>

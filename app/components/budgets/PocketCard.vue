@@ -1,49 +1,52 @@
 <script setup lang="ts">
-import { colorClassMap } from "~/constants/ui";
+import { colorClassMap } from '~/constants/ui'
 
 defineProps<{
   pocket: {
-    id: number;
-    name: string;
-    type: string;
-    icon: string | null;
-    color: string | null;
-    budgetAmount: number;
-    spent: number;
-    earned: number;
-    remaining: number;
-  };
-}>();
+    id: number
+    name: string
+    type: string
+    icon: string | null
+    color: string | null
+    budgetAmount: number
+    spent: number
+    earned: number
+    remaining: number
+  }
+}>()
 
 const emit = defineEmits<{
-  "set-budget": [pocketId: number, currentAmount: number];
-}>();
+  'set-budget': [pocketId: number, currentAmount: number]
+}>()
 
-const { formatCurrency, getProgressColor } = useFormatters();
+const { formatCurrency, getProgressColor } = useFormatters()
 </script>
 
 <template>
   <div
-    @click="navigateTo(`/budgets/${pocket.id}`)"
     class="flex flex-col justify-between p-5 rounded-3xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+    @click="navigateTo(`/budgets/${pocket.id}`)"
   >
     <div>
       <div class="flex items-start justify-between gap-2 mb-4">
         <div
           :class="[
             'w-11 h-11 rounded-2xl flex items-center justify-center border',
-            colorClassMap[pocket.color || 'slate'] || colorClassMap.slate,
+            colorClassMap[pocket.color || 'slate'] || colorClassMap.slate
           ]"
         >
-          <UIcon :name="pocket.icon || 'i-lucide-folder'" class="w-6 h-6" />
+          <UIcon
+            :name="pocket.icon || 'i-lucide-folder'"
+            class="w-6 h-6"
+          />
         </div>
         <UButton
           icon="i-lucide-sliders-horizontal"
           size="xs"
           color="neutral"
           variant="ghost"
-          @click.stop="emit('set-budget', pocket.id, pocket.budgetAmount)"
           class="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
+          @click.stop="emit('set-budget', pocket.id, pocket.budgetAmount)"
         />
       </div>
 
@@ -65,7 +68,9 @@ const { formatCurrency, getProgressColor } = useFormatters();
             >
               {{ formatCurrency(pocket.remaining) }}
             </p>
-            <p class="text-xs text-neutral-500">remaining</p>
+            <p class="text-xs text-neutral-500">
+              remaining
+            </p>
           </template>
           <template v-else>
             <p class="text-sm font-semibold text-neutral-400 py-1">
@@ -81,7 +86,9 @@ const { formatCurrency, getProgressColor } = useFormatters();
           >
             {{ formatCurrency(pocket.earned) }}
           </p>
-          <p class="text-xs text-neutral-500">total earned</p>
+          <p class="text-xs text-neutral-500">
+            total earned
+          </p>
         </div>
       </template>
     </div>
@@ -102,7 +109,10 @@ const { formatCurrency, getProgressColor } = useFormatters();
         size="xs"
       />
     </div>
-    <div v-else-if="pocket.type === 'spending'" class="mt-2">
+    <div
+      v-else-if="pocket.type === 'spending'"
+      class="mt-2"
+    >
       <UButton
         label="Set Limit"
         size="xs"

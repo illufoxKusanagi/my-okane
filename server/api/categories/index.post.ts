@@ -1,18 +1,18 @@
-import { categories } from "~~/server/db/schema";
-import { db } from "~~/server/db";
-import { validateCategory } from "~~/server/utils/validator";
+import { categories } from '~~/server/db/schema'
+import { db } from '~~/server/db'
+import { validateCategory } from '~~/server/utils/validator'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const validation = validateCategory(body);
+  const body = await readBody(event)
+  const validation = validateCategory(body)
   if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Validation Failed",
-      data: validation.error!.issues,
-    });
+      statusMessage: 'Validation Failed',
+      data: validation.error!.issues
+    })
   }
-  const userId = await getAuthUserId(event);
+  const userId = await getAuthUserId(event)
   const newCategory = await db
     .insert(categories)
     .values({
@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
       type: validation.data.type,
       icon: validation.data.icon,
       color: validation.data.color,
-      userId: userId,
+      userId: userId
     })
-    .returning();
-  return { success: true, data: newCategory[0] };
-});
+    .returning()
+  return { success: true, data: newCategory[0] }
+})

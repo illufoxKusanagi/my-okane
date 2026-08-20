@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { Category } from "~/composables/useFinance";
+import type { Category } from '~/composables/useFinance'
 
-const searchQuery = defineModel<string>("searchQuery", { required: true });
-const selectedType = defineModel<"all" | "income" | "spending">("selectedType", {
-  required: true,
-});
-const selectedCategoryId = defineModel<number | "all">("selectedCategoryId", {
-  required: true,
-});
+const searchQuery = defineModel<string>('searchQuery', { required: true })
+const selectedType = defineModel<'all' | 'income' | 'spending'>('selectedType', {
+  required: true
+})
+const selectedCategoryId = defineModel<number | 'all'>('selectedCategoryId', {
+  required: true
+})
 
 defineProps<{
-  categories: Category[];
-}>();
+  categories: Category[]
+}>()
 </script>
 
 <template>
@@ -34,7 +34,7 @@ defineProps<{
           :items="[
             { label: 'All Types', value: 'all' },
             { label: 'Income', value: 'income' },
-            { label: 'Spending', value: 'spending' },
+            { label: 'Spending', value: 'spending' }
           ]"
           class="w-full"
         />
@@ -45,7 +45,7 @@ defineProps<{
           v-model="selectedCategoryId"
           :items="[
             { label: 'All Categories', value: 'all' },
-            ...categories.map((c) => ({ label: c.name, value: c.id })),
+            ...categories.map((c) => ({ label: c.name, value: c.id }))
           ]"
           class="w-full"
         />

@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { Category } from "~/composables/useFinance";
-import { colorClassMap } from "~/constants/ui";
+import { computed } from 'vue'
+import type { Category } from '~/composables/useFinance'
+import { colorClassMap } from '~/constants/ui'
 
 const props = defineProps<{
-  category: Category;
-}>();
+  category: Category
+}>()
 
-const { getTransactionsByCategory } = useFinance();
+const { getTransactionsByCategory } = useFinance()
 
 const transactions = computed(() =>
   getTransactionsByCategory(props.category.name).filter(
-    (t) => t.type === props.category.type
+    t => t.type === props.category.type
   )
-);
+)
 
 const total = computed(() =>
   transactions.value.reduce((sum, t) => sum + t.amount, 0)
-);
+)
 
 const badgeClass = computed(() => {
-  return colorClassMap[props.category.color || "slate"] || colorClassMap.slate;
-});
+  return colorClassMap[props.category.color || 'slate'] || colorClassMap.slate
+})
 </script>
 
 <template>
@@ -31,10 +31,13 @@ const badgeClass = computed(() => {
     <div
       :class="[
         'flex w-10 h-10 rounded-lg items-center justify-center border',
-        badgeClass,
+        badgeClass
       ]"
     >
-      <UIcon :name="category.icon || 'i-lucide-folder'" class="w-5 h-5" />
+      <UIcon
+        :name="category.icon || 'i-lucide-folder'"
+        class="w-5 h-5"
+      />
     </div>
     <div class="flex flex-col justify-center flex-1">
       <p class="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
