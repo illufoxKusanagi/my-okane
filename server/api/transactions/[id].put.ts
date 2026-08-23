@@ -47,6 +47,13 @@ export default defineEventHandler(async (event) => {
           statusMessage: "Category not found or does not belong to the user",
         });
       }
+
+      if (validation.data.type !== undefined && category[0]?.type !== validation.data.type) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Category type (${category[0]?.type}) does not match transaction type (${validation.data.type})`,
+        });
+      }
     }
 
     const updatedTransaction = await db

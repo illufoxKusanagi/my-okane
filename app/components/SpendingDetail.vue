@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Category } from "~/composables/useFinance";
+import { colorClassMap } from "~/constants/ui";
 
 const props = defineProps<{
   category: Category;
@@ -17,19 +18,6 @@ const transactions = computed(() =>
 const total = computed(() =>
   transactions.value.reduce((sum, t) => sum + t.amount, 0)
 );
-
-const colorClassMap: Record<string, string> = {
-  amber: "text-amber-500 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200/50 dark:border-amber-900/30",
-  blue: "text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-900/30",
-  yellow: "text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200/50 dark:border-yellow-900/30",
-  purple: "text-purple-500 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 border-purple-200/50 dark:border-purple-900/30",
-  pink: "text-pink-500 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/30 border-pink-200/50 dark:border-pink-900/30",
-  slate: "text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200/50 dark:border-slate-900/30",
-  emerald: "text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200/50 dark:border-emerald-900/30",
-  cyan: "text-cyan-500 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200/50 dark:border-cyan-900/30",
-  indigo: "text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200/50 dark:border-indigo-900/30",
-  rose: "text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-200/50 dark:border-rose-900/30",
-};
 
 const badgeClass = computed(() => {
   return colorClassMap[props.category.color || "slate"] || colorClassMap.slate;

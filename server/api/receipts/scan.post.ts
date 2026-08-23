@@ -114,7 +114,7 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
 
   let response;
   try {
-    response = await callGemini("gemini-3.5-flash");
+    response = await callGemini("gemini-3.6-flash");
   } catch (err: any) {
     const isRateLimit =
       err.statusCode === 429 ||
@@ -122,13 +122,11 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
       (err.message && err.message.includes("429"));
     if (isRateLimit) {
       console.warn(
-        "Gemini 2.0 Flash rate limit (429) hit. Falling back to Gemini 1.5 Flash after a short delay...",
+        "Gemini 3.6 Flash rate limit (429) hit. Falling back to Gemini 3.5 Flash...",
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       try {
-        response = await callGemini("gemini-1.5-flash");
+        response = await callGemini("gemini-3.5-flash");
       } catch (fallbackErr: any) {
         Sentry.captureException(fallbackErr);
         const isFallbackRateLimit =

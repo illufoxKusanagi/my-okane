@@ -48,97 +48,100 @@ export default defineEventHandler(async (event) => {
 
     const passwordHash = hashUserPassword(password);
 
-    const userResult = await db
-      .insert(users)
-      .values({
-        name,
-        email: email.toLowerCase().trim(),
-        passwordHash,
-      })
-      .returning();
+    const newUser = await db.transaction(async (tx) => {
+      const userResult = await tx
+        .insert(users)
+        .values({
+          name,
+          email: email.toLowerCase().trim(),
+          passwordHash,
+        })
+        .returning();
 
-    const newUser = userResult[0];
-    if (!newUser) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: "Registration failed: User could not be created",
-      });
-    }
+      const createdUser = userResult[0];
+      if (!createdUser) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: "Registration failed: User could not be created",
+        });
+      }
 
-    const defaultCategories = [
-      {
-        name: "Food",
-        type: "spending",
-        icon: "i-lucide-utensils",
-        color: "amber",
-        userId: newUser.id,
-      },
-      {
-        name: "Transport",
-        type: "spending",
-        icon: "i-lucide-car",
-        color: "blue",
-        userId: newUser.id,
-      },
-      {
-        name: "Utilities",
-        type: "spending",
-        icon: "i-lucide-lightbulb",
-        color: "yellow",
-        userId: newUser.id,
-      },
-      {
-        name: "Entertainment",
-        type: "spending",
-        icon: "i-lucide-film",
-        color: "purple",
-        userId: newUser.id,
-      },
-      {
-        name: "Shopping",
-        type: "spending",
-        icon: "i-lucide-shopping-bag",
-        color: "pink",
-        userId: newUser.id,
-      },
-      {
-        name: "Others",
-        type: "spending",
-        icon: "i-lucide-circle-help",
-        color: "slate",
-        userId: newUser.id,
-      },
-      {
-        name: "Salary",
-        type: "income",
-        icon: "i-lucide-wallet",
-        color: "emerald",
-        userId: newUser.id,
-      },
-      {
-        name: "Freelance",
-        type: "income",
-        icon: "i-lucide-briefcase",
-        color: "cyan",
-        userId: newUser.id,
-      },
-      {
-        name: "Investments",
-        type: "income",
-        icon: "i-lucide-trending-up",
-        color: "indigo",
-        userId: newUser.id,
-      },
-      {
-        name: "Others",
-        type: "income",
-        icon: "i-lucide-circle-help",
-        color: "slate",
-        userId: newUser.id,
-      },
-    ];
+      const defaultCategories = [
+        {
+          name: "Food",
+          type: "spending",
+          icon: "i-lucide-utensils",
+          color: "amber",
+          userId: createdUser.id,
+        },
+        {
+          name: "Transport",
+          type: "spending",
+          icon: "i-lucide-car",
+          color: "blue",
+          userId: createdUser.id,
+        },
+        {
+          name: "Utilities",
+          type: "spending",
+          icon: "i-lucide-lightbulb",
+          color: "yellow",
+          userId: createdUser.id,
+        },
+        {
+          name: "Entertainment",
+          type: "spending",
+          icon: "i-lucide-film",
+          color: "purple",
+          userId: createdUser.id,
+        },
+        {
+          name: "Shopping",
+          type: "spending",
+          icon: "i-lucide-shopping-bag",
+          color: "pink",
+          userId: createdUser.id,
+        },
+        {
+          name: "Others",
+          type: "spending",
+          icon: "i-lucide-circle-help",
+          color: "slate",
+          userId: createdUser.id,
+        },
+        {
+          name: "Salary",
+          type: "income",
+          icon: "i-lucide-wallet",
+          color: "emerald",
+          userId: createdUser.id,
+        },
+        {
+          name: "Freelance",
+          type: "income",
+          icon: "i-lucide-briefcase",
+          color: "cyan",
+          userId: createdUser.id,
+        },
+        {
+          name: "Investments",
+          type: "income",
+          icon: "i-lucide-trending-up",
+          color: "indigo",
+          userId: createdUser.id,
+        },
+        {
+          name: "Others",
+          type: "income",
+          icon: "i-lucide-circle-help",
+          color: "slate",
+          userId: createdUser.id,
+        },
+      ];
 
-    await db.insert(categories).values(defaultCategories);
+      await tx.insert(categories).values(defaultCategories);
+      return createdUser;
+    });
 
     await setUserSession(event, {
       user: {

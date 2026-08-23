@@ -1,21 +1,20 @@
 <script setup lang="ts">
-const { getSpendingByCategory, getTotalSpending } = useFinance();
+const { getSpendingByCategory } = useFinance();
 
 const spendingData = computed(() => getSpendingByCategory());
-const totalSpending = computed(() => getTotalSpending());
+
+const currentMonthDescription = computed(() => {
+  return `Expenses for ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
+});
 </script>
 
 <template>
-  <!--
-    Because PieChart.vue is inside app/components/ui/chart/,
-    Nuxt auto-imports it as <UiChartPieChart />
-  -->
   <UiChartPieChart
     title="Monthly Spending"
-    description="Your actual expenses for this month"
+    :description="currentMonthDescription"
     center-sub-label="Total Spent"
-    trend="+2.1% from last month"
-    trend-note="Based on your real data"
+    trend="Category Breakdown"
+    trend-note="Based on your recorded transactions"
     :data="spendingData"
   />
 </template>

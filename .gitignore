@@ -28,3 +28,6 @@ logs
 
 /docs
 /scripts
+
+/.agents
+/.context

@@ -38,10 +38,11 @@ const categories = computed(() =>
 );
 
 watch(
-  () => props.type,
-  (newType) => {
-    const cats = getCategories(newType);
-    selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined;
+  categories,
+  (newCats) => {
+    if (selectedCategory.value === undefined && newCats.length > 0) {
+      selectedCategory.value = newCats[0]?.value;
+    }
   },
   { immediate: true },
 );

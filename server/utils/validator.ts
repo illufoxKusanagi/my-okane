@@ -10,7 +10,7 @@ export const CategorySchema = z.object({
 export const TransactionSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.enum(["income", "spending"]),
-  amount: z.number().int().positive("Amount must be positive"),
+  amount: z.number().positive("Amount must be positive"),
   categoryId: z.number().int().positive("Category ID must be positive"),
   notes: z.string().optional().nullable(),
   transactionDate: z.string().optional().transform((val) => val ? new Date(val) : undefined),

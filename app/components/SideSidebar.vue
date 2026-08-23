@@ -47,20 +47,6 @@ const items: NavigationMenuItem[][] = [
       to: "/categories",
     },
   ],
-  [
-    {
-      label: "Feedback",
-      icon: "i-lucide-message-circle",
-      to: "https://github.com/nuxt-ui-templates/dashboard",
-      target: "_blank",
-    },
-    {
-      label: "Help & Support",
-      icon: "i-lucide-info",
-      to: "https://github.com/nuxt/ui",
-      target: "_blank",
-    },
-  ],
 ];
 </script>
 
@@ -107,13 +93,6 @@ const items: NavigationMenuItem[][] = [
         :collapsed="collapsed"
         :items="items[0]"
         orientation="vertical"
-      />
-
-      <UNavigationMenu
-        :collapsed="collapsed"
-        :items="items[1]"
-        orientation="vertical"
-        class="mt-auto"
       />
     </template>
 

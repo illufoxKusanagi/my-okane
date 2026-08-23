@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, "spending"),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`,
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`,
         ),
       );
     const totalSpending = Number(totalSpendingResult[0]?.total || 0);
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, "income"),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`,
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`,
         ),
       );
     const totalIncome = Number(totalIncomeResult[0]?.total || 0);
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
       .where(
         and(
           eq(transactions.userId, userId),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`,
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`,
         ),
       )
       .groupBy(transactions.categoryId);
