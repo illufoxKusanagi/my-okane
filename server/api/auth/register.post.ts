@@ -2,18 +2,18 @@ import { db } from '~~/server/db'
 import { users, categories } from '~~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import * as Sentry from '@sentry/nuxt'
 
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 const registerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  password: z.string().min(8, 'Password must be at least 8 characters')
 })
 
 export default defineEventHandler(async (event) => {
-  checkRateLimit(event, {
+  await checkRateLimit(event, {
     uniqueKey: 'auth_register',
     windowMs: 60 * 60 * 1000,
     limit: 3,
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const passwordHash = hashUserPassword(password)
+    const passwordHash = await hashUserPassword(password)
 
     const newUser = await db.transaction(async (tx) => {
       const userResult = await tx
@@ -143,16 +143,9 @@ export default defineEventHandler(async (event) => {
       return createdUser
     })
 
-    await setUserSession(event, {
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email
-      }
-    })
-
     return {
       success: true,
+      message: 'Account created successfully. Please log in.',
       user: {
         id: newUser.id,
         name: newUser.name,
@@ -160,16 +153,10 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error: unknown) {
-    console.error('Registration error:', error)
-    Sentry.captureException(error)
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Registration failed',
-      data: {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      }
+    throwSafeServerError(error, {
+      context: 'registration',
+      fallbackMessage: 'Registration failed',
+      conflictMessage: 'Email address is already registered'
     })
   }
 })

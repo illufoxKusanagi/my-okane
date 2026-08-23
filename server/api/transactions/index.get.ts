@@ -1,10 +1,21 @@
 import { db } from '~~/server/db'
 import { transactions, categories } from '~~/server/db/schema'
 import { eq, desc } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   try {
     const userId = await getAuthUserId(event)
+
+    const query = getQuery(event)
+    const DEFAULT_LIMIT = 1000
+    const MAX_LIMIT = 5000
+    const limitRaw = Number.parseInt(String(query.limit ?? ''), 10)
+    const limit = Number.isFinite(limitRaw)
+      ? Math.min(MAX_LIMIT, Math.max(1, limitRaw))
+      : DEFAULT_LIMIT
+    const offsetRaw = Number.parseInt(String(query.offset ?? ''), 10)
+    const offset = Number.isFinite(offsetRaw) ? Math.max(0, offsetRaw) : 0
 
     const list = await db
       .select({
@@ -24,13 +35,11 @@ export default defineEventHandler(async (event) => {
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .where(eq(transactions.userId, userId))
       .orderBy(desc(transactions.transactionDate))
+      .limit(limit)
+      .offset(offset)
 
     return list
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch transactions',
-      data: error
-    })
+    throwSafeServerError(error, { context: 'fetch transactions', fallbackMessage: 'Failed to fetch transactions' })
   }
 })

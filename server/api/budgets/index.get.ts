@@ -1,7 +1,7 @@
 import { budgets, categories, transactions } from '~~/server/db/schema'
 import { db } from '~~/server/db'
 import { and, eq, isNull, sql } from 'drizzle-orm'
-import * as Sentry from '@sentry/nuxt'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -117,16 +117,6 @@ export default defineEventHandler(async (event) => {
       pockets
     }
   } catch (error: unknown) {
-    console.error('Fetch budgets error:', error)
-    Sentry.captureException(error)
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch budgets',
-      data: {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      }
-    })
+    throwSafeServerError(error, { context: 'fetch budgets', fallbackMessage: 'Failed to fetch budgets' })
   }
 })

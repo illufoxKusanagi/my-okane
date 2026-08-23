@@ -1,6 +1,7 @@
 import { db } from '~~/server/db'
 import { transactions, categories } from '~~/server/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -31,10 +32,6 @@ export default defineEventHandler(async (event) => {
 
     return results
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to generate category breakdown',
-      data: error
-    })
+    throwSafeServerError(error, { context: 'category breakdown', fallbackMessage: 'Failed to generate category breakdown' })
   }
 })

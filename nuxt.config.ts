@@ -29,7 +29,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     session: {
-      password: process.env.NUXT_SESSION_PASSWORD || ''
+      password: process.env.NUXT_SESSION_PASSWORD || '',
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      }
     },
     public: {
       sentry: {
@@ -39,7 +45,16 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/**': {
+      headers: {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(self), microphone=(), geolocation=()',
+        'Content-Security-Policy': 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob: https://api.dicebear.com https:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io;'
+      }
+    }
   },
 
   sourcemap: {

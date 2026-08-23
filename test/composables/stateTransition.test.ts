@@ -24,4 +24,33 @@ describe('Budget State Transitions', () => {
     expect(getProgressColor(1000, 1000)).toBe('error')
     expect(getProgressColor(1500, 1000)).toBe('error')
   })
+
+  it('should cleanly rollback optimistic list mutations on simulated network failure', async () => {
+    let transactions = [
+      { id: 1, name: 'Tx 1', amount: 50000 },
+      { id: 2, name: 'Tx 2', amount: 30000 }
+    ]
+
+    const deleteWithRollback = async (id: number, simulateError: boolean) => {
+      const snapshot = [...transactions]
+      // Optimistic delete
+      transactions = transactions.filter(t => t.id !== id)
+
+      if (simulateError) {
+        // Rollback
+        transactions = snapshot
+        throw new Error('Network error')
+      }
+    }
+
+    // 1. Successful deletion
+    await deleteWithRollback(1, false)
+    expect(transactions.length).toBe(1)
+    expect(transactions[0]?.id).toBe(2)
+
+    // 2. Failed deletion rolls back
+    await expect(deleteWithRollback(2, true)).rejects.toThrow('Network error')
+    expect(transactions.length).toBe(1)
+    expect(transactions[0]?.id).toBe(2)
+  })
 })

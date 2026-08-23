@@ -2,6 +2,7 @@ import { db } from '~~/server/db'
 import { transactions, categories } from '~~/server/db/schema'
 import { validateTransaction } from '~~/server/utils/validator'
 import { and, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -56,10 +57,6 @@ export default defineEventHandler(async (event) => {
       data: newTransaction[0]
     }
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to create transaction',
-      data: error
-    })
+    throwSafeServerError(error, { context: 'create transaction', fallbackMessage: 'Failed to create transaction' })
   }
 })

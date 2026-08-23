@@ -2,9 +2,9 @@ import { db } from '~~/server/db'
 import { users } from '~~/server/db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import * as Sentry from '@sentry/nuxt'
 
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 const loginSchema = z.object({
   email: z.email('Invalid email address'),
@@ -12,7 +12,7 @@ const loginSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  checkRateLimit(event, {
+  await checkRateLimit(event, {
     uniqueKey: 'auth_login',
     windowMs: 15 * 60 * 1000,
     limit: 5,
@@ -40,13 +40,15 @@ export default defineEventHandler(async (event) => {
 
     const user = userResult[0]
     if (!user) {
+      // Mitigate timing-based user enumeration with constant-time verification
+      await verifyUserPassword(password, DUMMY_PASSWORD_HASH)
       throw createError({
         statusCode: 401,
         statusMessage: 'Invalid email or password'
       })
     }
 
-    const match = verifyUserPassword(password, user.passwordHash)
+    const match = await verifyUserPassword(password, user.passwordHash)
     if (!match) {
       throw createError({
         statusCode: 401,
@@ -62,6 +64,9 @@ export default defineEventHandler(async (event) => {
       }
     })
 
+    // Successful login: refund the attempt so only failures count toward the brute-force budget.
+    await resetRateLimit(event, 'auth_login')
+
     return {
       success: true,
       user: {
@@ -71,16 +76,6 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error: unknown) {
-    console.error('Login error:', error)
-    Sentry.captureException(error)
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Login failed',
-      data: {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      }
-    })
+    throwSafeServerError(error, { context: 'login', fallbackMessage: 'Login failed' })
   }
 })

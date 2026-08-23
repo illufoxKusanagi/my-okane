@@ -99,8 +99,15 @@ export function useFinance() {
           }
         }
       )
-      if (res.success) {
-        await fetchAll()
+      if (res.success && res.data) {
+        const cat = categories.value.find(c => c.id === categoryId)
+        const enrichedTx: Transaction = {
+          ...res.data,
+          categoryName: cat?.name,
+          categoryIcon: cat?.icon || undefined,
+          categoryColor: cat?.color || undefined
+        }
+        transactions.value = [enrichedTx, ...transactions.value]
         toast.add({
           title: 'Transaction Added',
           description: `Successfully added "${name}".`,
@@ -112,8 +119,7 @@ export function useFinance() {
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Add Transaction',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error
@@ -144,8 +150,15 @@ export function useFinance() {
           }
         }
       )
-      if (res.success) {
-        await fetchAll()
+      if (res.success && res.data) {
+        const cat = categories.value.find(c => c.id === categoryId)
+        const enrichedTx: Transaction = {
+          ...res.data,
+          categoryName: cat?.name,
+          categoryIcon: cat?.icon || undefined,
+          categoryColor: cat?.color || undefined
+        }
+        transactions.value = transactions.value.map(t => (t.id === id ? enrichedTx : t))
         toast.add({
           title: 'Transaction Updated',
           description: `Successfully updated "${name}".`,
@@ -157,8 +170,7 @@ export function useFinance() {
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Update Transaction',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error
@@ -166,6 +178,10 @@ export function useFinance() {
   }
 
   const deleteTransaction = async (id: number) => {
+    const previousTransactions = [...transactions.value]
+    // Optimistically remove from local state immediately for 0ms perceived latency
+    transactions.value = transactions.value.filter(t => t.id !== id)
+
     try {
       const res = await $fetch<{ success: boolean }>(
         `/api/transactions/${id}`,
@@ -174,7 +190,6 @@ export function useFinance() {
         }
       )
       if (res.success) {
-        await fetchAll()
         toast.add({
           title: 'Transaction Deleted',
           description: 'Transaction has been deleted successfully.',
@@ -182,12 +197,13 @@ export function useFinance() {
         })
       }
     } catch (error) {
+      // Rollback local state on network / server failure
+      transactions.value = previousTransactions
       console.error('Failed to delete transaction:', error)
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Delete Transaction',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error
@@ -208,8 +224,8 @@ export function useFinance() {
           body: { name, type, icon, color }
         }
       )
-      if (res.success) {
-        await fetchAll()
+      if (res.success && res.data) {
+        categories.value = [...categories.value, res.data]
         toast.add({
           title: 'Category Added',
           description: `Successfully added "${name}".`,
@@ -222,8 +238,7 @@ export function useFinance() {
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Add Category',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error
@@ -231,12 +246,18 @@ export function useFinance() {
   }
 
   const deleteCategory = async (id: number) => {
+    const previousCategories = [...categories.value]
+    const previousTransactions = [...transactions.value]
+
+    // Optimistically remove category and cascade-remove its transactions locally
+    categories.value = categories.value.filter(c => c.id !== id)
+    transactions.value = transactions.value.filter(t => t.categoryId !== id)
+
     try {
       const res = await $fetch<{ success: boolean }>(`/api/categories/${id}`, {
         method: 'DELETE'
       })
       if (res.success) {
-        await fetchAll()
         toast.add({
           title: 'Category Deleted',
           description: 'Category has been deleted successfully.',
@@ -244,12 +265,14 @@ export function useFinance() {
         })
       }
     } catch (error) {
+      // Rollback on failure
+      categories.value = previousCategories
+      transactions.value = previousTransactions
       console.error('Failed to delete category:', error)
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Delete Category',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error
@@ -264,12 +287,24 @@ export function useFinance() {
     color?: string
   ) => {
     try {
-      const res = await $fetch<{ success: boolean }>(`/api/categories/${id}`, {
+      const res = await $fetch<{ success: boolean, data: Category }>(`/api/categories/${id}`, {
         method: 'PUT',
         body: { name, type, icon, color }
       })
-      if (res.success) {
-        await fetchAll()
+      if (res.success && res.data) {
+        const updatedCat = res.data
+        categories.value = categories.value.map(c => (c.id === id ? updatedCat : c))
+        transactions.value = transactions.value.map((t) => {
+          if (t.categoryId === id) {
+            return {
+              ...t,
+              categoryName: updatedCat.name,
+              categoryIcon: updatedCat.icon || undefined,
+              categoryColor: updatedCat.color || undefined
+            }
+          }
+          return t
+        })
         toast.add({
           title: 'Category Updated',
           description: `Successfully updated "${name}".`,
@@ -281,8 +316,7 @@ export function useFinance() {
       Sentry.captureException(error)
       toast.add({
         title: 'Failed to Update Category',
-        description:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
       throw error

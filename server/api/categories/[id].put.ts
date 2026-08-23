@@ -2,6 +2,7 @@ import { db } from '~~/server/db'
 import { categories } from '~~/server/db/schema'
 import { validateUpdateCategory } from '~~/server/utils/validator'
 import { and, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   const idStr = event.context.params?.id
@@ -57,11 +58,10 @@ export default defineEventHandler(async (event) => {
       data: updatedCategory[0]
     }
   } catch (error: unknown) {
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to update category',
-      data: error instanceof Error ? error.message : String(error)
+    throwSafeServerError(error, {
+      context: 'update category',
+      fallbackMessage: 'Failed to update category',
+      conflictMessage: 'A category with this name already exists.'
     })
   }
 })

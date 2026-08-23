@@ -23,7 +23,7 @@ async function main() {
   await db.delete(users)
 
   console.log('Creating default user...')
-  const passwordHash = hashUserPassword('defaultpassword123')
+  const passwordHash = await hashUserPassword('defaultpassword123')
   const userResult = await db
     .insert(users)
     .values({

@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const path = event.path
 
   if (path.startsWith('/api/')) {
-    checkRateLimit(event, {
+    await checkRateLimit(event, {
       uniqueKey: 'global_api_ddos',
       windowMs: 60000,
       limit: 100,
@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
       = path.startsWith('/api/auth/login')
         || path.startsWith('/api/auth/register')
         || path.startsWith('/api/auth/logout')
-        || path.startsWith('/api/sentry-example-api')
         || path.startsWith('/api/_auth/')
         || path.startsWith('/api/_nuxt_icon/')
 

@@ -44,10 +44,7 @@ export function useTransactionsController() {
         txNotes.value
           = `Scanned from receipt at ${result.storeName || 'Unknown Merchant'}.\n\nItems:\n`
             + result.items
-              .map(
-                item =>
-                  `- ${item.name}: ${formatCurrency(item.price)}`
-              )
+              .map(item => `- ${item.name}: ${formatCurrency(item.price)}`)
               .join('\n')
 
         const matchedCat = categories.value.find(
@@ -64,10 +61,9 @@ export function useTransactionsController() {
         isModalOpen.value = true
       }
     } catch (err: unknown) {
-      const error = err as Error
       toast.add({
         title: 'Receipt Scan Failed',
-        description: error.message || 'Failed to scan receipt.',
+        description: describeApiError(err, 'Failed to scan receipt.'),
         color: 'error'
       })
       Sentry.captureException(err)
@@ -81,6 +77,8 @@ export function useTransactionsController() {
   const searchQuery = ref('')
   const selectedType = ref<'all' | 'income' | 'spending'>('all')
   const selectedCategoryId = ref<number | 'all'>('all')
+  const currentPage = ref(1)
+  const pageSize = ref(15)
 
   const isModalOpen = ref(false)
   const editingTransaction = ref<Transaction | null>(null)
@@ -107,6 +105,26 @@ export function useTransactionsController() {
     }
   })
 
+  const hasActiveFilters = computed(() => {
+    return (
+      searchQuery.value.trim() !== ''
+      || selectedType.value !== 'all'
+      || selectedCategoryId.value !== 'all'
+    )
+  })
+
+  const resetFilters = () => {
+    searchQuery.value = ''
+    selectedType.value = 'all'
+    selectedCategoryId.value = 'all'
+    currentPage.value = 1
+  }
+
+  // Reset to page 1 whenever any filter condition changes
+  watch([searchQuery, selectedType, selectedCategoryId], () => {
+    currentPage.value = 1
+  })
+
   const filteredTransactions = computed(() => {
     return transactions.value.filter((t) => {
       const matchesSearch = t.name
@@ -119,6 +137,11 @@ export function useTransactionsController() {
           || t.categoryId === selectedCategoryId.value
       return matchesSearch && matchesType && matchesCategory
     })
+  })
+
+  const paginatedTransactions = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value
+    return filteredTransactions.value.slice(start, start + pageSize.value)
   })
 
   const openAddModal = () => {
@@ -207,6 +230,11 @@ export function useTransactionsController() {
     transactionToDelete,
     formCategories,
     filteredTransactions,
+    paginatedTransactions,
+    currentPage,
+    pageSize,
+    hasActiveFilters,
+    resetFilters,
     openAddModal,
     handleSaveTransaction,
     openEditModal,

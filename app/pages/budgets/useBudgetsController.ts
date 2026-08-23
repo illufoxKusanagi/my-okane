@@ -66,8 +66,7 @@ export function useBudgetsController() {
       console.error('Failed to create pocket:', error)
       toast.add({
         title: 'Failed to Create Pocket',
-        description:
-          error instanceof Error ? error.message : 'An unexpected error occurred.',
+        description: describeApiError(error),
         color: 'error'
       })
     }

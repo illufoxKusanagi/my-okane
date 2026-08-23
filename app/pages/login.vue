@@ -23,20 +23,34 @@
         </p>
       </div>
 
-      <UCard class="shadow-xl ring-1 ring-slate-200 dark:ring-slate-800">
+      <!-- Registration Success Message -->
+      <UAlert
+        v-if="isRegistered"
+        color="success"
+        variant="subtle"
+        icon="i-lucide-circle-check"
+        title="Account Created Successfully"
+        description="Please enter your password to sign in to your new account."
+        class="mb-6"
+      />
+
+      <!-- Error Message -->
+      <UAlert
+        v-if="errorMessage"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-alert-circle"
+        :title="errorMessage"
+        class="mb-6"
+      />
+
+      <UCard
+        class="shadow-xl shadow-neutral-950/5 border-neutral-200/80 dark:border-neutral-800 backdrop-blur-sm"
+      >
         <form
-          class="space-y-6"
+          class="space-y-4"
           @submit.prevent="handleLogin"
         >
-          <UAlert
-            v-if="errorMessage"
-            color="error"
-            variant="soft"
-            icon="i-lucide-alert-circle"
-            :title="errorMessage"
-            class="mb-4"
-          />
-
           <UFormField
             label="Email address"
             name="email"
@@ -67,6 +81,7 @@
               placeholder="••••••••"
               icon="i-lucide-lock"
               autocomplete="current-password"
+              :autofocus="isRegistered || !!email"
               required
               size="lg"
               class="w-full"
@@ -110,15 +125,29 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
   layout: false
 })
+
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
+const isRegistered = ref(false)
+
+onMounted(() => {
+  if (route.query.email) {
+    email.value = String(route.query.email)
+  }
+  if (route.query.registered === 'true') {
+    isRegistered.value = true
+  }
+})
 
 const { fetch: fetchSession } = useUserSession()
 
@@ -131,7 +160,7 @@ async function handleLogin() {
     await $fetch('/api/auth/login', {
       method: 'POST',
       body: {
-        email: email.value,
+        email: email.value.trim(),
         password: password.value
       }
     })
@@ -140,9 +169,7 @@ async function handleLogin() {
 
     await navigateTo('/')
   } catch (err: unknown) {
-    const error = err as { data?: { message?: string, statusMessage?: string } }
-    errorMessage.value
-      = error.data?.message || error.data?.statusMessage || 'Invalid email or password.'
+    errorMessage.value = describeApiError(err, 'Invalid email or password.')
   } finally {
     loading.value = false
   }

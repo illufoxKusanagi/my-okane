@@ -136,7 +136,7 @@ const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 
-const { fetch: fetchSession } = useUserSession()
+const toast = useToast()
 
 async function handleRegister() {
   if (loading.value) return
@@ -144,24 +144,32 @@ async function handleRegister() {
   errorMessage.value = ''
 
   try {
+    const userEmail = email.value.trim()
     await $fetch('/api/auth/register', {
       method: 'POST',
       body: {
-        name: name.value,
-        email: email.value,
+        name: name.value.trim(),
+        email: userEmail,
         password: password.value
       }
     })
 
-    await fetchSession()
+    toast.add({
+      title: 'Account created!',
+      description: 'Please sign in with your password.',
+      color: 'success',
+      icon: 'i-lucide-circle-check'
+    })
 
-    await navigateTo('/')
+    await navigateTo({
+      path: '/login',
+      query: {
+        email: userEmail,
+        registered: 'true'
+      }
+    })
   } catch (err: unknown) {
-    const error = err as { data?: { message?: string, statusMessage?: string } }
-    errorMessage.value
-      = error.data?.message
-        || error.data?.statusMessage
-        || 'Registration failed. Please check your inputs.'
+    errorMessage.value = describeApiError(err, 'Registration failed. Please check your inputs.')
   } finally {
     loading.value = false
   }

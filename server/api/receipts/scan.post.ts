@@ -2,13 +2,77 @@ import { categories, type Category } from '~~/server/db/schema'
 import { db } from '~~/server/db'
 import type { ReceiptScanResult } from '../../utils/receiptTypes'
 import * as Sentry from '@sentry/nuxt'
-
 import { eq } from 'drizzle-orm'
-
+import { z } from 'zod'
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
+import { matchesMagicBytes } from '~~/server/utils/imageValidation'
+import { throwSafeServerError } from '~~/server/utils/safeError'
+
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+const MAX_BASE64_LENGTH = 7 * 1024 * 1024 // ~5MB file in base64
+
+const sanitizeText = (val: string, maxLen: number): string => {
+  if (typeof val !== 'string') return ''
+  return Array.from(val)
+    .filter((c) => {
+      const code = c.charCodeAt(0)
+      return (code >= 32 && code !== 127) || code === 10 || code === 9
+    })
+    .join('')
+    .trim()
+    .slice(0, maxLen)
+}
+
+const receiptScanSchema = z.object({
+  storeName: z
+    .string()
+    .transform(v => sanitizeText(v, 100))
+    .default('Unknown Merchant'),
+  totalAmount: z
+    .number()
+    .finite()
+    .nonnegative()
+    .max(1_000_000_000_000)
+    .catch(0),
+  transactionDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .catch(() => new Date().toISOString().slice(0, 10)),
+  items: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .transform(v => sanitizeText(v, 100))
+          .default('Item'),
+        price: z
+          .number()
+          .finite()
+          .nonnegative()
+          .max(1_000_000_000_000)
+          .catch(0)
+      })
+    )
+    .max(100)
+    .catch([]),
+  suggestedCategory: z
+    .string()
+    .nullable()
+    .transform(v => (v ? sanitizeText(v, 50) : null))
+    .catch(null),
+  suggestedTransactionName: z
+    .string()
+    .transform(v => sanitizeText(v, 100))
+    .default('Receipt Scan'),
+  confidence: z.enum(['high', 'medium', 'low']).catch('medium')
+})
 
 export default defineEventHandler(async (event) => {
-  checkRateLimit(event, {
+  // 1. Mandatory Pre-Auth Check (Prevent unauthenticated memory/CPU exhaustion)
+  const userId = await getAuthUserId(event)
+
+  // 2. Rate Limiting per user / IP
+  await checkRateLimit(event, {
     uniqueKey: 'receipt_scan',
     windowMs: 60 * 60 * 1000,
     limit: 10,
@@ -26,10 +90,17 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  if (!body || !body.image) {
+  if (!body || !body.image || typeof body.image !== 'string') {
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing image data in request body.'
+    })
+  }
+
+  if (body.image.length > MAX_BASE64_LENGTH) {
+    throw createError({
+      statusCode: 413,
+      statusMessage: 'Image payload exceeds maximum allowed size (5MB).'
     })
   }
 
@@ -38,8 +109,8 @@ export default defineEventHandler(async (event) => {
 
   if (base64Data.startsWith('data:')) {
     const match = base64Data.match(/^data:([^;]+);base64,(.+)$/)
-    if (match) {
-      mimeType = match[1]
+    if (match && match[1] && match[2]) {
+      mimeType = match[1].toLowerCase()
       base64Data = match[2]
     } else {
       throw createError({
@@ -49,7 +120,31 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const userId = await getAuthUserId(event)
+  if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+    throw createError({
+      statusCode: 415,
+      statusMessage: `Unsupported media type "${mimeType}". Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`
+    })
+  }
+
+  // Verify the declared MIME type against the actual file signature (magic
+  // bytes) so arbitrary payloads cannot masquerade as images.
+  let imageBuffer: Buffer
+  try {
+    imageBuffer = Buffer.from(base64Data, 'base64')
+  } catch {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Image payload is not valid base64 data.'
+    })
+  }
+  if (imageBuffer.length === 0 || !matchesMagicBytes(imageBuffer, mimeType)) {
+    throw createError({
+      statusCode: 415,
+      statusMessage: 'File content does not match the declared image type.'
+    })
+  }
+
   const allCategories = await db
     .select()
     .from(categories)
@@ -87,9 +182,10 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
         }
       }[]
     }>(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: 'POST',
+        headers: { 'x-goog-api-key': apiKey },
         body: {
           contents: [
             {
@@ -142,11 +238,16 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
               'Gemini API rate limit exceeded. Please wait a moment before trying to scan again.'
           })
         }
-        throw fallbackErr
+        throwSafeServerError(fallbackErr, {
+          context: 'receipt scan (fallback model)',
+          fallbackMessage: 'Failed to process the receipt image. Please try again.'
+        })
       }
     } else {
-      Sentry.captureException(err)
-      throw err
+      throwSafeServerError(err, {
+        context: 'receipt scan',
+        fallbackMessage: 'Failed to process the receipt image. Please try again.'
+      })
     }
   }
 
@@ -161,19 +262,21 @@ Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdow
   }
 
   try {
-    const parsedResult = JSON.parse(textResponse) as ReceiptScanResult
+    const rawParsed = JSON.parse(textResponse)
+    const sanitizedData = receiptScanSchema.parse(rawParsed) as ReceiptScanResult
+
     return {
       success: true,
-      data: parsedResult
+      data: sanitizedData
     }
   } catch (parseErr: unknown) {
-    console.error('Failed to parse Gemini JSON response:', textResponse)
+    console.error('Failed to parse or validate Gemini JSON response:', textResponse)
     Sentry.captureException(parseErr, {
       extra: { textResponse }
     })
     throw createError({
       statusCode: 502,
-      statusMessage: 'Invalid JSON format returned by Gemini API.'
+      statusMessage: 'Invalid or malformed JSON returned by Gemini API.'
     })
   }
 })

@@ -1,6 +1,7 @@
 import { defineEventHandler, readRawBody } from 'h3'
+import { checkRateLimit } from '~~/server/utils/rateLimiter'
 
-const SENTRY_HOST = process.env.SENTRY_HOST!
+const SENTRY_HOST = process.env.SENTRY_HOST || 'o4507028420657152.ingest.us.sentry.io'
 const SENTRY_PROJECT_IDS_RAW = process.env.SENTRY_PROJECT_IDS
 const KNOWN_PROJECT_IDS: string[] = (() => {
   if (!SENTRY_PROJECT_IDS_RAW) return ['4511668334821376']
@@ -11,7 +12,16 @@ const KNOWN_PROJECT_IDS: string[] = (() => {
     return ['4511668334821376']
   }
 })()
+
 export default defineEventHandler(async (event) => {
+  // Rate limit tunnel requests to prevent external reflection spam
+  await checkRateLimit(event, {
+    uniqueKey: 'sentry_tunnel',
+    windowMs: 60 * 1000,
+    limit: 60,
+    message: 'Too many tunnel requests.'
+  })
+
   const body = await readRawBody(event)
   if (!body) {
     return new Response('No body', { status: 400 })

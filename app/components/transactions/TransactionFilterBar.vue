@@ -11,6 +11,11 @@ const selectedCategoryId = defineModel<number | 'all'>('selectedCategoryId', {
 
 defineProps<{
   categories: Category[]
+  hasActiveFilters?: boolean
+}>()
+
+defineEmits<{
+  reset: []
 }>()
 </script>
 
@@ -27,7 +32,7 @@ defineProps<{
       />
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
+    <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto items-center justify-end">
       <div class="w-full sm:w-36">
         <USelect
           v-model="selectedType"
@@ -50,6 +55,18 @@ defineProps<{
           class="w-full"
         />
       </div>
+
+      <UButton
+        v-if="hasActiveFilters"
+        icon="i-lucide-rotate-ccw"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        title="Reset all filters"
+        @click="$emit('reset')"
+      >
+        <span class="sr-only sm:not-sr-only">Reset</span>
+      </UButton>
     </div>
   </div>
 </template>

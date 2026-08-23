@@ -5,7 +5,7 @@ import type { H3Event } from 'h3'
 const mockSetResponseHeader = vi.fn()
 const mockCreateError = vi.fn((args: { message?: string, statusMessage?: string, statusCode?: number }) => {
   const err = new Error(args.message || args.statusMessage)
-  Object.assign(err, { statusCode: args.statusCode })
+  Object.assign(err, { statusCode: args.statusCode, statusMessage: args.statusMessage })
   return err
 })
 const mockGetRequestIP = vi.fn()
@@ -37,7 +37,7 @@ describe('checkRateLimit utility', () => {
     vi.useRealTimers()
   })
 
-  it('should allow requests under the limit', () => {
+  it('should allow requests under the limit', async () => {
     mockGetRequestIP.mockReturnValue('1.2.3.4')
     const event = {} as H3Event
     const config = {
@@ -47,11 +47,11 @@ describe('checkRateLimit utility', () => {
       message: 'Too many attempts'
     }
 
-    expect(() => checkRateLimit(event, config)).not.toThrow()
-    expect(() => checkRateLimit(event, config)).not.toThrow()
+    await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
+    await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
   })
 
-  it('should throw a 429 error and set retry-after when limit is exceeded', () => {
+  it('should throw a 429 error and set retry-after when limit is exceeded', async () => {
     mockGetRequestIP.mockReturnValue('1.2.3.4')
     const event = {} as H3Event
     const config = {
@@ -61,10 +61,13 @@ describe('checkRateLimit utility', () => {
       message: 'Too many attempts'
     }
 
-    checkRateLimit(event, config)
-    checkRateLimit(event, config)
+    await checkRateLimit(event, config)
+    await checkRateLimit(event, config)
 
-    expect(() => checkRateLimit(event, config)).toThrow()
+    await expect(checkRateLimit(event, config)).rejects.toMatchObject({
+      statusCode: 429,
+      statusMessage: 'Too Many Requests'
+    })
     expect(mockSetResponseHeader).toHaveBeenCalledWith(
       event,
       'retry-after',
@@ -78,7 +81,7 @@ describe('checkRateLimit utility', () => {
     )
   })
 
-  it('should separate rate limits for different IPs', () => {
+  it('should separate rate limits for different IPs', async () => {
     const event = {} as H3Event
     const config = {
       uniqueKey: 'test_key',
@@ -88,14 +91,14 @@ describe('checkRateLimit utility', () => {
     }
 
     mockGetRequestIP.mockReturnValue('1.1.1.1')
-    expect(() => checkRateLimit(event, config)).not.toThrow()
-    expect(() => checkRateLimit(event, config)).toThrow()
+    await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
+    await expect(checkRateLimit(event, config)).rejects.toThrow()
 
     mockGetRequestIP.mockReturnValue('2.2.2.2')
-    expect(() => checkRateLimit(event, config)).not.toThrow()
+    await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
   })
 
-  it('should allow requests again after window expiry', () => {
+  it('should allow requests again after window expiry', async () => {
     mockGetRequestIP.mockReturnValue('1.2.3.4')
     const event = {} as H3Event
     const config = {
@@ -105,11 +108,11 @@ describe('checkRateLimit utility', () => {
       message: 'Too many attempts'
     }
 
-    checkRateLimit(event, config)
-    expect(() => checkRateLimit(event, config)).toThrow()
+    await checkRateLimit(event, config)
+    await expect(checkRateLimit(event, config)).rejects.toThrow()
 
     vi.setSystemTime(Date.now() + 1001)
 
-    expect(() => checkRateLimit(event, config)).not.toThrow()
+    await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
   })
 })

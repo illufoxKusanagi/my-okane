@@ -1,6 +1,7 @@
 import { db } from '~~/server/db'
 import { transactions } from '~~/server/db/schema'
 import { sql, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -32,10 +33,6 @@ export default defineEventHandler(async (event) => {
       balance: totalIncome - totalSpending
     }
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to generate summary',
-      data: error
-    })
+    throwSafeServerError(error, { context: 'summary stats', fallbackMessage: 'Failed to generate summary' })
   }
 })

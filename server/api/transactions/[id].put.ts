@@ -2,6 +2,7 @@ import { db } from '~~/server/db'
 import { transactions, categories } from '~~/server/db/schema'
 import { validateUpdateTransaction } from '~~/server/utils/validator'
 import { and, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   const idStr = event.context.params?.id
@@ -81,11 +82,6 @@ export default defineEventHandler(async (event) => {
       data: updatedTransaction[0]
     }
   } catch (error: unknown) {
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to update transaction',
-      data: error instanceof Error ? error.message : String(error)
-    })
+    throwSafeServerError(error, { context: 'update transaction', fallbackMessage: 'Failed to update transaction' })
   }
 })

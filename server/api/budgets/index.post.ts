@@ -2,7 +2,7 @@ import { budgets, categories } from '~~/server/db/schema'
 import { db } from '~~/server/db'
 import { and, eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
-import * as Sentry from '@sentry/nuxt'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 const budgetSchema = z.object({
   categoryId: z.number().nullable().optional(),
@@ -99,16 +99,10 @@ export default defineEventHandler(async (event) => {
       }
     }
   } catch (error: unknown) {
-    console.error('Save budget error:', error)
-    Sentry.captureException(error)
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) throw error
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to save budget',
-      data: {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      }
+    throwSafeServerError(error, {
+      context: 'save budget',
+      fallbackMessage: 'Failed to save budget',
+      conflictMessage: 'A budget for this category and month already exists.'
     })
   }
 })
