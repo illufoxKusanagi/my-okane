@@ -2,7 +2,11 @@ import { ref, computed } from 'vue'
 import type { Transaction } from '~/composables/useFinance'
 
 export function usePocketDetailsController(categoryId: number) {
-  const currentMonth = ref(new Date().toISOString().slice(0, 7))
+  // Local-time month string; toISOString() would use UTC month.
+  const now = new Date()
+  const currentMonth = ref(
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  )
 
   const { data: budgetData, status, refresh } = useFetch('/api/budgets', {
     query: { month: currentMonth }

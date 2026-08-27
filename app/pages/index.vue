@@ -16,7 +16,12 @@ const toggleView = () => {
   currentView.value = currentView.value === 'month' ? 'week' : 'month'
 }
 
-const currentMonthStr = ref(new Date().toISOString().slice(0, 7))
+// Local-time month string; toISOString() would use UTC and can pick the
+// wrong month for negative-offset timezones early in the month.
+const _now = new Date()
+const currentMonthStr = ref(
+  `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}`
+)
 const { data: budgetData, status: budgetStatus } = await useFetch('/api/budgets', {
   query: { month: currentMonthStr }
 })

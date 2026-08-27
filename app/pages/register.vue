@@ -170,6 +170,12 @@ async function handleRegister() {
     })
   } catch (err: unknown) {
     errorMessage.value = describeApiError(err, 'Registration failed. Please check your inputs.')
+    toast.add({
+      title: 'Registration Failed',
+      description: errorMessage.value,
+      color: 'error',
+      icon: 'i-lucide-circle-alert'
+    })
   } finally {
     loading.value = false
   }

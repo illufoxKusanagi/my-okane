@@ -2,6 +2,7 @@ import { categories } from '~~/server/db/schema'
 import { db } from '~~/server/db'
 import { validateCategory } from '~~/server/utils/validator'
 import { throwSafeServerError } from '~~/server/utils/safeError'
+import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -15,6 +16,26 @@ export default defineEventHandler(async (event) => {
   }
   try {
     const userId = await getAuthUserId(event)
+
+    // Category names must be unique per user: charts and lookups group by
+    // name, so duplicates would silently merge unrelated spending.
+    const duplicate = await db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(
+        and(
+          eq(categories.userId, userId),
+          eq(categories.name, validation.data.name)
+        )
+      )
+      .limit(1)
+    if (duplicate.length > 0) {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'A category with this name already exists.'
+      })
+    }
+
     const newCategory = await db
       .insert(categories)
       .values({

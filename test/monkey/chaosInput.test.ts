@@ -12,10 +12,15 @@ describe('Validator Chaos & Fuzz Monkey Tests', () => {
       expect(validateCategory({ name: '', type: 'spending' }).success).toBe(false)
     })
 
-    it('should accept extremely long name strings (fuzzing boundary)', () => {
+    it('should reject extremely long name strings (DoS boundary)', () => {
       const longName = 'a'.repeat(1000)
       const result = validateCategory({ name: longName, type: 'spending' })
-      expect(result.success).toBe(true)
+      expect(result.success).toBe(false)
+    })
+
+    it('should enforce category name length cap at 100', () => {
+      expect(validateCategory({ name: 'a'.repeat(100), type: 'spending' }).success).toBe(true)
+      expect(validateCategory({ name: 'a'.repeat(101), type: 'spending' }).success).toBe(false)
     })
 
     it('should accept name strings containing malicious script payloads (sanitization test)', () => {
@@ -66,11 +71,9 @@ describe('Validator Chaos & Fuzz Monkey Tests', () => {
         categoryId: 1,
         transactionDate: 'invalid-date'
       })
-      // zod transform returns an invalid Date object which safeParse should catch or handle
-      expect(result.success).toBe(true) // Date object created but isNaN(date.getTime()) will be true
-      if (result.success) {
-        expect(isNaN(new Date(result.data.transactionDate as Date).getTime())).toBe(true)
-      }
+      // Regression guard: the validator used to let Invalid Date objects
+      // through (NaN timestamp would be written to the database).
+      expect(result.success).toBe(false)
     })
   })
 })

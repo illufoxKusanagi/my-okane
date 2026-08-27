@@ -139,6 +139,7 @@ const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const isRegistered = ref(false)
+const toast = useToast()
 
 onMounted(() => {
   if (route.query.email) {
@@ -170,6 +171,12 @@ async function handleLogin() {
     await navigateTo('/')
   } catch (err: unknown) {
     errorMessage.value = describeApiError(err, 'Invalid email or password.')
+    toast.add({
+      title: 'Login Failed',
+      description: errorMessage.value,
+      color: 'error',
+      icon: 'i-lucide-circle-alert'
+    })
   } finally {
     loading.value = false
   }

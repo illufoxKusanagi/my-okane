@@ -35,6 +35,27 @@ export default defineEventHandler(async (event) => {
   try {
     const userId = await getAuthUserId(event)
 
+    // Renaming to a name that already exists would merge two categories
+    // in name-based groupings (charts, lookups).
+    if (validation.data.name !== undefined) {
+      const duplicate = await db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(
+          and(
+            eq(categories.userId, userId),
+            eq(categories.name, validation.data.name)
+          )
+        )
+        .limit(1)
+      if (duplicate[0] && duplicate[0].id !== id) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'A category with this name already exists.'
+        })
+      }
+    }
+
     const updatedCategory = await db
       .update(categories)
       .set({

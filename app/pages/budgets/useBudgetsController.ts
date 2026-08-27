@@ -1,7 +1,12 @@
 import { ref, computed } from 'vue'
 
 export function useBudgetsController() {
-  const currentMonth = ref(new Date().toISOString().slice(0, 7))
+  // Local-time month string (YYYY-MM); toISOString() would report the
+  // previous month for negative-UTC-offset users early in the month.
+  const now = new Date()
+  const currentMonth = ref(
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  )
 
   const { data: budgetData, status, refresh } = useFetch('/api/budgets', {
     query: { month: currentMonth }
@@ -108,6 +113,11 @@ export function useBudgetsController() {
       refresh()
     } catch (error) {
       console.error('Failed to save budget:', error)
+      toast.add({
+        title: 'Failed to Save Budget',
+        description: describeApiError(error),
+        color: 'error'
+      })
     }
   }
 

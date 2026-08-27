@@ -8,8 +8,11 @@ export default defineEventHandler(async (event) => {
     const userId = await getAuthUserId(event)
     const query = getQuery(event)
 
-    const month
-      = (query.month as string) || new Date().toISOString().slice(0, 7)
+    const rawMonth = typeof query.month === 'string' ? query.month : ''
+    const isValidMonth = /^\d{4}-\d{2}$/.test(rawMonth)
+    const now = new Date()
+    const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const month = isValidMonth ? rawMonth : fallbackMonth
 
     const globalBudgetResult = await db
       .select()
@@ -32,7 +35,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'spending'),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )
     const totalSpending = Number(totalSpendingResult[0]?.total || 0)
@@ -44,7 +47,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'income'),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )
     const totalIncome = Number(totalIncomeResult[0]?.total || 0)
@@ -74,7 +77,7 @@ export default defineEventHandler(async (event) => {
       .where(
         and(
           eq(transactions.userId, userId),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate} / 1000, 'unixepoch')) = ${month}`
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )
       .groupBy(transactions.categoryId)

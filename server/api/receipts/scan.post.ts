@@ -150,7 +150,10 @@ export default defineEventHandler(async (event) => {
     .from(categories)
     .where(eq(categories.userId, userId))
   const categoryListStr = allCategories
-    .map((c: Category) => `- "${c.name}" (Type: ${c.type}, ID: ${c.id})`)
+    .map((c: Category) => {
+      const safeName = sanitizeText(c.name, 50).replace(/"/g, '\'')
+      return `- "${safeName}" (Type: ${c.type}, ID: ${c.id})`
+    })
     .join('\n')
 
   const prompt = `You are a professional receipt parser. Analyze the uploaded receipt image and extract details to create a transaction.

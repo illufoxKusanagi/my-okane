@@ -5,7 +5,8 @@ import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const type = query.type as string | undefined
+  const rawType = query.type as string | undefined
+  const type = rawType === 'income' || rawType === 'spending' ? rawType : undefined
 
   try {
     const userId = await getAuthUserId(event)
@@ -26,7 +27,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(categories.userId, userId))
       .groupBy(categories.id, categories.name, categories.color, categories.icon, categories.type)
 
-    if (type === 'income' || type === 'spending') {
+    if (type) {
       return results.filter((r: { type: string }) => r.type === type)
     }
 
