@@ -45,7 +45,6 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true },
     '/**': {
       headers: {
         'X-Frame-Options': 'DENY',

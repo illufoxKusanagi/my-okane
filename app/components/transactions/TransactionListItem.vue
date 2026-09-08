@@ -98,6 +98,7 @@ const { formatDate } = useFormatters()
           size="xs"
           color="neutral"
           variant="ghost"
+          aria-label="Edit transaction"
           @click="emit('edit')"
         />
         <UButton
@@ -105,6 +106,7 @@ const { formatDate } = useFormatters()
           size="xs"
           color="error"
           variant="ghost"
+          aria-label="Delete transaction"
           @click="emit('delete')"
         />
       </div>

@@ -98,11 +98,10 @@ export function useTransactionsController() {
 
   watch(txType, (newType) => {
     const cats = getCategories(newType)
-    if (cats.length > 0) {
-      txCategoryId.value = cats[0]?.id
-    } else {
-      txCategoryId.value = undefined
+    if (txCategoryId.value && cats.some(c => c.id === txCategoryId.value)) {
+      return
     }
+    txCategoryId.value = cats.length > 0 ? cats[0]?.id : undefined
   })
 
   const hasActiveFilters = computed(() => {

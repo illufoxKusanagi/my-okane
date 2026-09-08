@@ -24,8 +24,12 @@ const { formatCurrency, getProgressColor } = useFormatters()
 
 <template>
   <div
-    class="flex flex-col justify-between p-5 rounded-3xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+    role="link"
+    tabindex="0"
+    :aria-label="`${pocket.name} pocket details`"
+    class="flex flex-col justify-between p-5 rounded-3xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 cursor-pointer group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary-500/50"
     @click="navigateTo(`/budgets/${pocket.id}`)"
+    @keydown.enter="navigateTo(`/budgets/${pocket.id}`)"
   >
     <div>
       <div class="flex items-start justify-between gap-2 mb-4">
@@ -45,6 +49,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
           size="xs"
           color="neutral"
           variant="ghost"
+          aria-label="Set pocket budget limit"
           class="md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
           @click.stop="emit('set-budget', pocket.id, pocket.budgetAmount)"
         />

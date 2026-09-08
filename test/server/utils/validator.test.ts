@@ -75,6 +75,42 @@ describe('Validator utilities', () => {
       const result = validateTransaction(data)
       expect(result.success).toBe(false)
     })
+
+    it('should reject invalid calendar dates like 2026-02-31', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
+        amount: 25000,
+        categoryId: 1,
+        transactionDate: '2026-02-31'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
+
+    it('should reject non-ISO date formats like 02/28/2014', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
+        amount: 25000,
+        categoryId: 1,
+        transactionDate: '02/28/2014'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
+
+    it('should accept valid calendar dates', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
+        amount: 25000,
+        categoryId: 1,
+        transactionDate: '2026-02-28'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(true)
+    })
   })
 
   describe('Update category validation', () => {

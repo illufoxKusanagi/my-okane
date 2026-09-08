@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
-import { categories, transactions, users } from './schema'
+import { budgets, categories, transactions, users } from './schema'
 import { hashUserPassword } from '../utils/password'
 
 const url = process.env.TURSO_DATABASE_URL || ''
@@ -19,6 +19,7 @@ async function main() {
 
   console.log('Clearing existing data...')
   await db.delete(transactions)
+  await db.delete(budgets)
   await db.delete(categories)
   await db.delete(users)
 
