@@ -1,44 +1,43 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    open: boolean;
-    title: string;
-    description?: string;
-    submitLabel?: string;
-    cancelLabel?: string;
-    loading?: boolean;
-    disabled?: boolean;
+    open: boolean
+    title: string
+    description?: string
+    submitLabel?: string
+    cancelLabel?: string
+    loading?: boolean
+    disabled?: boolean
   }>(),
   {
-    description: "",
-    submitLabel: "Save",
-    cancelLabel: "Cancel",
+    description: '',
+    submitLabel: 'Save',
+    cancelLabel: 'Cancel',
     loading: false,
-    disabled: false,
-  },
-);
+    disabled: false
+  }
+)
 
 const emit = defineEmits<{
-  (e: "update:open", value: boolean): void;
-  (e: "submit"): void;
-  (e: "cancel"): void;
-}>();
+  (e: 'update:open', value: boolean): void
+  (e: 'submit' | 'cancel'): void
+}>()
 
 const isOpen = computed({
   get: () => props.open,
-  set: (val: boolean) => emit("update:open", val),
-});
+  set: (val: boolean) => emit('update:open', val)
+})
 
 const handleCancel = () => {
-  emit("cancel");
-  isOpen.value = false;
-};
+  emit('cancel')
+  isOpen.value = false
+}
 
 const handleSubmit = () => {
   if (!props.loading && !props.disabled) {
-    emit("submit");
+    emit('submit')
   }
-};
+}
 </script>
 
 <template>
@@ -49,7 +48,10 @@ const handleSubmit = () => {
           <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-100">
             {{ title }}
           </h3>
-          <p v-if="description" class="text-xs text-neutral-500 mt-1">
+          <p
+            v-if="description"
+            class="text-xs text-neutral-500 mt-1"
+          >
             {{ description }}
           </p>
         </div>

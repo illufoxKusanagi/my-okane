@@ -1,21 +1,21 @@
-import { defineVitestConfig } from "@nuxt/test-utils/config";
-import path from "node:path";
+import { defineVitestConfig } from '@nuxt/test-utils/config'
+import path from 'node:path'
 
 export default defineVitestConfig({
   test: {
-    environment: "nuxt",
+    environment: 'nuxt',
     globals: true,
     fileParallelism: false,
     sequence: {
-      concurrent: false,
-    },
+      concurrent: false
+    }
   },
   ssr: {
-    external: ["bun:test"],
+    external: ['bun:test']
   },
   resolve: {
     alias: {
-      "bun:test": path.resolve(__dirname, "./test/empty-mock.ts"),
-    },
-  },
-});
+      'bun:test': path.resolve(__dirname, './test/empty-mock.ts')
+    }
+  }
+})

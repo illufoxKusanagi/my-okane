@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { colorClassMap } from "~/constants/ui";
+import { colorClassMap } from '~/constants/ui'
 
 defineProps<{
   transaction: {
-    id: number;
-    name: string;
-    amount: number;
-    type: "income" | "spending";
-    transactionDate: string | Date;
-    notes?: string | null;
-    categoryName?: string | null;
-    categoryIcon?: string | null;
-    categoryColor?: string | null;
-    categoryId?: number;
-  };
+    id: number
+    name: string
+    amount: number
+    type: 'income' | 'spending'
+    transactionDate: string | Date
+    notes?: string | null
+    categoryName?: string | null
+    categoryIcon?: string | null
+    categoryColor?: string | null
+    categoryId?: number
+  }
   /** Override icon (e.g. pocket detail pages use the pocket icon) */
-  icon?: string;
+  icon?: string
   /** Override color (e.g. pocket detail pages use the pocket color) */
-  color?: string;
-}>();
+  color?: string
+}>()
 
 const emit = defineEmits<{
-  edit: [];
-  delete: [];
-}>();
+  edit: []
+  delete: []
+}>()
 
-const { formatDate, formatCurrency } = useFormatters();
+const { formatDate } = useFormatters()
 </script>
 
 <template>
@@ -37,8 +37,8 @@ const { formatDate, formatCurrency } = useFormatters();
       <div
         :class="[
           'w-10 h-10 rounded-xl flex items-center justify-center border shrink-0',
-          colorClassMap[color || transaction.categoryColor || 'slate'] ||
-            colorClassMap.slate,
+          colorClassMap[color || transaction.categoryColor || 'slate']
+            || colorClassMap.slate
         ]"
       >
         <UIcon
@@ -59,9 +59,7 @@ const { formatDate, formatCurrency } = useFormatters();
             {{ formatDate(transaction.transactionDate) }}
           </span>
           <template v-if="transaction.categoryName">
-            <span class="text-xs text-neutral-300 dark:text-neutral-700"
-              >•</span
-            >
+            <span class="text-xs text-neutral-300 dark:text-neutral-700">•</span>
             <span
               class="text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
             >
@@ -85,7 +83,7 @@ const { formatDate, formatCurrency } = useFormatters();
       <span
         :class="[
           'text-base sm:text-lg font-extrabold tabular-nums',
-          transaction.type === 'income' ? 'text-emerald-500' : 'text-rose-500',
+          transaction.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
         ]"
       >
         {{ transaction.type === "income" ? "+" : "-" }} Rp.

@@ -8,7 +8,10 @@
         <div
           class="inline-flex items-center justify-center p-3 bg-primary-500/10 rounded-2xl mb-4"
         >
-          <UIcon name="i-lucide-wallet" class="h-10 w-10 text-primary-500" />
+          <UIcon
+            name="i-lucide-wallet"
+            class="h-10 w-10 text-primary-500"
+          />
         </div>
         <h2
           class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
@@ -20,18 +23,40 @@
         </p>
       </div>
 
-      <UCard class="shadow-xl ring-1 ring-slate-200 dark:ring-slate-800">
-        <form @submit.prevent="handleLogin" class="space-y-6">
-          <UAlert
-            v-if="errorMessage"
-            color="error"
-            variant="soft"
-            icon="i-lucide-alert-circle"
-            :title="errorMessage"
-            class="mb-4"
-          />
+      <!-- Registration Success Message -->
+      <UAlert
+        v-if="isRegistered"
+        color="success"
+        variant="subtle"
+        icon="i-lucide-circle-check"
+        title="Account Created Successfully"
+        description="Please enter your password to sign in to your new account."
+        class="mb-6"
+      />
 
-          <UFormField label="Email address" name="email" required class="w-full">
+      <!-- Error Message -->
+      <UAlert
+        v-if="errorMessage"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-alert-circle"
+        :title="errorMessage"
+        class="mb-6"
+      />
+
+      <UCard
+        class="shadow-xl shadow-neutral-950/5 border-neutral-200/80 dark:border-neutral-800 backdrop-blur-sm"
+      >
+        <form
+          class="space-y-4"
+          @submit.prevent="handleLogin"
+        >
+          <UFormField
+            label="Email address"
+            name="email"
+            required
+            class="w-full"
+          >
             <UInput
               v-model="email"
               type="email"
@@ -44,13 +69,19 @@
             />
           </UFormField>
 
-          <UFormField label="Password" name="password" required class="w-full">
+          <UFormField
+            label="Password"
+            name="password"
+            required
+            class="w-full"
+          >
             <UInput
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               placeholder="••••••••"
               icon="i-lucide-lock"
               autocomplete="current-password"
+              :autofocus="isRegistered || !!email"
               required
               size="lg"
               class="w-full"
@@ -94,40 +125,60 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
-  layout: false,
-});
+  layout: false
+})
 
-const email = ref("");
-const password = ref("");
-const showPassword = ref(false);
-const loading = ref(false);
-const errorMessage = ref("");
+const route = useRoute()
 
-const { fetch: fetchSession } = useUserSession();
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+const isRegistered = ref(false)
+const toast = useToast()
+
+onMounted(() => {
+  if (route.query.email) {
+    email.value = String(route.query.email)
+  }
+  if (route.query.registered === 'true') {
+    isRegistered.value = true
+  }
+})
+
+const { fetch: fetchSession } = useUserSession()
 
 async function handleLogin() {
-  if (loading.value) return;
-  loading.value = true;
-  errorMessage.value = "";
+  if (loading.value) return
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    await $fetch("/api/auth/login", {
-      method: "POST",
+    await $fetch('/api/auth/login', {
+      method: 'POST',
       body: {
-        email: email.value,
-        password: password.value,
-      },
-    });
+        email: email.value.trim(),
+        password: password.value
+      }
+    })
 
-    await fetchSession();
+    await fetchSession()
 
-    await navigateTo("/");
-  } catch (err: any) {
-    errorMessage.value =
-      err.data?.message || err.data?.statusMessage || "Invalid email or password.";
+    await navigateTo('/')
+  } catch (err: unknown) {
+    errorMessage.value = describeApiError(err, 'Invalid email or password.')
+    toast.add({
+      title: 'Login Failed',
+      description: errorMessage.value,
+      color: 'error',
+      icon: 'i-lucide-circle-alert'
+    })
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>

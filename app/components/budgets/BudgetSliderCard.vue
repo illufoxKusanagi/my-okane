@@ -1,38 +1,38 @@
 <script setup lang="ts">
 const props = defineProps<{
-  currentView: "month" | "week";
-  monthlyBudgetLimit: number;
-  monthlySpent: number;
-  monthlyRemaining: number;
-  weeklyBudgetLimit: number;
-  weeklySpent: number;
-  weeklyRemaining: number;
-}>();
+  currentView: 'month' | 'week'
+  monthlyBudgetLimit: number
+  monthlySpent: number
+  monthlyRemaining: number
+  weeklyBudgetLimit: number
+  weeklySpent: number
+  weeklyRemaining: number
+}>()
 
 const emit = defineEmits<{
-  toggle: [];
-}>();
+  toggle: []
+}>()
 
-const { formatCurrency, getProgressColor } = useFormatters();
+const { formatCurrency, getProgressColor } = useFormatters()
 
 const activeLimit = computed(() =>
-  props.currentView === "month"
+  props.currentView === 'month'
     ? props.monthlyBudgetLimit
-    : props.weeklyBudgetLimit,
-);
+    : props.weeklyBudgetLimit
+)
 const activeSpent = computed(() =>
-  props.currentView === "month" ? props.monthlySpent : props.weeklySpent,
-);
+  props.currentView === 'month' ? props.monthlySpent : props.weeklySpent
+)
 const activeRemaining = computed(() =>
-  props.currentView === "month"
+  props.currentView === 'month'
     ? props.monthlyRemaining
-    : props.weeklyRemaining,
-);
+    : props.weeklyRemaining
+)
 const progressPct = computed(() =>
   activeLimit.value > 0
     ? Math.round((activeSpent.value / activeLimit.value) * 100)
-    : 0,
-);
+    : 0
+)
 </script>
 
 <template>
@@ -45,13 +45,19 @@ const progressPct = computed(() =>
       class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-200"
       @click.stop="emit('toggle')"
     >
-      <UIcon name="i-lucide-chevron-left" class="w-5 h-5 text-white/80" />
+      <UIcon
+        name="i-lucide-chevron-left"
+        class="w-5 h-5 text-white/80"
+      />
     </button>
     <button
       class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-200"
       @click.stop="emit('toggle')"
     >
-      <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-white/80" />
+      <UIcon
+        name="i-lucide-chevron-right"
+        class="w-5 h-5 text-white/80"
+      />
     </button>
 
     <div class="px-8 text-center flex flex-col items-center">
@@ -100,7 +106,10 @@ const progressPct = computed(() =>
       </template>
 
       <!-- Progress bar -->
-      <div v-if="activeLimit > 0" class="w-full max-w-md mt-5">
+      <div
+        v-if="activeLimit > 0"
+        class="w-full max-w-md mt-5"
+      >
         <div
           class="flex justify-between text-xxs opacity-75 mb-1.5 font-semibold"
         >

@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { colorClassMap } from "~/constants/ui";
-import type { Category } from "~/composables/useFinance";
+import { colorClassMap } from '~/constants/ui'
+import type { Category } from '~/composables/useFinance'
 
 defineProps<{
-  category: Category;
-}>();
+  category: Category
+}>()
 
 const emit = defineEmits<{
-  edit: [];
-  delete: [];
-}>();
+  edit: []
+  delete: []
+}>()
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const emit = defineEmits<{
       <div
         :class="[
           'w-10 h-10 rounded-xl flex items-center justify-center border',
-          colorClassMap[category.color || 'slate'] || colorClassMap.slate,
+          colorClassMap[category.color || 'slate'] || colorClassMap.slate
         ]"
       >
         <UIcon

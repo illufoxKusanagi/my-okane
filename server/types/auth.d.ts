@@ -1,12 +1,12 @@
-declare module "#auth-utils" {
+declare module '#auth-utils' {
   interface User {
-    id: number;
-    name: string;
-    email: string;
+    id: number
+    name: string
+    email: string
   }
   interface UserSession {
-    user: User;
+    user: User
   }
 }
 
-export {};
+export {}

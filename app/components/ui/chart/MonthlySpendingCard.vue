@@ -1,11 +1,11 @@
 <script setup lang="ts">
-const { getSpendingByCategory } = useFinance();
+const { getSpendingByCategory } = useFinance()
 
-const spendingData = computed(() => getSpendingByCategory());
+const spendingData = computed(() => getSpendingByCategory())
 
 const currentMonthDescription = computed(() => {
-  return `Expenses for ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`;
-});
+  return `Expenses for ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+})
 </script>
 
 <template>

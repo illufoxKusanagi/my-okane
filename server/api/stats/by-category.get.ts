@@ -1,13 +1,15 @@
-import { db } from "~~/server/db";
-import { transactions, categories } from "~~/server/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { db } from '~~/server/db'
+import { transactions, categories } from '~~/server/db/schema'
+import { and, eq, sql } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const type = query.type as string | undefined;
+  const query = getQuery(event)
+  const rawType = query.type as string | undefined
+  const type = rawType === 'income' || rawType === 'spending' ? rawType : undefined
 
   try {
-    const userId = await getAuthUserId(event);
+    const userId = await getAuthUserId(event)
 
     const results = await db
       .select({
@@ -15,7 +17,7 @@ export default defineEventHandler(async (event) => {
         color: categories.color,
         icon: categories.icon,
         type: categories.type,
-        value: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
+        value: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`
       })
       .from(categories)
       .leftJoin(
@@ -23,18 +25,14 @@ export default defineEventHandler(async (event) => {
         and(eq(transactions.categoryId, categories.id), eq(transactions.userId, userId))
       )
       .where(eq(categories.userId, userId))
-      .groupBy(categories.id, categories.name, categories.color, categories.icon, categories.type);
+      .groupBy(categories.id, categories.name, categories.color, categories.icon, categories.type)
 
-    if (type === "income" || type === "spending") {
-      return results.filter((r: { type: string }) => r.type === type);
+    if (type) {
+      return results.filter((r: { type: string }) => r.type === type)
     }
 
-    return results;
+    return results
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to generate category breakdown",
-      data: error,
-    });
+    throwSafeServerError(error, { context: 'category breakdown', fallbackMessage: 'Failed to generate category breakdown' })
   }
-});
+})

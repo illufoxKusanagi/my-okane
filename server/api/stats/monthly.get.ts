@@ -1,10 +1,11 @@
-import { db } from "~~/server/db";
-import { transactions } from "~~/server/db/schema";
-import { sql, desc, eq } from "drizzle-orm";
+import { db } from '~~/server/db'
+import { transactions } from '~~/server/db/schema'
+import { sql, desc, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   try {
-    const userId = await getAuthUserId(event);
+    const userId = await getAuthUserId(event)
 
     // In SQLite, dates stored via mode: 'timestamp' are unix epochs in seconds.
     // So format it using strftime('%Y-%m', datetime(transaction_date, 'unixepoch'))
@@ -12,51 +13,47 @@ export default defineEventHandler(async (event) => {
       .select({
         month: sql<string>`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
         type: transactions.type,
-        total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`,
+        total: sql<number>`CAST(coalesce(sum(${transactions.amount}), 0) AS INTEGER)`
       })
       .from(transactions)
       .where(eq(transactions.userId, userId))
       .groupBy(
         sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
-        transactions.type,
+        transactions.type
       )
       .orderBy(
         desc(
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`,
-        ),
-      );
+          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch'))`
+        )
+      )
 
-    const formatted: Record<string, { income: number; spending: number }> = {};
+    const formatted: Record<string, { income: number, spending: number }> = {}
 
     results.forEach(
-      (row: { month: string | null; type: string; total: number }) => {
-        if (!row.month) return;
+      (row: { month: string | null, type: string, total: number }) => {
+        if (!row.month) return
         if (!formatted[row.month]) {
-          formatted[row.month] = { income: 0, spending: 0 };
+          formatted[row.month] = { income: 0, spending: 0 }
         }
-        const data = formatted[row.month];
+        const data = formatted[row.month]
         if (data) {
-          if (row.type === "income") {
-            data.income = row.total;
-          } else if (row.type === "spending") {
-            data.spending = row.total;
+          if (row.type === 'income') {
+            data.income = row.total
+          } else if (row.type === 'spending') {
+            data.spending = row.total
           }
         }
-      },
-    );
+      }
+    )
 
     return Object.entries(formatted)
       .map(([month, data]) => ({
         month,
         income: data.income,
-        spending: data.spending,
+        spending: data.spending
       }))
-      .reverse();
+      .reverse()
   } catch (error) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Failed to generate monthly trend stats",
-      data: error,
-    });
+    throwSafeServerError(error, { context: 'monthly trend', fallbackMessage: 'Failed to generate monthly trend stats' })
   }
-});
+})
