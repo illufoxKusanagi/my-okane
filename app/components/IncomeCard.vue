@@ -44,7 +44,7 @@ const categories = computed(() =>
 watch(
   categories,
   (newCats) => {
-    if (selectedCategory.value === undefined && newCats.length > 0) {
+    if (!newCats.some(cat => cat.value === selectedCategory.value)) {
       selectedCategory.value = newCats[0]?.value
     }
   },

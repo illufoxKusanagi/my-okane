@@ -52,6 +52,7 @@ const { formatMonthLabel } = useFormatters()
               icon="i-lucide-chevron-left"
               color="neutral"
               variant="ghost"
+              aria-label="Previous month"
               @click="prevMonth"
             />
             <span
@@ -63,6 +64,7 @@ const { formatMonthLabel } = useFormatters()
               icon="i-lucide-chevron-right"
               color="neutral"
               variant="ghost"
+              aria-label="Next month"
               @click="nextMonth"
             />
           </div>

@@ -46,6 +46,7 @@ const emit = defineEmits<{
         size="xs"
         color="neutral"
         variant="ghost"
+        :aria-label="`Edit ${category.name} category`"
         @click="emit('edit')"
       />
       <UButton
@@ -53,6 +54,7 @@ const emit = defineEmits<{
         size="xs"
         color="error"
         variant="ghost"
+        :aria-label="`Delete ${category.name} category`"
         @click="emit('delete')"
       />
     </div>

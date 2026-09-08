@@ -41,7 +41,11 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal
+    v-model:open="isOpen"
+    :title="title"
+    :description="description"
+  >
     <template #content>
       <UContainer class="p-6 flex flex-col gap-5 w-full">
         <div>

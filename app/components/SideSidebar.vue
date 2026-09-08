@@ -24,6 +24,16 @@ const dropdownItems = computed(() => [
   ]
 ])
 
+const userInitials = computed(() => {
+  const name = user.value?.name?.trim()
+  if (!name) return 'U'
+  const parts = name.split(/\s+/)
+  if (parts.length >= 2) {
+    return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
+})
+
 const items: NavigationMenuItem[][] = [
   [
     {
@@ -126,8 +136,7 @@ const items: NavigationMenuItem[][] = [
       >
         <UButton
           :avatar="{
-            src: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}`,
-            loading: 'lazy' as const
+            text: userInitials
           }"
           :label="collapsed ? undefined : user.name"
           color="neutral"

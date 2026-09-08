@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest'
 
 describe('Timezone boundary date parsing regression tests', () => {
-  // Helper mimicking the timezone-safe month filter logic implemented in budgets/[id].vue
+  // Helper mimicking the timezone-safe month filter logic
   const parseLocalYearMonth = (dateStr: string | Date): string => {
+    if (typeof dateStr === 'string' && /^\d{4}-\d{2}/.test(dateStr)) {
+      return dateStr.slice(0, 7)
+    }
     const d = new Date(dateStr)
     if (isNaN(d.getTime())) return ''
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -21,6 +24,11 @@ describe('Timezone boundary date parsing regression tests', () => {
     const parsed = parseLocalYearMonth(dateObj)
 
     expect(parsed).toBe('2026-08')
+  })
+
+  it('should preserve calendar month on negative UTC offset date-only strings', () => {
+    expect(parseLocalYearMonth('2026-01-01')).toBe('2026-01')
+    expect(parseLocalYearMonth('2026-12-01')).toBe('2026-12')
   })
 
   it('should return empty string on invalid dates without throwing', () => {

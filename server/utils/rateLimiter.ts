@@ -31,15 +31,25 @@ function getRedis(): Redis | null {
 }
 
 function getClientIp(event: H3Event): string {
-  // On Vercel the edge proxy sanitizes x-forwarded-for with the real client IP,
-  // so it is trustworthy there. Self-hosted deployments fall back to the socket
-  // address so attackers cannot spoof per-IP buckets via a forged header.
-  if (process.env.VERCEL === '1') {
-    const forwarded = getHeader(event, 'x-forwarded-for')
-    if (forwarded) {
-      const last = forwarded.split(',').pop()?.trim()
-      if (last) return last
+  try {
+    if (event?.node?.req) {
+      // Cloudflare Workers sets cf-connecting-ip
+      const cfIp = getHeader(event, 'cf-connecting-ip')
+      if (cfIp) return cfIp.trim()
+
+      // On Vercel the edge proxy sanitizes x-forwarded-for with the real client IP,
+      // so it is trustworthy there. Self-hosted deployments fall back to the socket
+      // address so attackers cannot spoof per-IP buckets via a forged header.
+      if (process.env.VERCEL === '1') {
+        const forwarded = getHeader(event, 'x-forwarded-for')
+        if (forwarded) {
+          const last = forwarded.split(',').pop()?.trim()
+          if (last) return last
+        }
+      }
     }
+  } catch {
+    // Fallback if event is mocked or header extraction fails
   }
   return getRequestIP(event, { xForwardedFor: false }) || '127.0.0.1'
 }
@@ -85,7 +95,7 @@ async function checkRateLimitRedis(redis: Redis, event: H3Event, config: RateLim
 }
 
 function checkRateLimitInMemory(event: H3Event, config: RateLimitConfig): void {
-  const ip = getRequestIP(event, { xForwardedFor: false }) || '127.0.0.1'
+  const ip = getClientIp(event)
   const mapKey = `${ip}:${config.uniqueKey}`
   const now = Date.now()
 

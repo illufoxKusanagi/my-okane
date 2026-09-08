@@ -38,6 +38,19 @@ export const CategorySchema = z.object({
   color: z.enum(ALLOWED_COLORS).optional()
 })
 
+function isValidCalendarDate(val: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(val)
+  if (!match) {
+    return false
+  }
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false
+  const d = new Date(Date.UTC(year, month - 1, day))
+  return d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day
+}
+
 export const TransactionSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(200, 'Name too long'),
   type: z.enum(['income', 'spending']),
@@ -50,6 +63,10 @@ export const TransactionSchema = z.object({
   transactionDate: z
     .string()
     .optional()
+    .refine(
+      val => val === undefined || isValidCalendarDate(val),
+      'Invalid transaction date'
+    )
     .transform(val => (val ? new Date(val) : undefined))
     // `new Date(garbage)` yields an Invalid Date instead of throwing,
     // which would insert a broken timestamp into the database.

@@ -43,7 +43,8 @@ const { formatCurrency, formatMonthLabel } = useFormatters()
             icon="i-lucide-arrow-left"
             color="neutral"
             variant="ghost"
-            @click="router.back()"
+            aria-label="Back to budgets"
+            @click="navigateTo('/budgets')"
           />
         </div>
       </template>

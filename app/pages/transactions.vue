@@ -195,7 +195,9 @@ const {
       <!-- Scanning Loading Overlay -->
       <UModal
         v-model:open="isScanning"
-        prevent-close
+        :dismissible="false"
+        title="Scanning receipt image"
+        description="Parsing items and finding best category matches with Gemini AI"
       >
         <template #content>
           <div class="flex flex-col items-center justify-center p-8 gap-4">
