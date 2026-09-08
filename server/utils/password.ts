@@ -1,4 +1,4 @@
-import { scrypt, randomBytes, timingSafeEqual, scryptSync } from 'node:crypto'
+import { scrypt, randomBytes, timingSafeEqual } from 'node:crypto'
 import { promisify } from 'node:util'
 
 const scryptAsync = promisify(scrypt)
@@ -36,12 +36,9 @@ export async function verifyUserPassword(
 }
 
 /**
- * Pre-computed dummy hash used to neutralize timing attacks
+ * Pre-computed static dummy hash used to neutralize timing attacks
  * during failed login attempts for non-existent user accounts.
- * Initialized once on boot so it is immediately available.
+ * Static constant eliminates global-scope crypto/RNG execution during Cloudflare Worker cold starts.
  */
-export const DUMMY_PASSWORD_HASH: string = (() => {
-  const salt = randomBytes(16).toString('hex')
-  const derivedKey = scryptSync('my-okane-dummy-constant-for-timing-mitigation-safe', salt, 64)
-  return `${salt}:${derivedKey.toString('hex')}`
-})()
+export const DUMMY_PASSWORD_HASH
+  = 'f1a4e2c8d7b6a5948372615049382716:8e72e45a3b4481324cb5f2070b3d45b75b4273f439821ebceac0487d92a65b3a5a3192389a9e4173ad2d104f3b86e09b621d09e47177e9b4490bcdf0acab3df6'

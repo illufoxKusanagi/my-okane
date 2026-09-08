@@ -10,16 +10,13 @@ interface RateLimitConfig {
 
 const rateLimitMap = new Map<string, number[]>()
 
-if (import.meta.server) {
-  setInterval(() => {
-    const now = Date.now()
-    for (const [key, timestamps] of rateLimitMap.entries()) {
-      const youngest = timestamps[timestamps.length - 1]
-      if (youngest && youngest < now - 3600000) {
-        rateLimitMap.delete(key)
-      }
+function cleanupExpiredBuckets(now: number): void {
+  for (const [key, timestamps] of rateLimitMap.entries()) {
+    const youngest = timestamps[timestamps.length - 1]
+    if (youngest && youngest < now - 3600000) {
+      rateLimitMap.delete(key)
     }
-  }, 600000).unref()
+  }
 }
 
 let redisClient: Redis | null | undefined
@@ -91,6 +88,11 @@ function checkRateLimitInMemory(event: H3Event, config: RateLimitConfig): void {
   const ip = getRequestIP(event, { xForwardedFor: false }) || '127.0.0.1'
   const mapKey = `${ip}:${config.uniqueKey}`
   const now = Date.now()
+
+  // Evict stale buckets when map grows, avoiding global timers disallowed in serverless / Cloudflare
+  if (rateLimitMap.size > 500) {
+    cleanupExpiredBuckets(now)
+  }
 
   let timestamps = rateLimitMap.get(mapKey) || []
 
