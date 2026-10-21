@@ -28,7 +28,9 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    await db.delete(budgets).where(eq(budgets.id, id))
+    await db
+      .delete(budgets)
+      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)))
 
     return {
       success: true

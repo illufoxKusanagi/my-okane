@@ -1,71 +1,17 @@
-import { categories, type Category } from '~~/server/db/schema'
+import { categories } from '~~/server/db/schema'
 import { db } from '~~/server/db'
 import type { ReceiptScanResult } from '../../utils/receiptTypes'
 import * as Sentry from '@sentry/nuxt'
 import { eq } from 'drizzle-orm'
-import { z } from 'zod'
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
 import { matchesMagicBytes } from '~~/server/utils/imageValidation'
 import { throwSafeServerError } from '~~/server/utils/safeError'
+import { receiptScanSchema } from '~~/server/utils/receiptSchema'
+import { buildReceiptPrompt } from '~~/server/utils/receiptPrompt'
+import { callGeminiWithFallback } from '~~/server/utils/geminiClient'
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const MAX_BASE64_LENGTH = 7 * 1024 * 1024 // ~5MB file in base64
-
-const sanitizeText = (val: string, maxLen: number): string => {
-  if (typeof val !== 'string') return ''
-  return Array.from(val)
-    .filter((c) => {
-      const code = c.charCodeAt(0)
-      return (code >= 32 && code !== 127) || code === 10 || code === 9
-    })
-    .join('')
-    .trim()
-    .slice(0, maxLen)
-}
-
-const receiptScanSchema = z.object({
-  storeName: z
-    .string()
-    .transform(v => sanitizeText(v, 100))
-    .default('Unknown Merchant'),
-  totalAmount: z
-    .number()
-    .finite()
-    .nonnegative()
-    .max(1_000_000_000_000)
-    .catch(0),
-  transactionDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .catch(() => new Date().toISOString().slice(0, 10)),
-  items: z
-    .array(
-      z.object({
-        name: z
-          .string()
-          .transform(v => sanitizeText(v, 100))
-          .default('Item'),
-        price: z
-          .number()
-          .finite()
-          .nonnegative()
-          .max(1_000_000_000_000)
-          .catch(0)
-      })
-    )
-    .max(100)
-    .catch([]),
-  suggestedCategory: z
-    .string()
-    .nullable()
-    .transform(v => (v ? sanitizeText(v, 50) : null))
-    .catch(null),
-  suggestedTransactionName: z
-    .string()
-    .transform(v => sanitizeText(v, 100))
-    .default('Receipt Scan'),
-  confidence: z.enum(['high', 'medium', 'low']).catch('medium')
-})
 
 export default defineEventHandler(async (event) => {
   // 1. Mandatory Pre-Auth Check (Prevent unauthenticated memory/CPU exhaustion)
@@ -149,109 +95,20 @@ export default defineEventHandler(async (event) => {
     .select()
     .from(categories)
     .where(eq(categories.userId, userId))
-  const categoryListStr = allCategories
-    .map((c: Category) => {
-      const safeName = sanitizeText(c.name, 50).replace(/"/g, '\'')
-      return `- "${safeName}" (Type: ${c.type}, ID: ${c.id})`
-    })
-    .join('\n')
 
-  const prompt = `You are a professional receipt parser. Analyze the uploaded receipt image and extract details to create a transaction.
-You must return a valid JSON object matching the schema below.
-
-List of available categories in the system:
-${categoryListStr}
-
-JSON schema target:
-{
-  "storeName": "Name of the merchant or store",
-  "totalAmount": 15000 (total transaction amount, integer number only),
-  "transactionDate": "YYYY-MM-DD" (date on the receipt, format YYYY-MM-DD, fallback to today's date if not found),
-  "items": [
-    { "name": "Item name", "price": 10000 }
-  ],
-  "suggestedCategory": "The exact name of one of the available categories listed above. Choose the most appropriate match. If it is a spending receipt, map only to one of the spending categories. If it is an income receipt, map only to one of the income categories. If unsure, map to 'Others' or a general spending category.",
-  "suggestedTransactionName": "Short descriptive name for the transaction, e.g., 'Lunch at McD', 'Starbucks Coffee', 'Indomaret Groceries'",
-  "confidence": "high" | "medium" | "low"
-}
-
-Provide ONLY the raw JSON string matching this schema. Do not wrap it in markdown code blocks like \`\`\`json.`
-
-  const callGemini = async (model: string) => {
-    return await $fetch<{
-      candidates?: {
-        content?: {
-          parts?: { text: string }[]
-        }
-      }[]
-    }>(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'x-goog-api-key': apiKey },
-        body: {
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: mimeType,
-                    data: base64Data
-                  }
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            responseMimeType: 'application/json'
-          }
-        }
-      }
-    )
-  }
+  const prompt = buildReceiptPrompt(allCategories)
 
   let response
   try {
-    response = await callGemini('gemini-3.6-flash')
+    response = await callGeminiWithFallback(apiKey, prompt, mimeType, base64Data)
   } catch (err: unknown) {
-    const error = err as { statusCode?: number, status?: number, message?: string }
-    const isRateLimit
-      = error.statusCode === 429
-        || error.status === 429
-        || (error.message && error.message.includes('429'))
-    if (isRateLimit) {
-      console.warn(
-        'Gemini 3.6 Flash rate limit (429) hit. Falling back to Gemini 3.5 Flash...'
-      )
-
-      try {
-        response = await callGemini('gemini-3.5-flash')
-      } catch (fallbackErr: unknown) {
-        Sentry.captureException(fallbackErr)
-        const fbError = fallbackErr as { statusCode?: number, status?: number, message?: string }
-        const isFallbackRateLimit
-          = fbError.statusCode === 429
-            || fbError.status === 429
-            || (fbError.message && fbError.message.includes('429'))
-        if (isFallbackRateLimit) {
-          throw createError({
-            statusCode: 429,
-            statusMessage:
-              'Gemini API rate limit exceeded. Please wait a moment before trying to scan again.'
-          })
-        }
-        throwSafeServerError(fallbackErr, {
-          context: 'receipt scan (fallback model)',
-          fallbackMessage: 'Failed to process the receipt image. Please try again.'
-        })
-      }
-    } else {
-      throwSafeServerError(err, {
-        context: 'receipt scan',
-        fallbackMessage: 'Failed to process the receipt image. Please try again.'
-      })
-    }
+    // callGeminiWithFallback already throws sanitized 429/500 errors;
+    // rethrow anything shaped like an H3 error untouched.
+    if (err && typeof err === 'object' && 'statusCode' in err) throw err
+    throwSafeServerError(err, {
+      context: 'receipt scan',
+      fallbackMessage: 'Failed to process the receipt image. Please try again.'
+    })
   }
 
   const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text
