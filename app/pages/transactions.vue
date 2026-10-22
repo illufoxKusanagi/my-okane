@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppModal from '~/components/ui/AppModal.vue'
+import DeleteConfirmModal from '~/components/ui/DeleteConfirmModal.vue'
 import TransactionFilterBar from '~/components/transactions/TransactionFilterBar.vue'
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
 import { useTransactionsController } from './useTransactionsController'
@@ -26,6 +26,7 @@ const {
   txAmount,
   txCategoryId,
   txNotes,
+  txDate,
   isDeleteConfirmOpen,
   transactionToDelete,
   formCategories,
@@ -167,30 +168,22 @@ const {
         v-model:amount="txAmount"
         v-model:category-id="txCategoryId"
         v-model:notes="txNotes"
+        v-model:date="txDate"
         :editing-transaction="editingTransaction"
         :categories="formCategories"
         @submit="handleSaveTransaction"
       />
 
       <!-- Delete Confirmation Modal -->
-      <AppModal
+      <DeleteConfirmModal
         v-model:open="isDeleteConfirmOpen"
         title="Delete Transaction?"
-        submit-label="Delete"
-        @submit="handleDeleteConfirm"
+        @confirm="handleDeleteConfirm"
       >
-        <div class="flex items-center gap-3 text-error mb-2">
-          <UIcon
-            name="i-lucide-triangle-alert"
-            class="w-6 h-6"
-          />
-          <span class="font-semibold">Warning: Irreversible Action</span>
-        </div>
-        <p class="text-sm text-neutral-600 dark:text-neutral-400">
-          Are you sure you want to delete this transaction for <strong>{{ transactionToDelete?.name }}</strong>?
-          This action cannot be undone.
-        </p>
-      </AppModal>
+        Are you sure you want to delete this transaction for
+        <strong>{{ transactionToDelete?.name }}</strong>?
+        This action cannot be undone.
+      </DeleteConfirmModal>
 
       <!-- Scanning Loading Overlay -->
       <UModal

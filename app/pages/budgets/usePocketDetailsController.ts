@@ -44,9 +44,13 @@ export function usePocketDetailsController(categoryId: number) {
 
   const isTxModalOpen = ref(false)
   const txName = ref('')
-  const txAmount = ref<number | null>(null)
+  const txAmount = ref(0)
   const txNotes = ref('')
+  const txDate = ref('')
   const editingTx = ref<Transaction | null>(null)
+
+  const isDeleteConfirmOpen = ref(false)
+  const txToDelete = ref<Transaction | null>(null)
 
   const openBudgetModal = () => {
     budgetAmount.value = pocket.value?.budgetAmount || null
@@ -83,22 +87,32 @@ export function usePocketDetailsController(categoryId: number) {
   }
 
   const openTxModal = (tx?: Transaction) => {
+    const { toDateInputValue } = useFormatters()
     if (tx) {
       editingTx.value = tx
       txName.value = tx.name
       txAmount.value = tx.amount
       txNotes.value = tx.notes || ''
+      txDate.value = toDateInputValue(tx.transactionDate)
     } else {
       editingTx.value = null
       txName.value = ''
-      txAmount.value = null
+      txAmount.value = 0
       txNotes.value = ''
+      txDate.value = toDateInputValue(new Date())
     }
     isTxModalOpen.value = true
   }
 
   const handleSaveTransaction = async () => {
-    if (!txName.value || !txAmount.value || !pocket.value) return
+    if (
+      !txName.value.trim()
+      || !(txAmount.value > 0)
+      || !txDate.value
+      || !pocket.value
+    ) {
+      return
+    }
 
     const type = pocket.value.type === 'income' ? 'income' : 'spending'
     try {
@@ -109,7 +123,8 @@ export function usePocketDetailsController(categoryId: number) {
           categoryId,
           txAmount.value,
           type,
-          txNotes.value
+          txNotes.value,
+          txDate.value
         )
       } else {
         await addTransaction(
@@ -117,7 +132,8 @@ export function usePocketDetailsController(categoryId: number) {
           categoryId,
           txAmount.value,
           type,
-          txNotes.value
+          txNotes.value,
+          txDate.value
         )
       }
       isTxModalOpen.value = false
@@ -127,14 +143,21 @@ export function usePocketDetailsController(categoryId: number) {
     }
   }
 
-  const handleDeleteTx = async (txId: number) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-      try {
-        await deleteTransaction(txId)
-        refresh()
-      } catch (error) {
-        console.error('Failed to delete transaction:', error)
-      }
+  const confirmDeleteTx = (tx: Transaction) => {
+    txToDelete.value = tx
+    isDeleteConfirmOpen.value = true
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!txToDelete.value) return
+    try {
+      await deleteTransaction(txToDelete.value.id)
+      refresh()
+    } catch (error) {
+      console.error('Failed to delete transaction:', error)
+    } finally {
+      isDeleteConfirmOpen.value = false
+      txToDelete.value = null
     }
   }
 
@@ -151,12 +174,16 @@ export function usePocketDetailsController(categoryId: number) {
     txName,
     txAmount,
     txNotes,
+    txDate,
     editingTx,
+    isDeleteConfirmOpen,
+    txToDelete,
     openBudgetModal,
     handleSaveBudget,
     handleDeleteBudget,
     openTxModal,
     handleSaveTransaction,
-    handleDeleteTx
+    confirmDeleteTx,
+    handleDeleteConfirm
   }
 }

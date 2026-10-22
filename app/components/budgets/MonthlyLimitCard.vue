@@ -48,7 +48,12 @@ const progressPct = computed(() => {
 
       <template v-if="globalBudget">
         <h2
-          class="text-3xl font-extrabold text-neutral-800 dark:text-neutral-100 mb-4"
+          class="text-3xl font-extrabold mb-4"
+          :class="
+            globalBudget.remaining < 0
+              ? 'text-rose-600 dark:text-rose-400'
+              : 'text-neutral-800 dark:text-neutral-100'
+          "
         >
           {{ formatCurrency(globalBudget.remaining) }}
           <span class="text-xs font-medium text-neutral-500 block mt-1">remaining of {{ formatCurrency(globalBudget.amount) }}</span>

@@ -63,7 +63,14 @@ const { formatCurrency } = useFormatters()
     <!-- Main Balance -->
     <div class="mb-6">
       <template v-if="pocket.type === 'spending'">
-        <h1 class="text-4xl font-extrabold tracking-tight">
+        <h1
+          class="text-4xl font-extrabold tracking-tight"
+          :class="
+            pocket.remaining < 0
+              ? 'text-rose-600 dark:text-rose-400'
+              : ''
+          "
+        >
           {{ formatCurrency(pocket.remaining) }}
         </h1>
         <p class="text-xs opacity-80 mt-1">

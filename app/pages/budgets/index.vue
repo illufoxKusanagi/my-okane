@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
-import ColorIconPicker from '~/components/ui/ColorIconPicker.vue'
+import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 import BalanceCard from '~/components/budgets/BalanceCard.vue'
 import MonthlyLimitCard from '~/components/budgets/MonthlyLimitCard.vue'
 import PocketCard from '~/components/budgets/PocketCard.vue'
@@ -115,11 +115,17 @@ const { formatMonthLabel } = useFormatters()
         <!-- Pockets / Categories Pockets List -->
         <div class="flex flex-col gap-4 mt-2">
           <div class="flex items-center justify-between">
-            <h3
-              class="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 tracking-tight"
-            >
-              Your Pockets (Kantong)
-            </h3>
+            <div>
+              <h3
+                class="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 tracking-tight"
+              >
+                Your Pockets (Kantong)
+              </h3>
+              <p class="text-xs text-neutral-500 mt-1">
+                Each pocket is a category — spending pockets can have a monthly
+                limit.
+              </p>
+            </div>
           </div>
 
           <!-- Pockets Grid / Skeletons -->
@@ -148,7 +154,16 @@ const { formatMonthLabel } = useFormatters()
             v-else
             class="p-8 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl text-neutral-500 text-sm"
           >
-            No pockets found for this month.
+            No categories yet. Create your first pocket to get started.
+            <UButton
+              label="Create Pocket"
+              icon="i-lucide-plus"
+              color="primary"
+              size="sm"
+              class="mt-4"
+              block
+              @click="openCreatePocketModal"
+            />
           </div>
         </div>
       </UContainer>
@@ -180,33 +195,15 @@ const { formatMonthLabel } = useFormatters()
       v-model:open="isCreatePocketModalOpen"
       title="Create New Pocket (Category)"
       submit-label="Create Pocket"
+      :disabled="!pocketName.trim()"
       @submit="handleCreatePocket"
     >
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Pocket Name
-        </p>
-        <UInput
-          v-model="pocketName"
-          placeholder="e.g. Emergency Fund, Vacation, Coffee"
-          class="w-full"
-          autofocus
-        />
-      </div>
-
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Pocket Type
-        </p>
-        <USelect
-          v-model="pocketType"
-          :items="[
-            { label: 'Spending Pocket', value: 'spending' },
-            { label: 'Income Pocket', value: 'income' }
-          ]"
-          class="w-full"
-        />
-      </div>
+      <CategoryFormFields
+        v-model:name="pocketName"
+        v-model:type="pocketType"
+        v-model:color="pocketColor"
+        v-model:icon="pocketIcon"
+      />
 
       <div v-if="pocketType === 'spending'">
         <p class="text-sm font-semibold mb-2">
@@ -219,11 +216,6 @@ const { formatMonthLabel } = useFormatters()
           class="w-full"
         />
       </div>
-
-      <ColorIconPicker
-        v-model:color="pocketColor"
-        v-model:icon="pocketIcon"
-      />
     </AppModal>
   </UDashboardPanel>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import AppModal from '~/components/ui/AppModal.vue'
+import DeleteConfirmModal from '~/components/ui/DeleteConfirmModal.vue'
+import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
 import PocketHeroCard from '~/components/budgets/PocketHeroCard.vue'
 import PocketStatsCard from '~/components/budgets/PocketStatsCard.vue'
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
@@ -22,13 +24,17 @@ const {
   txName,
   txAmount,
   txNotes,
+  txDate,
   editingTx,
+  isDeleteConfirmOpen,
+  txToDelete,
   openBudgetModal,
   handleSaveBudget,
   handleDeleteBudget,
   openTxModal,
   handleSaveTransaction,
-  handleDeleteTx
+  confirmDeleteTx,
+  handleDeleteConfirm
 } = usePocketDetailsController(categoryId)
 
 const { formatMonthLabel } = useFormatters()
@@ -118,7 +124,7 @@ const { formatMonthLabel } = useFormatters()
               :color="pocket.color || undefined"
               :icon="pocket.icon || undefined"
               @edit="openTxModal(tx)"
-              @delete="handleDeleteTx(tx.id)"
+              @delete="confirmDeleteTx(tx)"
             />
           </div>
 
@@ -188,40 +194,26 @@ const { formatMonthLabel } = useFormatters()
       v-model:open="isTxModalOpen"
       :title="editingTx ? 'Edit Transaction' : 'Add Transaction'"
       submit-label="Save"
+      :disabled="!txName.trim() || !(txAmount > 0) || !txDate"
       @submit="handleSaveTransaction"
     >
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Name / Description
-        </p>
-        <UInput
-          v-model="txName"
-          placeholder="e.g. Coffee, Indomaret, Salary"
-          class="w-full"
-          autofocus
-        />
-      </div>
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Amount (IDR)
-        </p>
-        <UInput
-          v-model="txAmount"
-          type="number"
-          placeholder="e.g. 50000"
-          class="w-full"
-        />
-      </div>
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Notes (Optional)
-        </p>
-        <UInput
-          v-model="txNotes"
-          placeholder="Add some details..."
-          class="w-full"
-        />
-      </div>
+      <TransactionFormFields
+        v-model:name="txName"
+        v-model:amount="txAmount"
+        v-model:date="txDate"
+        v-model:notes="txNotes"
+      />
     </AppModal>
+
+    <!-- Delete Transaction Confirmation -->
+    <DeleteConfirmModal
+      v-model:open="isDeleteConfirmOpen"
+      title="Delete Transaction?"
+      @confirm="handleDeleteConfirm"
+    >
+      Are you sure you want to delete
+      <strong>{{ txToDelete?.name }}</strong>?
+      This action cannot be undone.
+    </DeleteConfirmModal>
   </UDashboardPanel>
 </template>

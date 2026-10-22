@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
-import ColorIconPicker from '~/components/ui/ColorIconPicker.vue'
+import DeleteConfirmModal from '~/components/ui/DeleteConfirmModal.vue'
+import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 import CategoryCard from '~/components/categories/CategoryCard.vue'
 import { useCategoriesController } from './useCategoriesController'
 
@@ -131,58 +132,26 @@ const {
       v-model:open="isModalOpen"
       :title="editingCategory ? 'Edit Category' : 'Create New Category'"
       :submit-label="editingCategory ? 'Save Changes' : 'Create'"
+      :disabled="!categoryName.trim()"
       @submit="handleSaveCategory"
     >
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Category Name
-        </p>
-        <UInput
-          v-model="categoryName"
-          placeholder="e.g. Health, Coffee, Salary"
-          class="w-full"
-          autofocus
-        />
-      </div>
-
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Category Type
-        </p>
-        <USelect
-          v-model="categoryType"
-          :items="[
-            { label: 'Spending', value: 'spending' },
-            { label: 'Income', value: 'income' }
-          ]"
-          class="w-full"
-        />
-      </div>
-
-      <ColorIconPicker
+      <CategoryFormFields
+        v-model:name="categoryName"
+        v-model:type="categoryType"
         v-model:color="categoryColor"
         v-model:icon="categoryIcon"
       />
     </AppModal>
 
     <!-- Delete Confirmation Modal -->
-    <AppModal
+    <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
       title="Delete Category?"
-      submit-label="Delete"
-      @submit="handleDeleteConfirm"
+      @confirm="handleDeleteConfirm"
     >
-      <div class="flex items-center gap-3 text-error mb-2">
-        <UIcon
-          name="i-lucide-triangle-alert"
-          class="w-6 h-6"
-        />
-        <span class="font-semibold">Warning: Irreversible Action</span>
-      </div>
-      <p class="text-sm text-neutral-600 dark:text-neutral-400">
-        Are you sure you want to delete <strong>{{ categoryToDelete?.name }}</strong>?
-        This will also delete all transactions associated with this category.
-      </p>
-    </AppModal>
+      Are you sure you want to delete
+      <strong>{{ categoryToDelete?.name }}</strong>?
+      This will also delete all transactions associated with this category.
+    </DeleteConfirmModal>
   </UDashboardPanel>
 </template>

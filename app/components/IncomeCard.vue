@@ -23,7 +23,7 @@ const props = defineProps({
 })
 
 const { addTransaction, getCategories } = useFinance()
-const { formatCurrency } = useFormatters()
+const { formatCurrency, toDateInputValue } = useFormatters()
 
 const iconName = computed(
   () =>
@@ -35,7 +35,8 @@ const iconName = computed(
 
 const transactionName = ref('')
 const selectedCategory = ref<number | undefined>(undefined)
-const transactionAmount = ref(30000)
+const transactionAmount = ref(0)
+const transactionDate = ref(toDateInputValue(new Date()))
 const isSaving = ref(false)
 const categories = computed(() =>
   getCategories(props.type).map(cat => ({ label: cat.name, value: cat.id }))
@@ -53,28 +54,33 @@ watch(
 
 const isOpen = ref(false)
 
-const handleAddTransaction = async () => {
-  if (
+const isInvalid = computed(
+  () =>
     !transactionName.value.trim()
     || selectedCategory.value === undefined
-    || transactionAmount.value <= 0
-    || isSaving.value
-  ) {
-    return
-  }
+    || !(transactionAmount.value > 0)
+    || !transactionDate.value
+)
+
+const handleAddTransaction = async () => {
+  const categoryId = selectedCategory.value
+  if (categoryId === undefined || isInvalid.value || isSaving.value) return
 
   isSaving.value = true
   try {
     await addTransaction(
       transactionName.value,
-      selectedCategory.value,
+      categoryId,
       transactionAmount.value,
-      props.type
+      props.type,
+      undefined,
+      transactionDate.value
     )
     transactionName.value = ''
     const cats = getCategories(props.type)
     selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined
-    transactionAmount.value = 30000
+    transactionAmount.value = 0
+    transactionDate.value = toDateInputValue(new Date())
     isOpen.value = false
   } finally {
     isSaving.value = false
@@ -129,6 +135,7 @@ const handleAddTransaction = async () => {
       :title="`Add ${type === 'income' ? 'Income' : 'Spending'}`"
       submit-label="Add"
       :loading="isSaving"
+      :disabled="isInvalid"
       @submit="handleAddTransaction"
     >
       <div>
@@ -151,6 +158,17 @@ const handleAddTransaction = async () => {
           v-model="selectedCategory"
           class="w-full"
           :items="categories"
+        />
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
+          Date
+        </p>
+        <UInput
+          v-model="transactionDate"
+          type="date"
+          class="w-full"
         />
       </div>
 

@@ -33,7 +33,8 @@
             color="error"
             variant="soft"
             icon="i-lucide-alert-circle"
-            :title="errorMessage"
+            title="Registration Failed"
+            :description="errorMessage"
             class="mb-4"
           />
 
@@ -48,6 +49,7 @@
               type="text"
               placeholder="John Doe"
               icon="i-lucide-user"
+              autocomplete="name"
               required
               size="lg"
               class="w-full"
@@ -65,6 +67,7 @@
               type="email"
               placeholder="you@example.com"
               icon="i-lucide-mail"
+              autocomplete="email"
               required
               size="lg"
               class="w-full"
@@ -82,6 +85,7 @@
               :type="showPassword ? 'text' : 'password'"
               placeholder="••••••••"
               icon="i-lucide-lock"
+              autocomplete="new-password"
               required
               size="lg"
               class="w-full"
@@ -98,6 +102,9 @@
               </template>
             </UInput>
           </UFormField>
+          <p class="text-xs text-neutral-500 -mt-4">
+            Must be at least 8 characters.
+          </p>
 
           <UButton
             type="submit"
@@ -136,8 +143,6 @@ const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 
-const toast = useToast()
-
 async function handleRegister() {
   if (loading.value) return
   loading.value = true
@@ -154,13 +159,6 @@ async function handleRegister() {
       }
     })
 
-    toast.add({
-      title: 'Account created!',
-      description: 'Please sign in with your password.',
-      color: 'success',
-      icon: 'i-lucide-circle-check'
-    })
-
     await navigateTo({
       path: '/login',
       query: {
@@ -170,12 +168,6 @@ async function handleRegister() {
     })
   } catch (err: unknown) {
     errorMessage.value = describeApiError(err, 'Registration failed. Please check your inputs.')
-    toast.add({
-      title: 'Registration Failed',
-      description: errorMessage.value,
-      color: 'error',
-      icon: 'i-lucide-circle-alert'
-    })
   } finally {
     loading.value = false
   }

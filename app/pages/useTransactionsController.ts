@@ -1,6 +1,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import type { Transaction } from '~/composables/useFinance'
 import { useReceiptScan } from '~/composables/useReceiptScan'
+import { useTransactionsFilter } from './useTransactionsFilter'
 import * as Sentry from '@sentry/nuxt'
 
 export function useTransactionsController() {
@@ -17,7 +18,7 @@ export function useTransactionsController() {
   const { isScanning, scanError, scan } = useReceiptScan()
   const fileInput = ref<HTMLInputElement | null>(null)
   const toast = useToast()
-  const { formatCurrency } = useFormatters()
+  const { formatCurrency, toDateInputValue } = useFormatters()
 
   const isMobile = ref(false)
   onMounted(() => {
@@ -41,6 +42,7 @@ export function useTransactionsController() {
           = result.suggestedTransactionName || result.storeName || 'Receipt Scan'
         txAmount.value = result.totalAmount || 0
         txType.value = 'spending'
+        txDate.value = result.transactionDate || toDateInputValue(new Date())
         txNotes.value
           = `Scanned from receipt at ${result.storeName || 'Unknown Merchant'}.\n\nItems:\n`
             + result.items
@@ -74,20 +76,27 @@ export function useTransactionsController() {
     }
   }
 
-  const searchQuery = ref('')
-  const selectedType = ref<'all' | 'income' | 'spending'>('all')
-  const selectedCategoryId = ref<number | 'all'>('all')
-  const currentPage = ref(1)
-  const pageSize = ref(15)
+  const {
+    searchQuery,
+    selectedType,
+    selectedCategoryId,
+    currentPage,
+    pageSize,
+    hasActiveFilters,
+    resetFilters,
+    filteredTransactions,
+    paginatedTransactions
+  } = useTransactionsFilter(transactions)
 
   const isModalOpen = ref(false)
   const editingTransaction = ref<Transaction | null>(null)
 
   const txName = ref('')
   const txType = ref<'income' | 'spending'>('spending')
-  const txAmount = ref(30000)
+  const txAmount = ref(0)
   const txCategoryId = ref<number | undefined>(undefined)
   const txNotes = ref('')
+  const txDate = ref(toDateInputValue(new Date()))
 
   const isDeleteConfirmOpen = ref(false)
   const transactionToDelete = ref<Transaction | null>(null)
@@ -104,58 +113,27 @@ export function useTransactionsController() {
     txCategoryId.value = cats.length > 0 ? cats[0]?.id : undefined
   })
 
-  const hasActiveFilters = computed(() => {
-    return (
-      searchQuery.value.trim() !== ''
-      || selectedType.value !== 'all'
-      || selectedCategoryId.value !== 'all'
-    )
-  })
-
-  const resetFilters = () => {
-    searchQuery.value = ''
-    selectedType.value = 'all'
-    selectedCategoryId.value = 'all'
-    currentPage.value = 1
-  }
-
-  // Reset to page 1 whenever any filter condition changes
-  watch([searchQuery, selectedType, selectedCategoryId], () => {
-    currentPage.value = 1
-  })
-
-  const filteredTransactions = computed(() => {
-    return transactions.value.filter((t) => {
-      const matchesSearch = t.name
-        .toLowerCase()
-        .includes(searchQuery.value.toLowerCase())
-      const matchesType
-        = selectedType.value === 'all' || t.type === selectedType.value
-      const matchesCategory
-        = selectedCategoryId.value === 'all'
-          || t.categoryId === selectedCategoryId.value
-      return matchesSearch && matchesType && matchesCategory
-    })
-  })
-
-  const paginatedTransactions = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value
-    return filteredTransactions.value.slice(start, start + pageSize.value)
-  })
-
   const openAddModal = () => {
     editingTransaction.value = null
     txName.value = ''
     txType.value = 'spending'
-    txAmount.value = 30000
+    txAmount.value = 0
     txNotes.value = ''
+    txDate.value = toDateInputValue(new Date())
     const cats = getCategories('spending')
     txCategoryId.value = cats.length > 0 ? cats[0]?.id : undefined
     isModalOpen.value = true
   }
 
   const handleSaveTransaction = async () => {
-    if (!txName.value.trim() || !txCategoryId.value) return
+    if (
+      !txName.value.trim()
+      || !txCategoryId.value
+      || !(txAmount.value > 0)
+      || !txDate.value
+    ) {
+      return
+    }
 
     try {
       if (editingTransaction.value) {
@@ -165,7 +143,8 @@ export function useTransactionsController() {
           txCategoryId.value,
           txAmount.value,
           txType.value,
-          txNotes.value
+          txNotes.value,
+          txDate.value
         )
       } else {
         await addTransaction(
@@ -173,7 +152,8 @@ export function useTransactionsController() {
           txCategoryId.value,
           txAmount.value,
           txType.value,
-          txNotes.value
+          txNotes.value,
+          txDate.value
         )
       }
       isModalOpen.value = false
@@ -190,6 +170,7 @@ export function useTransactionsController() {
     txAmount.value = t.amount
     txCategoryId.value = t.categoryId
     txNotes.value = t.notes || ''
+    txDate.value = toDateInputValue(t.transactionDate)
     isModalOpen.value = true
   }
 
@@ -225,6 +206,7 @@ export function useTransactionsController() {
     txAmount,
     txCategoryId,
     txNotes,
+    txDate,
     isDeleteConfirmOpen,
     transactionToDelete,
     formCategories,

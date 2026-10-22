@@ -13,8 +13,21 @@ export function useFormatters() {
     return d.toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
+      // Date-only rows are stored as UTC midnight; render them on the UTC
+      // calendar so negative-offset timezones don't shift the day backwards.
+      timeZone: d.getTime() % 86_400_000 === 0 ? 'UTC' : undefined
     })
+  }
+
+  const toDateInputValue = (dateStr: string | Date | undefined): string => {
+    if (!dateStr) return ''
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return ''
+    if (d.getTime() % 86_400_000 === 0) {
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+    }
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
   const formatMonthLabel = (monthStr: string): string => {
@@ -43,6 +56,7 @@ export function useFormatters() {
   return {
     formatCurrency,
     formatDate,
+    toDateInputValue,
     formatMonthLabel,
     getProgressColor
   }

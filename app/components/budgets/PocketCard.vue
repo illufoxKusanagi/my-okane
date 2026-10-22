@@ -69,7 +69,12 @@ const { formatCurrency, getProgressColor } = useFormatters()
         <div class="mb-4">
           <template v-if="pocket.budgetAmount > 0">
             <p
-              class="text-xl font-extrabold text-neutral-800 dark:text-neutral-100"
+              class="text-xl font-extrabold"
+              :class="
+                pocket.remaining < 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-neutral-800 dark:text-neutral-100'
+              "
             >
               {{ formatCurrency(pocket.remaining) }}
             </p>

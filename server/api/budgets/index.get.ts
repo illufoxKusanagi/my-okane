@@ -98,8 +98,8 @@ export default defineEventHandler(async (event) => {
         spent: cat.type === 'spending' ? spentOrIncome : 0,
         earned: cat.type === 'income' ? spentOrIncome : 0,
         remaining:
-          cat.type === 'spending'
-            ? Math.max(0, budgetAmount - spentOrIncome)
+          cat.type === 'spending' && budget
+            ? budgetAmount - spentOrIncome
             : 0
       }
     })
@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
             id: globalBudget.id,
             amount: globalBudget.amount,
             spent: totalSpending,
-            remaining: Math.max(0, globalBudget.amount - totalSpending)
+            remaining: globalBudget.amount - totalSpending
           }
         : null,
       totalIncome,

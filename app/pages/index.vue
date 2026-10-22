@@ -12,9 +12,6 @@ const spendingCategories = computed(() => getCategories('spending'))
 const incomeCategories = computed(() => getCategories('income'))
 
 const currentView = ref<'month' | 'week'>('month')
-const toggleView = () => {
-  currentView.value = currentView.value === 'month' ? 'week' : 'month'
-}
 
 // Local-time month string; toISOString() would use UTC and can pick the
 // wrong month for negative-offset timezones early in the month.
@@ -56,8 +53,8 @@ const weeklySpent = computed(() =>
 const weeklyBudgetLimit = computed(() =>
   Math.round(monthlyBudgetLimit.value / 4)
 )
-const weeklyRemaining = computed(() =>
-  Math.max(0, weeklyBudgetLimit.value - weeklySpent.value)
+const weeklyRemaining = computed(
+  () => weeklyBudgetLimit.value - weeklySpent.value
 )
 </script>
 
@@ -88,7 +85,7 @@ const weeklyRemaining = computed(() =>
           :weekly-budget-limit="weeklyBudgetLimit"
           :weekly-spent="weeklySpent"
           :weekly-remaining="weeklyRemaining"
-          @toggle="toggleView"
+          @set-view="currentView = $event"
         />
 
         <!-- Income and Spending Summary Cards / Skeletons -->
@@ -131,19 +128,16 @@ const weeklyRemaining = computed(() =>
           <MonthlyTrendChart class="lg:col-span-2" />
         </div>
 
-        <!-- Add Category Buttons -->
-        <div class="flex flex-wrap gap-3">
-          <AddCategoryModal type="spending" />
-          <AddCategoryModal type="income" />
-        </div>
-
         <!-- Spending Details by Category / Skeletons -->
         <div class="flex flex-col gap-3">
-          <p
-            class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
-          >
-            Spending by Category
-          </p>
+          <div class="flex items-center justify-between gap-3">
+            <p
+              class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
+            >
+              Spending by Category
+            </p>
+            <AddCategoryModal type="spending" />
+          </div>
           <div
             v-if="isLoading"
             class="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -174,11 +168,14 @@ const weeklyRemaining = computed(() =>
 
         <!-- Income Details by Category / Skeletons -->
         <div class="flex flex-col gap-3">
-          <p
-            class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
-          >
-            Income by Category
-          </p>
+          <div class="flex items-center justify-between gap-3">
+            <p
+              class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
+            >
+              Income by Category
+            </p>
+            <AddCategoryModal type="income" />
+          </div>
           <div
             v-if="isLoading"
             class="grid grid-cols-1 md:grid-cols-2 gap-4"

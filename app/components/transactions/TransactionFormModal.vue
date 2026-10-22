@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
+import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
 import type { Category, Transaction } from '~/composables/useFinance'
 
 const isOpen = defineModel<boolean>('open', { required: true })
 
-defineProps<{
+const props = defineProps<{
   editingTransaction: Transaction | null
   categories: Category[]
 }>()
@@ -12,84 +13,43 @@ defineProps<{
 const txName = defineModel<string>('name', { required: true })
 const txType = defineModel<'income' | 'spending'>('type', { required: true })
 const txAmount = defineModel<number>('amount', { required: true })
-const txCategoryId = defineModel<number | undefined>('categoryId', { required: true })
+const txCategoryId = defineModel<number | undefined>('categoryId', {
+  required: true
+})
 const txNotes = defineModel<string>('notes', { required: true })
+const txDate = defineModel<string>('date', { required: true })
 
 defineEmits<{
   submit: []
 }>()
+
+const isInvalid = computed(
+  () =>
+    !txName.value.trim()
+    || !txCategoryId.value
+    || !(txAmount.value > 0)
+    || !txDate.value
+)
 </script>
 
 <template>
   <AppModal
     v-model:open="isOpen"
-    :title="editingTransaction ? 'Edit Transaction' : 'Add Transaction'"
-    :submit-label="editingTransaction ? 'Save Changes' : 'Create'"
+    :title="props.editingTransaction ? 'Edit Transaction' : 'Add Transaction'"
+    :submit-label="props.editingTransaction ? 'Save Changes' : 'Create'"
+    :disabled="isInvalid"
     @submit="$emit('submit')"
   >
-    <div>
-      <p class="text-sm font-semibold mb-2">
-        Transaction Name
-      </p>
-      <UInput
-        v-model="txName"
-        placeholder="e.g. Lunch at McD, Monthly Salary"
-        class="w-full"
-        autofocus
-      />
-    </div>
-
-    <div>
-      <p class="text-sm font-semibold mb-2">
-        Transaction Type
-      </p>
-      <USelect
-        v-model="txType"
-        :items="[
-          { label: 'Spending', value: 'spending' },
-          { label: 'Income', value: 'income' }
-        ]"
-        class="w-full"
-      />
-    </div>
-
-    <div>
-      <p class="text-sm font-semibold mb-2">
-        Category
-      </p>
-      <USelect
-        v-model="txCategoryId"
-        :items="categories.map((c) => ({ label: c.name, value: c.id }))"
-        class="w-full"
-        placeholder="Select category"
-      />
-    </div>
-
-    <div>
-      <p class="text-sm font-semibold mb-2">
-        Amount
-      </p>
-      <UInputNumber
-        v-model="txAmount"
-        class="w-full"
-        :format-options="{
-          style: 'currency',
-          currency: 'IDR',
-          currencyDisplay: 'code',
-          currencySign: 'accounting'
-        }"
-      />
-    </div>
-
-    <div>
-      <p class="text-sm font-semibold mb-2">
-        Notes (Optional)
-      </p>
-      <UTextarea
-        v-model="txNotes"
-        placeholder="Add details, store name, or description..."
-        class="w-full"
-      />
-    </div>
+    <TransactionFormFields
+      v-model:name="txName"
+      v-model:type="txType"
+      v-model:category-id="txCategoryId"
+      v-model:amount="txAmount"
+      v-model:date="txDate"
+      v-model:notes="txNotes"
+      show-type
+      show-category
+      :categories="categories"
+    />
   </AppModal>
 </template>
