@@ -123,12 +123,14 @@ export function useMonthlyTrend() {
         }
       },
       y: {
+        beginAtZero: true,
         grid: {
           color: isDark.value
             ? 'rgba(255, 255, 255, 0.05)'
             : 'rgba(156, 163, 175, 0.1)'
         },
         ticks: {
+          precision: 0,
           color: isDark.value ? '#9ca3af' : '#4b5563',
           font: {
             size: 11

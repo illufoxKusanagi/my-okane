@@ -41,28 +41,16 @@ const {
 </script>
 
 <template>
-  <div>
-    <!-- Hidden file input for OCR scanning -->
-    <input
-      ref="fileInput"
-      type="file"
-      accept="image/*"
-      class="hidden"
-      :capture="isMobile ? 'environment' : undefined"
-      @change="onFileSelected"
-    >
-
-    <UDashboardPanel>
+  <UDashboardPanel>
+    <template #header>
       <UDashboardNavbar title="Transactions">
-        <template #left>
-          <UDashboardSidebarToggle />
-        </template>
         <template #right>
           <div class="flex items-center gap-2">
             <UButton
               icon="i-lucide-camera"
               color="neutral"
               variant="outline"
+              aria-label="Scan receipt"
               @click="triggerFileSelect"
             >
               <span class="sr-only sm:not-sr-only">Scan Receipt</span>
@@ -70,6 +58,7 @@ const {
             <UButton
               icon="i-lucide-plus"
               color="primary"
+              aria-label="Add transaction"
               @click="openAddModal"
             >
               <span class="sr-only sm:not-sr-only">Add Transaction</span>
@@ -78,87 +67,101 @@ const {
           </div>
         </template>
       </UDashboardNavbar>
+    </template>
 
-      <div class="h-full overflow-auto p-4 md:p-6">
-        <UContainer class="flex flex-col gap-6 max-w-6xl">
-          <!-- Filters Row -->
-          <TransactionFilterBar
-            v-model:search-query="searchQuery"
-            v-model:selected-type="selectedType"
-            v-model:selected-category-id="selectedCategoryId"
-            :categories="categories"
-            :has-active-filters="hasActiveFilters"
-            @reset="resetFilters"
+    <template #body>
+      <UContainer class="flex flex-col gap-6 max-w-6xl pb-12 sm:pb-8">
+        <!-- Filters Row -->
+        <TransactionFilterBar
+          v-model:search-query="searchQuery"
+          v-model:selected-type="selectedType"
+          v-model:selected-category-id="selectedCategoryId"
+          :categories="categories"
+          :has-active-filters="hasActiveFilters"
+          @reset="resetFilters"
+        />
+
+        <!-- Transactions List / Skeletons -->
+        <div
+          v-if="isLoading"
+          class="flex flex-col gap-3"
+          aria-busy="true"
+          aria-label="Loading transactions"
+        >
+          <USkeleton
+            v-for="i in 5"
+            :key="`tx-page-skel-${i}`"
+            class="h-20 rounded-2xl w-full"
           />
+        </div>
 
-          <!-- Transactions List / Skeletons -->
-          <div
-            v-if="isLoading"
-            class="flex flex-col gap-3"
-          >
-            <USkeleton
-              v-for="i in 5"
-              :key="`tx-page-skel-${i}`"
-              class="h-20 rounded-2xl w-full"
+        <div
+          v-else-if="filteredTransactions.length > 0"
+          class="flex flex-col gap-4"
+        >
+          <div class="flex flex-col gap-3">
+            <TransactionListItem
+              v-for="tx in paginatedTransactions"
+              :key="tx.id"
+              :transaction="tx"
+              @edit="openEditModal(tx)"
+              @delete="confirmDeleteTransaction(tx)"
             />
           </div>
 
+          <!-- Pagination Controls -->
           <div
-            v-else-if="filteredTransactions.length > 0"
-            class="flex flex-col gap-4"
+            v-if="filteredTransactions.length > pageSize"
+            class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-muted"
           >
-            <div class="flex flex-col gap-3">
-              <TransactionListItem
-                v-for="tx in paginatedTransactions"
-                :key="tx.id"
-                :transaction="tx"
-                @edit="openEditModal(tx)"
-                @delete="confirmDeleteTransaction(tx)"
-              />
-            </div>
-
-            <!-- Pagination Controls -->
-            <div
-              v-if="filteredTransactions.length > pageSize"
-              class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-neutral-200/60 dark:border-neutral-800/60"
-            >
-              <p class="text-xs text-neutral-500">
-                Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredTransactions.length) }} of {{ filteredTransactions.length }} transactions
-              </p>
-              <UPagination
-                v-model:page="currentPage"
-                :items-per-page="pageSize"
-                :total="filteredTransactions.length"
-              />
-            </div>
-          </div>
-
-          <!-- Empty State -->
-          <div
-            v-else
-            class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/50 dark:bg-neutral-900/10"
-          >
-            <UIcon
-              name="i-lucide-arrow-right-left"
-              class="w-12 h-12 text-neutral-400 dark:text-neutral-600 mb-3"
-            />
-            <p class="font-semibold text-neutral-700 dark:text-neutral-300">
-              No transactions found
+            <p class="text-xs text-muted">
+              Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredTransactions.length) }} of {{ filteredTransactions.length }} transactions
             </p>
-            <p
-              class="text-sm text-neutral-500 dark:text-neutral-500 mt-1 mb-4"
-            >
-              Try adjusting your filters or add a new transaction
-            </p>
-            <UButton
-              label="Add Transaction"
-              icon="i-lucide-plus"
-              size="sm"
-              @click="openAddModal"
+            <UPagination
+              v-model:page="currentPage"
+              :items-per-page="pageSize"
+              :total="filteredTransactions.length"
             />
           </div>
-        </UContainer>
-      </div>
+        </div>
+
+        <!-- Empty State -->
+        <div
+          v-else
+          class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-muted rounded-2xl bg-muted/20"
+        >
+          <UIcon
+            name="i-lucide-arrow-right-left"
+            class="w-12 h-12 text-muted mb-3"
+          />
+          <p class="font-semibold text-highlighted">
+            No transactions found
+          </p>
+          <p
+            class="text-sm text-muted mt-1 mb-4"
+          >
+            Try adjusting your filters or add a new transaction
+          </p>
+          <UButton
+            label="Add Transaction"
+            icon="i-lucide-plus"
+            size="sm"
+            @click="openAddModal"
+          />
+        </div>
+      </UContainer>
+
+      <!-- Hidden file input for OCR scanning -->
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/*"
+        class="hidden"
+        aria-hidden="true"
+        tabindex="-1"
+        :capture="isMobile ? 'environment' : undefined"
+        @change="onFileSelected"
+      >
 
       <!-- Create/Edit Modal -->
       <TransactionFormModal
@@ -198,15 +201,15 @@ const {
               name="i-lucide-loader-2"
               class="w-12 h-12 text-primary animate-spin"
             />
-            <p class="font-semibold text-neutral-850 dark:text-neutral-100">
+            <p class="font-semibold text-highlighted">
               Scanning receipt image...
             </p>
-            <p class="text-sm text-neutral-500">
+            <p class="text-sm text-muted">
               Parsing items and finding best category matches with Gemini AI
             </p>
           </div>
         </template>
       </UModal>
-    </UDashboardPanel>
-  </div>
+    </template>
+  </UDashboardPanel>
 </template>

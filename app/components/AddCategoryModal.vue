@@ -54,9 +54,13 @@ const handleAddCategory = async () => {
   <div>
     <UButton
       color="neutral"
+      variant="outline"
+      icon="i-lucide-plus"
+      size="sm"
       @click="isOpen = true"
     >
-      Add {{ type === "income" ? "Income" : "Spending" }} Category
+      <span class="sm:hidden">Add</span>
+      <span class="hidden sm:inline">Add {{ type === "income" ? "Income" : "Spending" }} Category</span>
     </UButton>
 
     <AppModal

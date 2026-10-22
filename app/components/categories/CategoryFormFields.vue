@@ -30,22 +30,19 @@ const existingCategories = computed(() =>
 </script>
 
 <template>
-  <div>
-    <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-      Category Name
-    </p>
+  <UFormField label="Category Name">
     <UInput
       v-model="name"
       class="w-full"
       placeholder="e.g. Health, Coffee, Salary"
       autofocus
     />
-  </div>
+  </UFormField>
 
-  <div v-if="showTypeSelect">
-    <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-      Category Type
-    </p>
+  <UFormField
+    v-if="showTypeSelect"
+    label="Category Type"
+  >
     <USelect
       v-model="type"
       class="w-full"
@@ -54,7 +51,7 @@ const existingCategories = computed(() =>
         { label: 'Income', value: 'income' }
       ]"
     />
-  </div>
+  </UFormField>
 
   <ColorIconPicker
     v-model:color="color"
@@ -62,11 +59,11 @@ const existingCategories = computed(() =>
   />
 
   <div v-if="showExisting && existingCategories.length > 0">
-    <p class="text-xs text-neutral-400 dark:text-neutral-500 mb-2">
+    <p class="text-xs text-muted mb-2">
       Existing Categories
     </p>
     <div
-      class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-neutral-50/50 dark:bg-neutral-900/20 rounded-xl border border-neutral-200/30 dark:border-neutral-800/30"
+      class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-muted/40 rounded-xl border border-muted"
     >
       <UBadge
         v-for="cat in existingCategories"

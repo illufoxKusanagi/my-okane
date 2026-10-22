@@ -60,17 +60,16 @@ const weeklyRemaining = computed(
 
 <template>
   <UDashboardPanel>
-    <UDashboardNavbar title="Dashboard">
-      <template #left>
-        <UDashboardSidebarToggle />
-      </template>
-      <template #right>
-        <ColorModeButton />
-      </template>
-    </UDashboardNavbar>
+    <template #header>
+      <UDashboardNavbar title="Dashboard">
+        <template #right>
+          <ColorModeButton />
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <div class="h-full overflow-auto p-4 md:p-6">
-      <UContainer class="flex flex-col gap-6 max-w-6xl">
+    <template #body>
+      <UContainer class="flex flex-col gap-6 max-w-6xl pb-12 sm:pb-8">
         <!-- Hero Budget Slider / Skeleton -->
         <USkeleton
           v-if="isBudgetLoading"
@@ -132,7 +131,7 @@ const weeklyRemaining = computed(
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between gap-3">
             <p
-              class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
+              class="text-lg font-bold tracking-tight text-highlighted"
             >
               Spending by Category
             </p>
@@ -160,7 +159,7 @@ const weeklyRemaining = computed(
           </div>
           <div
             v-else
-            class="p-6 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl text-neutral-500 text-sm"
+            class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
           >
             No spending categories created yet.
           </div>
@@ -170,7 +169,7 @@ const weeklyRemaining = computed(
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between gap-3">
             <p
-              class="text-lg font-bold tracking-tight text-neutral-800 dark:text-neutral-100"
+              class="text-lg font-bold tracking-tight text-highlighted"
             >
               Income by Category
             </p>
@@ -198,12 +197,12 @@ const weeklyRemaining = computed(
           </div>
           <div
             v-else
-            class="p-6 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl text-neutral-500 text-sm"
+            class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
           >
             No income categories created yet.
           </div>
         </div>
       </UContainer>
-    </div>
+    </template>
   </UDashboardPanel>
 </template>

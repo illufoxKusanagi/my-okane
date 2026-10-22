@@ -15,7 +15,7 @@ import { users, categories, transactions, budgets } from '~~/server/db/schema'
  */
 describe('Budgets month filter (unix-seconds timestamps)', () => {
   beforeAll(async () => {
-    await migrate(db, { migrationsFolder: './server/db/migrations' })
+    await migrate(db, { migrationsFolder: './server/db/migrations/turso' })
     await db.delete(transactions)
     await db.delete(budgets)
     await db.delete(categories)

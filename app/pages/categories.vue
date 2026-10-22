@@ -23,57 +23,41 @@ const {
   confirmDeleteCategory,
   handleDeleteConfirm
 } = useCategoriesController()
+
+const categoryTabs = [
+  { label: 'Spending Categories', value: 'spending' },
+  { label: 'Income Categories', value: 'income' }
+]
 </script>
 
 <template>
   <UDashboardPanel>
-    <UDashboardNavbar title="Category Management">
-      <template #left>
-        <UDashboardSidebarToggle />
-      </template>
-      <template #right>
-        <div class="flex items-center gap-2">
-          <UButton
-            icon="i-lucide-plus"
-            color="primary"
-            @click="openCreateModal"
-          >
-            <span class="sr-only sm:not-sr-only">Add Category</span>
-          </UButton>
-          <ColorModeButton />
-        </div>
-      </template>
-    </UDashboardNavbar>
+    <template #header>
+      <UDashboardNavbar title="Category Management">
+        <template #right>
+          <div class="flex items-center gap-2">
+            <UButton
+              icon="i-lucide-plus"
+              color="primary"
+              aria-label="Add category"
+              @click="openCreateModal"
+            >
+              <span class="sr-only sm:not-sr-only">Add Category</span>
+            </UButton>
+            <ColorModeButton />
+          </div>
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <div class="h-full overflow-auto p-4 md:p-6">
-      <UContainer class="flex flex-col gap-6 max-w-6xl">
+    <template #body>
+      <UContainer class="flex flex-col gap-6 max-w-6xl pb-12 sm:pb-8">
         <!-- Tabs -->
-        <div
-          class="flex border-b border-neutral-200 dark:border-neutral-800"
-        >
-          <button
-            :class="[
-              'py-3 px-6 text-sm font-semibold border-b-2 transition-all duration-200 focus:outline-none',
-              currentTab === 'spending'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
-            ]"
-            @click="currentTab = 'spending'"
-          >
-            Spending Categories
-          </button>
-          <button
-            :class="[
-              'py-3 px-6 text-sm font-semibold border-b-2 transition-all duration-200 focus:outline-none',
-              currentTab === 'income'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
-            ]"
-            @click="currentTab = 'income'"
-          >
-            Income Categories
-          </button>
-        </div>
+        <UTabs
+          v-model="currentTab"
+          :items="categoryTabs"
+          class="w-full"
+        />
 
         <!-- Grid / Skeletons -->
         <div
@@ -103,17 +87,17 @@ const {
         <!-- Empty State -->
         <div
           v-else
-          class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/50 dark:bg-neutral-900/10"
+          class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-muted rounded-2xl bg-muted/20"
         >
           <UIcon
             name="i-lucide-tag"
-            class="w-12 h-12 text-neutral-400 dark:text-neutral-600 mb-3"
+            class="w-12 h-12 text-muted mb-3"
           />
-          <p class="font-semibold text-neutral-700 dark:text-neutral-300">
+          <p class="font-semibold text-highlighted">
             No categories found
           </p>
           <p
-            class="text-sm text-neutral-500 dark:text-neutral-500 mt-1 mb-4"
+            class="text-sm text-muted mt-1 mb-4"
           >
             Create one to start organizing your transactions
           </p>
@@ -125,33 +109,33 @@ const {
           />
         </div>
       </UContainer>
-    </div>
 
-    <!-- Create/Edit Modal -->
-    <AppModal
-      v-model:open="isModalOpen"
-      :title="editingCategory ? 'Edit Category' : 'Create New Category'"
-      :submit-label="editingCategory ? 'Save Changes' : 'Create'"
-      :disabled="!categoryName.trim()"
-      @submit="handleSaveCategory"
-    >
-      <CategoryFormFields
-        v-model:name="categoryName"
-        v-model:type="categoryType"
-        v-model:color="categoryColor"
-        v-model:icon="categoryIcon"
-      />
-    </AppModal>
+      <!-- Create/Edit Modal -->
+      <AppModal
+        v-model:open="isModalOpen"
+        :title="editingCategory ? 'Edit Category' : 'Create New Category'"
+        :submit-label="editingCategory ? 'Save Changes' : 'Create'"
+        :disabled="!categoryName.trim()"
+        @submit="handleSaveCategory"
+      >
+        <CategoryFormFields
+          v-model:name="categoryName"
+          v-model:type="categoryType"
+          v-model:color="categoryColor"
+          v-model:icon="categoryIcon"
+        />
+      </AppModal>
 
-    <!-- Delete Confirmation Modal -->
-    <DeleteConfirmModal
-      v-model:open="isDeleteConfirmOpen"
-      title="Delete Category?"
-      @confirm="handleDeleteConfirm"
-    >
-      Are you sure you want to delete
-      <strong>{{ categoryToDelete?.name }}</strong>?
-      This will also delete all transactions associated with this category.
-    </DeleteConfirmModal>
+      <!-- Delete Confirmation Modal -->
+      <DeleteConfirmModal
+        v-model:open="isDeleteConfirmOpen"
+        title="Delete Category?"
+        @confirm="handleDeleteConfirm"
+      >
+        Are you sure you want to delete
+        <strong>{{ categoryToDelete?.name }}</strong>?
+        This will also delete all transactions associated with this category.
+      </DeleteConfirmModal>
+    </template>
   </UDashboardPanel>
 </template>

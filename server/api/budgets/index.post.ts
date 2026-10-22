@@ -6,7 +6,10 @@ import { throwSafeServerError } from '~~/server/utils/safeError'
 
 const budgetSchema = z.object({
   categoryId: z.number().int().positive().nullable().optional(),
-  amount: z.number().min(0, 'Amount must be greater than or equal to 0').max(1_000_000_000_000, 'Amount too large'),
+  amount: z
+    .number()
+    .min(0, 'Amount must be greater than or equal to 0')
+    .max(1_000_000_000_000, 'Amount too large'),
   month: z.string().regex(/^\d{4}-\d{2}$/, 'Month must be in YYYY-MM format')
 })
 
@@ -75,7 +78,9 @@ export default defineEventHandler(async (event) => {
       const updated = await db
         .update(budgets)
         .set({ amount })
-        .where(eq(budgets.id, existingBudget.id))
+        .where(
+          and(eq(budgets.id, existingBudget.id), eq(budgets.userId, userId))
+        )
         .returning()
 
       return {

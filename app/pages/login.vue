@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen flex items-center justify-center bg-default px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
@@ -14,11 +14,11 @@
           />
         </div>
         <h2
-          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+          class="text-3xl font-bold tracking-tight text-highlighted"
         >
           Welcome Back
         </h2>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <p class="mt-2 text-sm text-muted">
           Sign in to manage your finance
         </p>
       </div>
@@ -46,7 +46,7 @@
       />
 
       <UCard
-        class="shadow-xl shadow-neutral-950/5 border-neutral-200/80 dark:border-neutral-800 backdrop-blur-sm"
+        class="shadow-xl shadow-neutral-950/5 border border-default backdrop-blur-sm"
       >
         <form
           class="space-y-4"
@@ -100,6 +100,15 @@
             </UInput>
           </UFormField>
 
+          <div class="flex justify-end">
+            <NuxtLink
+              to="/forgot-password"
+              class="text-xs font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            >
+              Forgot password?
+            </NuxtLink>
+          </div>
+
           <UButton
             type="submit"
             color="primary"
@@ -112,7 +121,7 @@
         </form>
       </UCard>
 
-      <p class="text-center text-sm text-slate-600 dark:text-slate-400">
+      <p class="text-center text-sm text-muted">
         Don't have an account?
         <NuxtLink
           to="/register"

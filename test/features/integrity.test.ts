@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 describe('Database Referential Cascades and Data Integrity', () => {
   beforeAll(async () => {
     // Run migrations on local.test.db to ensure tables are loaded
-    await migrate(db, { migrationsFolder: './server/db/migrations' })
+    await migrate(db, { migrationsFolder: './server/db/migrations/turso' })
 
     // Clean existing test data
     await db.delete(transactions)

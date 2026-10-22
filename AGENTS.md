@@ -5,9 +5,8 @@
 1. **No Deceptive Facades:** Never write superficial UI code that "looks good on the outside" while leaving monolithic files (>250 lines), duplicate modal dialogs, or unhandled errors inside.
 2. **Autonomous Abstraction:** Identify similar UI patterns (e.g. duplicate modal dialogs, color/icon pickers) and extract generic reusable components (`AppModal.vue`, `ColorIconPicker.vue`) BEFORE updating consumer page files.
 3. **Delete Dead Code Immediately:** Purge starter boilerplate (`sentry-example-page.vue`, `TemplateMenu.vue`, redundant lockfiles) without waiting for user reminders.
-4. **Empirical Verification:** Always run compilation and typecheck validation (`npx nuxi typecheck`) to prove structural correctness before declaring any task resolved.
-5. **Honest Statuses:** Never declare refactoring or clean-code tasks complete if structural duplication or oversized files remain.
-6. **Persistent Context Rule:** Always READ `[new-my-okane/.context/CONTEXT.md](file:///home/illufoxkusanagi/Documents/new-my-okane/.context/CONTEXT.md)` before analyzing or proposing changes, and WRITE updates to it whenever architectural changes, bug fixes, or model updates occur.
+4. **Honest Statuses:** Never declare refactoring or clean-code tasks complete if structural duplication or oversized files remain.
+5. **Persistent Context Rule:** Always READ `[new-my-okane/.context/CONTEXT.md](file:///home/illufoxkusanagi/Documents/new-my-okane/.context/CONTEXT.md)` before analyzing or proposing changes, and WRITE updates to it whenever architectural changes, bug fixes, or model updates occur.
 
 
 # Strict Execution & Anti-Drift Rules
@@ -21,5 +20,4 @@
 - **Strict Scope Boundaries**: Touch only the exact files requested by the user. Do not explore, refactor, or edit untouched files.
 - **Implementation Plan Artifacts**: Whenever proposing an implementation plan, design, or multi-step changes, always write an Antigravity implementation plan artifact (`write_to_file` in the artifact directory with `RequestFeedback: true`) instead of writing out plans or proposals in conversational response text.
 - **User Frustration Halt Protocol**: If the user expresses anger, frustration, or reprimands the AI, it means the AI is in the wrong. The AI is strictly forbidden from running tools or making changes. It must acknowledge the error without making excuses, confirm understanding, and ask an open question to let the user direct the next step.
-- **Agent Driven Development is Mandatory**: If you're Gemini Argon, Claude Sonnet, Claude Opus, do not write code by yourself, but delegate your task to subagents. Read `subagent-driven-development` skills for full detail.
-
+- **Agent Driven Development is Mandatory**: If you're Gemini Argon, Claude Sonnet, Claude Opus, do not write code by yourself, but delegate your task to subagents which is lower tier(e.g. gemini flash 3.8). Read `subagent-driven-development` skills for full detail.

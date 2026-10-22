@@ -30,7 +30,7 @@ const { formatDate } = useFormatters()
 
 <template>
   <div
-    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 gap-3 sm:gap-4 group"
+    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl bg-elevated border border-default shadow-sm hover:shadow-md hover:border-default transition-all duration-300 gap-3 sm:gap-4 group"
   >
     <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
       <!-- Category Icon Badge -->
@@ -50,18 +50,18 @@ const { formatDate } = useFormatters()
       <!-- Transaction Info -->
       <div class="flex-1 min-w-0">
         <p
-          class="font-bold text-neutral-850 dark:text-neutral-100 truncate text-sm sm:text-base"
+          class="font-bold text-default truncate text-sm sm:text-base"
         >
           {{ transaction.name }}
         </p>
         <div class="flex items-center gap-2 mt-0.5 sm:mt-1">
-          <span class="text-xs text-neutral-500">
+          <span class="text-xs text-muted">
             {{ formatDate(transaction.transactionDate) }}
           </span>
           <template v-if="transaction.categoryName">
-            <span class="text-xs text-neutral-300 dark:text-neutral-700">•</span>
+            <span class="text-xs text-dimmed">•</span>
             <span
-              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
+              class="text-xs px-2 py-0.5 rounded-full bg-muted text-muted font-semibold"
             >
               {{ transaction.categoryName }}
             </span>
@@ -69,7 +69,7 @@ const { formatDate } = useFormatters()
         </div>
         <p
           v-if="transaction.notes"
-          class="text-xs text-neutral-400 dark:text-neutral-500 mt-1 truncate"
+          class="text-xs text-dimmed mt-1 truncate"
         >
           {{ transaction.notes }}
         </p>
@@ -78,7 +78,7 @@ const { formatDate } = useFormatters()
 
     <!-- Amount and Actions -->
     <div
-      class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800/50 pt-2 sm:pt-0"
+      class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-muted pt-2 sm:pt-0"
     >
       <span
         :class="[

@@ -1,5 +1,5 @@
 import { db } from '~~/server/db'
-import { categories } from '~~/server/db/schema'
+import { categories, transactions } from '~~/server/db/schema'
 import { validateUpdateCategory } from '~~/server/utils/validator'
 import { and, eq } from 'drizzle-orm'
 import { throwSafeServerError } from '~~/server/utils/safeError'
@@ -53,6 +53,40 @@ export default defineEventHandler(async (event) => {
           statusCode: 409,
           statusMessage: 'A category with this name already exists.'
         })
+      }
+    }
+
+    // Changing category type (spending <-> income) when transactions already exist
+    // causes transaction-type mismatch and inverts budget calculations.
+    if (validation.data.type !== undefined) {
+      const currentCategory = await db
+        .select({ type: categories.type })
+        .from(categories)
+        .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+        .limit(1)
+
+      if (
+        currentCategory[0]
+        && currentCategory[0].type !== validation.data.type
+      ) {
+        const linkedTx = await db
+          .select({ id: transactions.id })
+          .from(transactions)
+          .where(
+            and(
+              eq(transactions.categoryId, id),
+              eq(transactions.userId, userId)
+            )
+          )
+          .limit(1)
+
+        if (linkedTx.length > 0) {
+          throw createError({
+            statusCode: 400,
+            statusMessage:
+              'Cannot change category type when linked transactions exist.'
+          })
+        }
       }
     }
 

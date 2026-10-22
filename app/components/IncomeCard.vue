@@ -138,44 +138,32 @@ const handleAddTransaction = async () => {
       :disabled="isInvalid"
       @submit="handleAddTransaction"
     >
-      <div>
-        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-          Transaction Name
-        </p>
+      <UFormField label="Transaction Name">
         <UInput
           v-model="transactionName"
           class="w-full"
           placeholder="Enter name"
           autofocus
         />
-      </div>
+      </UFormField>
 
-      <div>
-        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-          Category
-        </p>
+      <UFormField label="Category">
         <USelect
           v-model="selectedCategory"
           class="w-full"
           :items="categories"
         />
-      </div>
+      </UFormField>
 
-      <div>
-        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-          Date
-        </p>
+      <UFormField label="Date">
         <UInput
           v-model="transactionDate"
           type="date"
           class="w-full"
         />
-      </div>
+      </UFormField>
 
-      <div>
-        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-          Amount
-        </p>
+      <UFormField label="Amount">
         <UInputNumber
           v-model="transactionAmount"
           class="w-full"
@@ -186,7 +174,7 @@ const handleAddTransaction = async () => {
             currencySign: 'accounting'
           }"
         />
-      </div>
+      </UFormField>
     </AppModal>
   </div>
 </template>

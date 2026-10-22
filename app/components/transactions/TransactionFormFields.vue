@@ -23,22 +23,19 @@ const categoryId = defineModel<number | undefined>('categoryId')
 </script>
 
 <template>
-  <div>
-    <p class="text-sm font-semibold mb-2">
-      Transaction Name
-    </p>
+  <UFormField label="Transaction Name">
     <UInput
       v-model="name"
       placeholder="e.g. Lunch at McD, Monthly Salary"
       class="w-full"
       autofocus
     />
-  </div>
+  </UFormField>
 
-  <div v-if="showType">
-    <p class="text-sm font-semibold mb-2">
-      Transaction Type
-    </p>
+  <UFormField
+    v-if="showType"
+    label="Transaction Type"
+  >
     <USelect
       v-model="type"
       class="w-full"
@@ -47,24 +44,21 @@ const categoryId = defineModel<number | undefined>('categoryId')
         { label: 'Income', value: 'income' }
       ]"
     />
-  </div>
+  </UFormField>
 
-  <div v-if="showCategory">
-    <p class="text-sm font-semibold mb-2">
-      Category
-    </p>
+  <UFormField
+    v-if="showCategory"
+    label="Category"
+  >
     <USelect
       v-model="categoryId"
       class="w-full"
       :items="categories.map(c => ({ label: c.name, value: c.id }))"
       placeholder="Select category"
     />
-  </div>
+  </UFormField>
 
-  <div>
-    <p class="text-sm font-semibold mb-2">
-      Amount
-    </p>
+  <UFormField label="Amount">
     <UInputNumber
       v-model="amount"
       class="w-full"
@@ -75,27 +69,21 @@ const categoryId = defineModel<number | undefined>('categoryId')
         currencySign: 'accounting'
       }"
     />
-  </div>
+  </UFormField>
 
-  <div>
-    <p class="text-sm font-semibold mb-2">
-      Date
-    </p>
+  <UFormField label="Date">
     <UInput
       v-model="date"
       type="date"
       class="w-full"
     />
-  </div>
+  </UFormField>
 
-  <div>
-    <p class="text-sm font-semibold mb-2">
-      Notes (Optional)
-    </p>
+  <UFormField label="Notes (Optional)">
     <UTextarea
       v-model="notes"
       placeholder="Add details, store name, or description..."
       class="w-full"
     />
-  </div>
+  </UFormField>
 </template>

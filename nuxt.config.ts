@@ -27,6 +27,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
+    appUrl: process.env.NUXT_APP_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     session: {
       password: process.env.NUXT_SESSION_PASSWORD || '',

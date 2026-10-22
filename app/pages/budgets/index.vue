@@ -32,20 +32,19 @@ const { formatMonthLabel } = useFormatters()
 
 <template>
   <UDashboardPanel>
-    <UDashboardNavbar title="Budgets & Pockets">
-      <template #left>
-        <UDashboardSidebarToggle />
-      </template>
-      <template #right>
-        <ColorModeButton />
-      </template>
-    </UDashboardNavbar>
+    <template #header>
+      <UDashboardNavbar title="Budgets & Pockets">
+        <template #right>
+          <ColorModeButton />
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <div class="h-full overflow-auto p-4 md:p-6">
-      <UContainer class="flex flex-col gap-6 max-w-6xl">
+    <template #body>
+      <UContainer class="flex flex-col gap-6 max-w-6xl pb-12 sm:pb-8">
         <!-- Month Selection Header -->
         <div
-          class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 p-5 rounded-2xl shadow-sm backdrop-blur-md"
+          class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-elevated/70 border border-muted/50 p-5 rounded-2xl shadow-sm backdrop-blur-md"
         >
           <div class="flex items-center gap-3">
             <UButton
@@ -56,7 +55,7 @@ const { formatMonthLabel } = useFormatters()
               @click="prevMonth"
             />
             <span
-              class="text-lg font-bold text-neutral-850 dark:text-neutral-100 min-w-44 text-center"
+              class="text-lg font-bold text-highlighted min-w-44 text-center"
             >
               {{ formatMonthLabel(currentMonth) }}
             </span>
@@ -117,11 +116,11 @@ const { formatMonthLabel } = useFormatters()
           <div class="flex items-center justify-between">
             <div>
               <h3
-                class="text-xl font-extrabold text-neutral-800 dark:text-neutral-100 tracking-tight"
+                class="text-xl font-extrabold text-highlighted tracking-tight"
               >
                 Your Pockets (Kantong)
               </h3>
-              <p class="text-xs text-neutral-500 mt-1">
+              <p class="text-xs text-muted mt-1">
                 Each pocket is a category — spending pockets can have a monthly
                 limit.
               </p>
@@ -152,7 +151,7 @@ const { formatMonthLabel } = useFormatters()
           </div>
           <div
             v-else
-            class="p-8 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl text-neutral-500 text-sm"
+            class="p-8 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
           >
             No categories yet. Create your first pocket to get started.
             <UButton
@@ -167,55 +166,52 @@ const { formatMonthLabel } = useFormatters()
           </div>
         </div>
       </UContainer>
-    </div>
 
-    <!-- Budget Configuration Modal -->
-    <AppModal
-      v-model:open="isModalOpen"
-      :title="selectedCategoryId === null ? 'Configure Overall Budget' : 'Configure Pocket Budget'"
-      submit-label="Save Budget"
-      @submit="handleSaveBudget"
-    >
-      <div>
-        <p class="text-sm font-semibold mb-2">
-          Budget Limit Amount
-        </p>
-        <UInput
-          v-model="budgetAmount"
-          type="number"
-          placeholder="e.g. 500000"
-          class="w-full"
-          autofocus
+      <!-- Budget Configuration Modal -->
+      <AppModal
+        v-model:open="isModalOpen"
+        :title="selectedCategoryId === null ? 'Configure Overall Budget' : 'Configure Pocket Budget'"
+        submit-label="Save Budget"
+        @submit="handleSaveBudget"
+      >
+        <UFormField label="Budget Limit Amount">
+          <UInput
+            v-model="budgetAmount"
+            type="number"
+            placeholder="e.g. 500000"
+            class="w-full"
+            autofocus
+          />
+        </UFormField>
+      </AppModal>
+
+      <!-- Create Pocket Modal -->
+      <AppModal
+        v-model:open="isCreatePocketModalOpen"
+        title="Create New Pocket (Category)"
+        submit-label="Create Pocket"
+        :disabled="!pocketName.trim()"
+        @submit="handleCreatePocket"
+      >
+        <CategoryFormFields
+          v-model:name="pocketName"
+          v-model:type="pocketType"
+          v-model:color="pocketColor"
+          v-model:icon="pocketIcon"
         />
-      </div>
-    </AppModal>
 
-    <!-- Create Pocket Modal -->
-    <AppModal
-      v-model:open="isCreatePocketModalOpen"
-      title="Create New Pocket (Category)"
-      submit-label="Create Pocket"
-      :disabled="!pocketName.trim()"
-      @submit="handleCreatePocket"
-    >
-      <CategoryFormFields
-        v-model:name="pocketName"
-        v-model:type="pocketType"
-        v-model:color="pocketColor"
-        v-model:icon="pocketIcon"
-      />
-
-      <div v-if="pocketType === 'spending'">
-        <p class="text-sm font-semibold mb-2">
-          Monthly Budget Limit (Optional)
-        </p>
-        <UInput
-          v-model="pocketBudgetLimit"
-          type="number"
-          placeholder="e.g. 500000"
-          class="w-full"
-        />
-      </div>
-    </AppModal>
+        <UFormField
+          v-if="pocketType === 'spending'"
+          label="Monthly Budget Limit (Optional)"
+        >
+          <UInput
+            v-model="pocketBudgetLimit"
+            type="number"
+            placeholder="e.g. 500000"
+            class="w-full"
+          />
+        </UFormField>
+      </AppModal>
+    </template>
   </UDashboardPanel>
 </template>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import AccountSettingsModal from '~/components/account/AccountSettingsModal.vue'
 
 const { user, clear } = useUserSession()
+const isAccountSettingsOpen = ref(false)
 
 const handleLogout = async () => {
   try {
@@ -17,8 +19,26 @@ const handleLogout = async () => {
 const dropdownItems = computed(() => [
   [
     {
+      label: user.value?.name || 'Account',
+      description: user.value?.email,
+      avatar: { text: userInitials.value },
+      type: 'label' as const
+    }
+  ],
+  [
+    {
+      label: 'Account Settings',
+      icon: 'i-lucide-user-cog',
+      onSelect: () => {
+        isAccountSettingsOpen.value = true
+      }
+    }
+  ],
+  [
+    {
       label: 'Sign out',
       icon: 'i-lucide-log-out',
+      color: 'error' as const,
       onSelect: handleLogout
     }
   ]
@@ -80,7 +100,7 @@ const items: NavigationMenuItem[][] = [
           name="i-lucide-wallet"
           class="size-5 text-primary shrink-0"
         />
-        <p class="font-bold text-base text-neutral-850 dark:text-neutral-100 truncate">
+        <p class="font-bold text-base text-highlighted truncate">
           My Okane
         </p>
       </div>
@@ -106,7 +126,8 @@ const items: NavigationMenuItem[][] = [
       <UDropdownMenu
         v-if="user"
         :items="dropdownItems"
-        :content="{ align: 'start' }"
+        :content="{ align: 'start', side: 'top', sideOffset: 8 }"
+        :ui="{ content: 'w-[var(--reka-dropdown-menu-trigger-width)] min-w-52' }"
         class="w-full"
       >
         <UButton
@@ -114,12 +135,17 @@ const items: NavigationMenuItem[][] = [
             text: userInitials
           }"
           :label="collapsed ? undefined : user.name"
+          :trailing-icon="collapsed ? undefined : 'i-lucide-chevrons-up-down'"
           color="neutral"
           variant="ghost"
-          class="w-full"
+          class="w-full justify-start"
+          :ui="{ trailingIcon: 'ms-auto text-muted size-4' }"
           :block="collapsed"
+          aria-label="User menu"
         />
       </UDropdownMenu>
+
+      <AccountSettingsModal v-model:open="isAccountSettingsOpen" />
     </template>
   </UDashboardSidebar>
 </template>

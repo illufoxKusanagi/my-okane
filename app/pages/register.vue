@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen flex items-center justify-center bg-default px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
@@ -14,16 +14,16 @@
           />
         </div>
         <h2
-          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+          class="text-3xl font-bold tracking-tight text-highlighted"
         >
           Create an Account
         </h2>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <p class="mt-2 text-sm text-muted">
           Start tracking your transactions securely
         </p>
       </div>
 
-      <UCard class="shadow-xl ring-1 ring-slate-200 dark:ring-slate-800">
+      <UCard class="shadow-xl border border-default">
         <form
           class="space-y-6"
           @submit.prevent="handleRegister"
@@ -102,7 +102,7 @@
               </template>
             </UInput>
           </UFormField>
-          <p class="text-xs text-neutral-500 -mt-4">
+          <p class="text-xs text-muted -mt-4">
             Must be at least 8 characters.
           </p>
 
@@ -118,7 +118,7 @@
         </form>
       </UCard>
 
-      <p class="text-center text-sm text-slate-600 dark:text-slate-400">
+      <p class="text-center text-sm text-muted">
         Already have an account?
         <NuxtLink
           to="/login"

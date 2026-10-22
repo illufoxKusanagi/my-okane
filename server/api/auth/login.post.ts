@@ -56,13 +56,24 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Any outstanding reset token is now moot — the authenticated user has
+    // proven possession of the current password.
+    await db
+      .update(users)
+      .set({ resetTokenHash: null, resetTokenExpiresAt: null })
+      .where(eq(users.id, user.id))
+
+    // credentialsVersion is consumed by server/middleware/auth.ts to revoke
+    // sessions after a password reset. The #auth-utils User augmentation does
+    // not merge into setUserSession's parameter type, hence the assertion.
     await setUserSession(event, {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        credentialsVersion: user.credentialsVersion ?? 0
       }
-    })
+    } as Parameters<typeof setUserSession>[1])
 
     // Successful login: refund the attempt so only failures count toward the brute-force budget.
     await resetRateLimit(event, 'auth_login')

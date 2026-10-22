@@ -23,12 +23,12 @@ const progressPct = computed(() => {
 
 <template>
   <div
-    class="flex flex-col justify-between p-6 rounded-3xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-md backdrop-blur-md transition-all duration-300"
+    class="flex flex-col justify-between p-6 rounded-3xl bg-elevated border border-default shadow-md backdrop-blur-md transition-all duration-300"
   >
     <div>
       <div class="flex items-center justify-between mb-2">
         <div
-          class="flex items-center gap-2 text-neutral-500 dark:text-neutral-400"
+          class="flex items-center gap-2 text-muted"
         >
           <UIcon
             name="i-lucide-sliders-horizontal"
@@ -52,16 +52,16 @@ const progressPct = computed(() => {
           :class="
             globalBudget.remaining < 0
               ? 'text-rose-600 dark:text-rose-400'
-              : 'text-neutral-800 dark:text-neutral-100'
+              : 'text-default'
           "
         >
           {{ formatCurrency(globalBudget.remaining) }}
-          <span class="text-xs font-medium text-neutral-500 block mt-1">remaining of {{ formatCurrency(globalBudget.amount) }}</span>
+          <span class="text-xs font-medium text-muted block mt-1">remaining of {{ formatCurrency(globalBudget.amount) }}</span>
         </h2>
       </template>
       <template v-else>
         <div class="flex flex-col items-center justify-center py-4 text-center">
-          <p class="text-sm text-neutral-500 mb-2">
+          <p class="text-sm text-muted mb-2">
             No global budget set for this month.
           </p>
           <UButton
@@ -78,8 +78,8 @@ const progressPct = computed(() => {
       class="w-full"
     >
       <div class="flex justify-between text-xs mb-1 font-semibold">
-        <span class="text-neutral-500">Progress</span>
-        <span class="text-neutral-700 dark:text-neutral-300">
+        <span class="text-muted">Progress</span>
+        <span class="text-default">
           {{ progressPct }}%
         </span>
       </div>

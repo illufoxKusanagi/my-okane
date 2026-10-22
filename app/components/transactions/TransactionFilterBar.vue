@@ -2,9 +2,12 @@
 import type { Category } from '~/composables/useFinance'
 
 const searchQuery = defineModel<string>('searchQuery', { required: true })
-const selectedType = defineModel<'all' | 'income' | 'spending'>('selectedType', {
-  required: true
-})
+const selectedType = defineModel<'all' | 'income' | 'spending'>(
+  'selectedType',
+  {
+    required: true
+  }
+)
 const selectedCategoryId = defineModel<number | 'all'>('selectedCategoryId', {
   required: true
 })
@@ -21,7 +24,7 @@ defineEmits<{
 
 <template>
   <div
-    class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-neutral-50 dark:bg-neutral-900/40 p-4 rounded-2xl border border-neutral-200/50 dark:border-neutral-800/50"
+    class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-elevated p-4 rounded-2xl border border-default"
   >
     <div class="w-full sm:w-1/3">
       <UInput
@@ -32,7 +35,9 @@ defineEmits<{
       />
     </div>
 
-    <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto items-center justify-end">
+    <div
+      class="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto items-center justify-end"
+    >
       <div class="w-full sm:w-36">
         <USelect
           v-model="selectedType"

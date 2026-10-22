@@ -4,19 +4,21 @@ import { createClient } from '@libsql/client'
 
 const isDev = process.env.NODE_ENV === 'development'
 const isTest = process.env.NODE_ENV === 'test'
+const isLocal = isDev || isTest
 
-const defaultLocalDb = isTest ? 'file:local.test.db' : isDev ? 'file:local.dev.db' : undefined
-const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || defaultLocalDb
+const url = isTest
+  ? 'file:local.test.db'
+  : isDev
+    ? 'file:local.dev.db'
+    : (process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL)
 
 if (!url) {
-  throw new Error('TURSO_DATABASE_URL or DATABASE_URL must be configured outside development and test environments.')
+  throw new Error('TURSO_DATABASE_URL must be configured in production.')
 }
-
-const authToken = process.env.TURSO_AUTH_TOKEN
 
 const client = createClient({
   url,
-  authToken
+  authToken: isLocal ? undefined : process.env.TURSO_AUTH_TOKEN
 })
 
 export const db = drizzle({ client })

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nuxt'
+import { scrubResetTokens, scrubResetTokenBreadcrumb } from './sentry.scrub'
 
 if (process.env.NODE_ENV !== 'test') {
   Sentry.init({
@@ -37,6 +38,14 @@ if (process.env.NODE_ENV !== 'test') {
     },
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: false
+    debug: false,
+
+    // Password-reset tokens must never leak via captured URLs/messages.
+    beforeSend(event) {
+      return scrubResetTokens(event)
+    },
+    beforeBreadcrumb(breadcrumb) {
+      return scrubResetTokenBreadcrumb(breadcrumb)
+    }
   })
 }

@@ -115,4 +115,22 @@ describe('checkRateLimit utility', () => {
 
     await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
   })
+
+  it('should extract cf-connecting-ip without event.node.req on Cloudflare Workers', async () => {
+    mockGetRequestIP.mockReturnValue(undefined)
+    const event1 = { headers: new Headers({ 'cf-connecting-ip': '203.0.113.10' }) } as unknown as H3Event
+    const event2 = { headers: new Headers({ 'cf-connecting-ip': '203.0.113.20' }) } as unknown as H3Event
+    const config = {
+      uniqueKey: 'cf_test',
+      windowMs: 1000,
+      limit: 1,
+      message: 'Too many attempts'
+    }
+
+    await expect(checkRateLimit(event1, config)).resolves.toBeUndefined()
+    await expect(checkRateLimit(event1, config)).rejects.toThrow()
+
+    // Different Cloudflare connecting IP should not be blocked
+    await expect(checkRateLimit(event2, config)).resolves.toBeUndefined()
+  })
 })

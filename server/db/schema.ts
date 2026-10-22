@@ -6,6 +6,11 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  resetTokenHash: text('reset_token_hash'),
+  resetTokenExpiresAt: integer('reset_token_expires_at', {
+    mode: 'timestamp'
+  }),
+  credentialsVersion: integer('credentials_version').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(unixepoch())`)
     .notNull()

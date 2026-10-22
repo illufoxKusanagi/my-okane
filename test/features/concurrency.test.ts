@@ -7,7 +7,7 @@ import { and, eq, isNull } from 'drizzle-orm'
 
 describe('Concurrency Upsert Verification', () => {
   beforeAll(async () => {
-    await migrate(db, { migrationsFolder: './server/db/migrations' })
+    await migrate(db, { migrationsFolder: './server/db/migrations/turso' })
     await db.delete(budgets)
     await db.delete(users)
   })

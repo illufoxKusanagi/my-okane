@@ -30,24 +30,59 @@ function getRedis(): Redis | null {
   return redisClient
 }
 
-function getClientIp(event: H3Event): string {
+function extractHeader(event: H3Event, name: string): string | undefined {
   try {
-    if (event?.node?.req) {
-      // Cloudflare Workers sets cf-connecting-ip
-      const cfIp = getHeader(event, 'cf-connecting-ip')
-      if (cfIp) return cfIp.trim()
+    const val = getHeader(event, name)
+    if (val) return val
+  } catch {
+    // Ignore error and try explicit property inspection
+  }
 
-      // On Vercel the edge proxy sanitizes x-forwarded-for with the real client IP,
-      // so it is trustworthy there. Self-hosted deployments fall back to the socket
-      // address so attackers cannot spoof per-IP buckets via a forged header.
-      if (process.env.VERCEL === '1') {
-        const forwarded = getHeader(event, 'x-forwarded-for')
-        if (forwarded) {
-          const last = forwarded.split(',').pop()?.trim()
-          if (last) return last
-        }
+  const headerName = name.toLowerCase()
+  const ev = event as unknown as {
+    headers?: Headers | Record<string, string | string[] | undefined>
+    web?: { request?: { headers?: Headers } }
+  }
+
+  try {
+    if (ev?.web?.request?.headers && typeof ev.web.request.headers.get === 'function') {
+      const v = ev.web.request.headers.get(headerName)
+      if (v) return v
+    }
+    if (ev?.headers) {
+      if (typeof (ev.headers as Headers).get === 'function') {
+        const v = (ev.headers as Headers).get(headerName)
+        if (v) return v
+      } else if (typeof ev.headers === 'object') {
+        const v = (ev.headers as Record<string, string | undefined>)[headerName]
+        if (typeof v === 'string') return v
       }
     }
+  } catch {
+    // Ignore fallback inspection errors
+  }
+  return undefined
+}
+
+function getClientIp(event: H3Event): string {
+  try {
+    // Cloudflare Workers sets cf-connecting-ip
+    const cfIp = extractHeader(event, 'cf-connecting-ip')
+    if (cfIp) return cfIp.trim()
+
+    // On Vercel the edge proxy sanitizes x-forwarded-for with the real client IP,
+    // so it is trustworthy there. Self-hosted deployments fall back to the socket
+    // address so attackers cannot spoof per-IP buckets via a forged header.
+    if (process.env.VERCEL === '1') {
+      const forwarded = extractHeader(event, 'x-forwarded-for')
+      if (forwarded) {
+        const last = forwarded.split(',').pop()?.trim()
+        if (last) return last
+      }
+    }
+
+    const realIp = extractHeader(event, 'x-real-ip')
+    if (realIp) return realIp.trim()
   } catch {
     // Fallback if event is mocked or header extraction fails
   }

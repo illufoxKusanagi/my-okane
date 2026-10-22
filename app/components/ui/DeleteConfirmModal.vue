@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppModal from '~/components/ui/AppModal.vue'
 
 const props = withDefaults(
@@ -28,6 +29,7 @@ const isOpen = computed({
     v-model:open="isOpen"
     :title="title"
     submit-label="Delete"
+    submit-color="error"
     :loading="loading"
     @submit="emit('confirm')"
   >
@@ -38,7 +40,7 @@ const isOpen = computed({
       />
       <span class="font-semibold">Warning: Irreversible Action</span>
     </div>
-    <p class="text-sm text-neutral-600 dark:text-neutral-400">
+    <p class="text-sm text-muted">
       <slot />
     </p>
   </AppModal>

@@ -31,6 +31,8 @@ const ALLOWED_ICONS = [
   'i-lucide-circle-help'
 ] as const
 
+export const passwordSchema = z.string().min(8, 'Password must be at least 8 characters')
+
 export const CategorySchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(100, 'Name too long'),
   type: z.enum(['income', 'spending']),

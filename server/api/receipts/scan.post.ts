@@ -130,9 +130,10 @@ export default defineEventHandler(async (event) => {
       data: sanitizedData
     }
   } catch (parseErr: unknown) {
-    console.error('Failed to parse or validate Gemini JSON response:', textResponse)
+    console.error('Failed to parse or validate Gemini JSON response (length:', textResponse?.length || 0, ')')
     Sentry.captureException(parseErr, {
-      extra: { textResponse }
+      tags: { feature: 'receipt-scan' },
+      extra: { responseLength: textResponse?.length || 0 }
     })
     throw createError({
       statusCode: 502,
