@@ -84,6 +84,7 @@ const items: NavigationMenuItem[][] = [
   <UDashboardSidebar
     collapsible
     resizable
+    class="md:rounded-2xl md:border md:border-default md:bg-default md:shadow-xs md:overflow-hidden"
     :ui="{ footer: 'border-t border-default' }"
     :toggle="{
       color: 'primary',

@@ -59,150 +59,134 @@ const weeklyRemaining = computed(
 </script>
 
 <template>
-  <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar title="Dashboard">
-        <template #right>
-          <ColorModeButton />
-        </template>
-      </UDashboardNavbar>
-    </template>
+  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8">
+    <!-- Hero Budget Slider / Skeleton -->
+    <USkeleton
+      v-if="isBudgetLoading"
+      class="h-64 rounded-3xl w-full"
+    />
+    <BudgetSliderCard
+      v-else
+      :current-view="currentView"
+      :monthly-budget-limit="monthlyBudgetLimit"
+      :monthly-spent="monthlySpent"
+      :monthly-remaining="monthlyRemaining"
+      :weekly-budget-limit="weeklyBudgetLimit"
+      :weekly-spent="weeklySpent"
+      :weekly-remaining="weeklyRemaining"
+      @set-view="currentView = $event"
+    />
 
-    <template #body>
-      <UContainer class="flex flex-col gap-6 max-w-6xl pb-12 sm:pb-8">
-        <!-- Hero Budget Slider / Skeleton -->
+    <!-- Income and Spending Quick-Add Summary Cards / Skeletons -->
+    <div
+      v-if="isLoading"
+      class="grid grid-cols-1 md:grid-cols-2 gap-5"
+    >
+      <USkeleton class="h-28 rounded-2xl w-full" />
+      <USkeleton class="h-28 rounded-2xl w-full" />
+    </div>
+    <div
+      v-else
+      class="grid grid-cols-1 md:grid-cols-2 gap-5"
+    >
+      <IncomeCard
+        label="Total Income"
+        type="income"
+        :amount="totalIncome"
+      />
+      <IncomeCard
+        label="Total Spending"
+        type="spending"
+        :amount="totalSpending"
+      />
+    </div>
+
+    <!-- Charts / Skeletons -->
+    <div
+      v-if="isBudgetLoading || isLoading"
+      class="grid grid-cols-1 lg:grid-cols-3 gap-5"
+    >
+      <USkeleton class="h-80 rounded-2xl w-full lg:col-span-1" />
+      <USkeleton class="h-80 rounded-2xl w-full lg:col-span-2" />
+    </div>
+    <div
+      v-else
+      class="grid grid-cols-1 lg:grid-cols-3 gap-5"
+    >
+      <MonthlySpendingCard class="lg:col-span-1" />
+      <MonthlyTrendChart class="lg:col-span-2" />
+    </div>
+
+    <!-- Spending Details by Category / Skeletons -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-lg font-bold tracking-tight text-highlighted">
+          Spending by Category
+        </p>
+        <AddCategoryModal type="spending" />
+      </div>
+      <div
+        v-if="isLoading"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
         <USkeleton
-          v-if="isBudgetLoading"
-          class="h-64 rounded-3xl w-full"
+          v-for="i in 4"
+          :key="`spending-skel-${i}`"
+          class="h-20 rounded-2xl w-full"
         />
-        <BudgetSliderCard
-          v-else
-          :current-view="currentView"
-          :monthly-budget-limit="monthlyBudgetLimit"
-          :monthly-spent="monthlySpent"
-          :monthly-remaining="monthlyRemaining"
-          :weekly-budget-limit="weeklyBudgetLimit"
-          :weekly-spent="weeklySpent"
-          :weekly-remaining="weeklyRemaining"
-          @set-view="currentView = $event"
+      </div>
+      <div
+        v-else-if="spendingCategories.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <SpendingDetail
+          v-for="category in spendingCategories"
+          :key="`spending-${category.id}`"
+          :category="category"
         />
+      </div>
+      <div
+        v-else
+        class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
+      >
+        No spending categories created yet.
+      </div>
+    </div>
 
-        <!-- Income and Spending Summary Cards / Skeletons -->
-        <div
-          v-if="isLoading"
-          class="grid grid-cols-1 md:grid-cols-2 gap-5"
-        >
-          <USkeleton class="h-28 rounded-2xl w-full" />
-          <USkeleton class="h-28 rounded-2xl w-full" />
-        </div>
-        <div
-          v-else
-          class="grid grid-cols-1 md:grid-cols-2 gap-5"
-        >
-          <IncomeCard
-            label="Total Income"
-            type="income"
-            :amount="totalIncome"
-          />
-          <IncomeCard
-            label="Total Spending"
-            type="spending"
-            :amount="totalSpending"
-          />
-        </div>
-
-        <!-- Charts / Skeletons -->
-        <div
-          v-if="isBudgetLoading || isLoading"
-          class="grid grid-cols-1 lg:grid-cols-3 gap-5"
-        >
-          <USkeleton class="h-80 rounded-2xl w-full lg:col-span-1" />
-          <USkeleton class="h-80 rounded-2xl w-full lg:col-span-2" />
-        </div>
-        <div
-          v-else
-          class="grid grid-cols-1 lg:grid-cols-3 gap-5"
-        >
-          <MonthlySpendingCard class="lg:col-span-1" />
-          <MonthlyTrendChart class="lg:col-span-2" />
-        </div>
-
-        <!-- Spending Details by Category / Skeletons -->
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-3">
-            <p
-              class="text-lg font-bold tracking-tight text-highlighted"
-            >
-              Spending by Category
-            </p>
-            <AddCategoryModal type="spending" />
-          </div>
-          <div
-            v-if="isLoading"
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <USkeleton
-              v-for="i in 4"
-              :key="`spending-skel-${i}`"
-              class="h-20 rounded-2xl w-full"
-            />
-          </div>
-          <div
-            v-else-if="spendingCategories.length > 0"
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <SpendingDetail
-              v-for="category in spendingCategories"
-              :key="`spending-${category.id}`"
-              :category="category"
-            />
-          </div>
-          <div
-            v-else
-            class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
-          >
-            No spending categories created yet.
-          </div>
-        </div>
-
-        <!-- Income Details by Category / Skeletons -->
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-3">
-            <p
-              class="text-lg font-bold tracking-tight text-highlighted"
-            >
-              Income by Category
-            </p>
-            <AddCategoryModal type="income" />
-          </div>
-          <div
-            v-if="isLoading"
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <USkeleton
-              v-for="i in 2"
-              :key="`income-skel-${i}`"
-              class="h-20 rounded-2xl w-full"
-            />
-          </div>
-          <div
-            v-else-if="incomeCategories.length > 0"
-            class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <SpendingDetail
-              v-for="category in incomeCategories"
-              :key="`income-${category.id}`"
-              :category="category"
-            />
-          </div>
-          <div
-            v-else
-            class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
-          >
-            No income categories created yet.
-          </div>
-        </div>
-      </UContainer>
-    </template>
-  </UDashboardPanel>
+    <!-- Income Details by Category / Skeletons -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-lg font-bold tracking-tight text-highlighted">
+          Income by Category
+        </p>
+        <AddCategoryModal type="income" />
+      </div>
+      <div
+        v-if="isLoading"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <USkeleton
+          v-for="i in 2"
+          :key="`income-skel-${i}`"
+          class="h-20 rounded-2xl w-full"
+        />
+      </div>
+      <div
+        v-else-if="incomeCategories.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <SpendingDetail
+          v-for="category in incomeCategories"
+          :key="`income-${category.id}`"
+          :category="category"
+        />
+      </div>
+      <div
+        v-else
+        class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
+      >
+        No income categories created yet.
+      </div>
+    </div>
+  </div>
 </template>
