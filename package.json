@@ -16,6 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:up": "drizzle-kit up",
     "db:migrate:prod": "NODE_ENV=production drizzle-kit migrate",
+    "deploy": "wrangler deploy",
+    "preview:cf": "wrangler dev",
     "pages:dev": "wrangler pages dev .output/public",
     "pages:deploy": "wrangler pages deploy .output/public",
     "test": "vitest run"
@@ -58,7 +60,7 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.12",
     "vue-tsc": "^3.3.13",
-    "wrangler": "^3.114.0"
+    "wrangler": "^4.0.0"
   },
   "packageManager": "bun@1.3.5",
   "overrides": {

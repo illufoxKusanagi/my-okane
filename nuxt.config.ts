@@ -66,12 +66,7 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-01-15',
   nitro: {
-    preset: 'cloudflare-pages',
-    output: {
-      dir: '{{ rootDir }}/.output/public',
-      publicDir: '{{ output.dir }}',
-      serverDir: '{{ output.dir }}/_worker.js'
-    },
+    preset: 'cloudflare-module',
     alias: {
       '@react-email/render': fileURLToPath(
         new URL('./server/stubs/react-email-render.ts', import.meta.url)
