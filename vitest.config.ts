@@ -15,7 +15,8 @@ export default defineVitestConfig({
   },
   resolve: {
     alias: {
-      'bun:test': path.resolve(__dirname, './test/empty-mock.ts')
+      'bun:test': path.resolve(__dirname, './test/empty-mock.ts'),
+      '@libsql/client': '@libsql/client/node'
     }
   }
 })
