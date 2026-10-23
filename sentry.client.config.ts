@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nuxt'
+import { scrubResetTokens, scrubResetTokenBreadcrumb } from './sentry.scrub'
 
 if (process.env.NODE_ENV !== 'test') {
   Sentry.init({
@@ -18,20 +19,33 @@ if (process.env.NODE_ENV !== 'test') {
     // sessions when an error occurs.
     replaysOnErrorSampleRate: 1.0,
 
-    // If you don't want to use Session Replay, just remove the line below:
-    integrations: [Sentry.replayIntegration()],
+    // Session Replay kept for money-math debugging, with aggressive privacy
+    // masking so financial values, names, and inputs never leave the browser.
+    integrations: [
+      Sentry.replayIntegration({
+        maskAllText: true,
+        maskAllInputs: true,
+        blockAllMedia: true
+      })
+    ],
 
     // Enable logs to be sent to Sentry
     enableLogs: true,
 
     dataCollection: {
-      // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
-      // https://docs.sentry.io/platforms/javascript/guides/nuxt/configuration/options/#dataCollection
-      // userInfo: false,
-      // httpBodies: [],
+      userInfo: false,
+      httpBodies: []
     },
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: false
+    debug: false,
+
+    // Password-reset tokens must never leak via captured URLs/messages.
+    beforeSend(event) {
+      return scrubResetTokens(event)
+    },
+    beforeBreadcrumb(breadcrumb) {
+      return scrubResetTokenBreadcrumb(breadcrumb)
+    }
   })
 }

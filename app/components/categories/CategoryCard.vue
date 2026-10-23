@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex flex-col justify-between p-5 rounded-2xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 group"
+    class="flex flex-col justify-between p-5 rounded-2xl bg-elevated border border-default shadow-sm hover:shadow-md hover:border-default transition-all duration-300 group"
   >
     <div class="flex items-center gap-3">
       <div
@@ -29,17 +29,17 @@ const emit = defineEmits<{
         />
       </div>
       <div>
-        <p class="font-bold text-neutral-800 dark:text-neutral-100">
+        <p class="font-bold text-default">
           {{ category.name }}
         </p>
-        <p class="text-xs text-neutral-500 capitalize">
+        <p class="text-xs text-muted capitalize">
           {{ category.type }}
         </p>
       </div>
     </div>
 
     <div
-      class="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-neutral-100 dark:border-neutral-800/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
+      class="flex items-center justify-end gap-2 mt-6 pt-3 border-t border-muted md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
     >
       <UButton
         icon="i-lucide-pencil"

@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -27,6 +29,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
+    appUrl: process.env.NUXT_APP_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     session: {
       password: process.env.NUXT_SESSION_PASSWORD || '',
@@ -52,7 +55,7 @@ export default defineNuxtConfig({
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'camera=(self), microphone=(), geolocation=()',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob: https://api.dicebear.com https:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io;'
+        'Content-Security-Policy': 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io; object-src \'none\'; base-uri \'self\'; form-action \'self\';'
       }
     }
   },
@@ -62,6 +65,14 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-01-15',
+  nitro: {
+    preset: 'cloudflare-module',
+    alias: {
+      '@react-email/render': fileURLToPath(
+        new URL('./server/stubs/react-email-render.ts', import.meta.url)
+      )
+    }
+  },
 
   vite: {
     optimizeDeps: {

@@ -27,7 +27,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
     role="link"
     tabindex="0"
     :aria-label="`${pocket.name} pocket details`"
-    class="flex flex-col justify-between p-5 rounded-3xl bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 shadow-sm hover:shadow-md hover:border-neutral-300/80 dark:hover:border-neutral-700/80 transition-all duration-300 cursor-pointer group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+    class="flex flex-col justify-between p-5 rounded-3xl bg-elevated border border-default shadow-sm hover:shadow-md hover:border-default transition-all duration-300 cursor-pointer group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary/50"
     @click="navigateTo(`/budgets/${pocket.id}`)"
     @keydown.enter="navigateTo(`/budgets/${pocket.id}`)"
   >
@@ -56,11 +56,11 @@ const { formatCurrency, getProgressColor } = useFormatters()
       </div>
 
       <h4
-        class="text-lg font-bold text-neutral-800 dark:text-neutral-100 group-hover:text-primary transition-colors duration-200"
+        class="text-lg font-bold text-default group-hover:text-primary transition-colors duration-200"
       >
         {{ pocket.name }}
       </h4>
-      <p class="text-xs text-neutral-500 capitalize mb-3">
+      <p class="text-xs text-muted capitalize mb-3">
         {{ pocket.type }} Pocket
       </p>
 
@@ -69,16 +69,21 @@ const { formatCurrency, getProgressColor } = useFormatters()
         <div class="mb-4">
           <template v-if="pocket.budgetAmount > 0">
             <p
-              class="text-xl font-extrabold text-neutral-800 dark:text-neutral-100"
+              class="text-xl font-extrabold"
+              :class="
+                pocket.remaining < 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-default'
+              "
             >
               {{ formatCurrency(pocket.remaining) }}
             </p>
-            <p class="text-xs text-neutral-500">
+            <p class="text-xs text-muted">
               remaining
             </p>
           </template>
           <template v-else>
-            <p class="text-sm font-semibold text-neutral-400 py-1">
+            <p class="text-sm font-semibold text-dimmed py-1">
               No limit set
             </p>
           </template>
@@ -91,7 +96,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
           >
             {{ formatCurrency(pocket.earned) }}
           </p>
-          <p class="text-xs text-neutral-500">
+          <p class="text-xs text-muted">
             total earned
           </p>
         </div>

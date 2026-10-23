@@ -1,6 +1,57 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+definePageMeta({
+  layout: false
+})
+
+const route = useRoute()
+
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+const isRegistered = ref(false)
+
+onMounted(() => {
+  if (route.query.email) {
+    email.value = String(route.query.email)
+  }
+  if (route.query.registered === 'true') {
+    isRegistered.value = true
+  }
+})
+
+const { fetch: fetchSession } = useUserSession()
+
+async function handleLogin() {
+  if (loading.value) return
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: email.value.trim(),
+        password: password.value
+      }
+    })
+
+    await fetchSession()
+    await navigateTo('/')
+  } catch (err: unknown) {
+    errorMessage.value = describeApiError(err, 'Invalid email or password.')
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen flex items-center justify-center bg-default px-4 sm:px-6 lg:px-8"
   >
     <div class="max-w-md w-full space-y-8">
       <div class="text-center">
@@ -14,11 +65,11 @@
           />
         </div>
         <h2
-          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+          class="text-3xl font-bold tracking-tight text-highlighted"
         >
           Welcome Back
         </h2>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <p class="mt-2 text-sm text-muted">
           Sign in to manage your finance
         </p>
       </div>
@@ -40,12 +91,13 @@
         color="error"
         variant="subtle"
         icon="i-lucide-alert-circle"
-        :title="errorMessage"
+        title="Sign in failed"
+        :description="errorMessage"
         class="mb-6"
       />
 
       <UCard
-        class="shadow-xl shadow-neutral-950/5 border-neutral-200/80 dark:border-neutral-800 backdrop-blur-sm"
+        class="shadow-xl shadow-neutral-950/5 border border-default backdrop-blur-sm"
       >
         <form
           class="space-y-4"
@@ -75,6 +127,17 @@
             required
             class="w-full"
           >
+            <template #hint>
+              <ULink
+                to="/forgot-password"
+                class="text-xs text-primary font-medium hover:underline cursor-pointer"
+                tabindex="0"
+                @click.stop
+              >
+                Forgot password?
+              </ULink>
+            </template>
+
             <UInput
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
@@ -111,74 +174,15 @@
         </form>
       </UCard>
 
-      <p class="text-center text-sm text-slate-600 dark:text-slate-400">
+      <p class="text-center text-sm text-muted">
         Don't have an account?
-        <NuxtLink
+        <ULink
           to="/register"
-          class="font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+          class="font-medium text-primary hover:underline transition-colors"
         >
           Sign up for free
-        </NuxtLink>
+        </ULink>
       </p>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-definePageMeta({
-  layout: false
-})
-
-const route = useRoute()
-
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
-const loading = ref(false)
-const errorMessage = ref('')
-const isRegistered = ref(false)
-const toast = useToast()
-
-onMounted(() => {
-  if (route.query.email) {
-    email.value = String(route.query.email)
-  }
-  if (route.query.registered === 'true') {
-    isRegistered.value = true
-  }
-})
-
-const { fetch: fetchSession } = useUserSession()
-
-async function handleLogin() {
-  if (loading.value) return
-  loading.value = true
-  errorMessage.value = ''
-
-  try {
-    await $fetch('/api/auth/login', {
-      method: 'POST',
-      body: {
-        email: email.value.trim(),
-        password: password.value
-      }
-    })
-
-    await fetchSession()
-
-    await navigateTo('/')
-  } catch (err: unknown) {
-    errorMessage.value = describeApiError(err, 'Invalid email or password.')
-    toast.add({
-      title: 'Login Failed',
-      description: errorMessage.value,
-      color: 'error',
-      icon: 'i-lucide-circle-alert'
-    })
-  } finally {
-    loading.value = false
-  }
-}
-</script>

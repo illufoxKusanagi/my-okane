@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
-import ColorIconPicker from '~/components/ui/ColorIconPicker.vue'
-import { colorClassMap } from '~/constants/ui'
+import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -12,17 +11,19 @@ const props = withDefaults(
   }
 )
 
-const { addCategory, getCategories } = useFinance()
+const { addCategory } = useFinance()
+const toast = useToast()
 
-const categories = computed(() => getCategories(props.type))
 const newCategoryName = ref('')
 const selectedColor = ref('blue')
 const selectedIcon = ref('i-lucide-folder')
 const isOpen = ref(false)
 const isSaving = ref(false)
 
+const isInvalid = computed(() => !newCategoryName.value.trim())
+
 const handleAddCategory = async () => {
-  if (!newCategoryName.value.trim() || isSaving.value) return
+  if (isInvalid.value || isSaving.value) return
   isSaving.value = true
   try {
     await addCategory(
@@ -37,6 +38,12 @@ const handleAddCategory = async () => {
     isOpen.value = false
   } catch (error) {
     console.error('Failed to add category:', error)
+    toast.add({
+      title: 'Failed to Add Category',
+      description: 'Something went wrong. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-circle-alert'
+    })
   } finally {
     isSaving.value = false
   }
@@ -47,9 +54,13 @@ const handleAddCategory = async () => {
   <div>
     <UButton
       color="neutral"
+      variant="outline"
+      icon="i-lucide-plus"
+      size="sm"
       @click="isOpen = true"
     >
-      Add {{ type === "income" ? "Income" : "Spending" }} Category
+      <span class="sm:hidden">Add</span>
+      <span class="hidden sm:inline">Add {{ type === "income" ? "Income" : "Spending" }} Category</span>
     </UButton>
 
     <AppModal
@@ -57,42 +68,16 @@ const handleAddCategory = async () => {
       :title="`Add New ${type === 'income' ? 'Income' : 'Spending'} Category`"
       submit-label="Create"
       :loading="isSaving"
+      :disabled="isInvalid"
       @submit="handleAddCategory"
     >
-      <div>
-        <p class="text-sm font-semibold mb-2 text-neutral-700 dark:text-neutral-300">
-          Category Name
-        </p>
-        <UInput
-          v-model="newCategoryName"
-          class="w-full"
-          placeholder="Enter category name"
-          autofocus
-        />
-      </div>
-
-      <ColorIconPicker
+      <CategoryFormFields
+        v-model:name="newCategoryName"
         v-model:color="selectedColor"
         v-model:icon="selectedIcon"
+        :fixed-type="type"
+        show-existing
       />
-
-      <div v-if="categories.length > 0">
-        <p class="text-xs text-neutral-400 dark:text-neutral-500 mb-2">
-          Existing Categories
-        </p>
-        <div
-          class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-neutral-50/50 dark:bg-neutral-900/20 rounded-xl border border-neutral-200/30 dark:border-neutral-800/30"
-        >
-          <UBadge
-            v-for="cat in categories"
-            :key="cat.id"
-            variant="outline"
-            :class="colorClassMap[cat.color || 'slate']"
-          >
-            {{ cat.name }}
-          </UBadge>
-        </div>
-      </div>
     </AppModal>
   </div>
 </template>

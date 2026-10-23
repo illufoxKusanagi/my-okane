@@ -26,7 +26,7 @@ const badgeClass = computed(() => {
 
 <template>
   <div
-    class="flex flex-row gap-4 h-16 bg-white/70 dark:bg-neutral-900/70 border border-neutral-200/50 dark:border-neutral-800/50 rounded-xl py-4 px-5 items-center w-full shadow-sm hover:shadow-md transition-all duration-300 hover:border-neutral-300/80 dark:hover:border-neutral-700/80"
+    class="flex flex-row gap-4 h-16 bg-elevated border border-default rounded-xl py-4 px-5 items-center w-full shadow-sm hover:shadow-md transition-all duration-300 hover:border-default"
   >
     <div
       :class="[
@@ -40,14 +40,14 @@ const badgeClass = computed(() => {
       />
     </div>
     <div class="flex flex-col justify-center flex-1">
-      <p class="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+      <p class="text-xs font-semibold text-muted uppercase tracking-wider">
         {{ category.name }}
       </p>
-      <p class="text-lg font-bold text-neutral-800 dark:text-neutral-100 tabular-nums">
+      <p class="text-lg font-bold text-default tabular-nums">
         Rp. {{ total.toLocaleString() }}
       </p>
     </div>
-    <div class="text-xs text-neutral-400 dark:text-neutral-500 font-medium">
+    <div class="text-xs text-dimmed font-medium">
       {{ transactions.length }} trans.
     </div>
   </div>

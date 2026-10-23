@@ -62,33 +62,48 @@ const { colorMode, chartData, chartOptions, centerTextPlugin } = usePieChart(pro
       </div>
     </template>
 
-    <!-- Chart -->
-    <div class="relative mx-auto w-full max-w-[240px] aspect-square">
-      <Doughnut
-        :key="colorMode.value"
-        :data="chartData"
-        :options="chartOptions"
-        :plugins="[centerTextPlugin]"
-      />
-    </div>
+    <!-- Chart / Empty State -->
+    <template v-if="data && data.length > 0">
+      <div class="relative mx-auto w-full max-w-[240px] aspect-square">
+        <Doughnut
+          :key="colorMode.value"
+          :data="chartData"
+          :options="chartOptions"
+          :plugins="[centerTextPlugin]"
+        />
+      </div>
 
-    <!-- Legend -->
-    <ul class="flex flex-col gap-2">
-      <li
-        v-for="item in data"
-        :key="item.label"
-        class="flex items-center justify-between text-sm"
-      >
-        <div class="flex items-center gap-2">
-          <span
-            class="size-2.5 rounded-full shrink-0"
-            :style="{ backgroundColor: item.color }"
-          />
-          <span class="text-muted">{{ item.label }}</span>
-        </div>
-        <span class="font-medium tabular-nums">Rp. {{ item.value.toLocaleString() }}</span>
-      </li>
-    </ul>
+      <!-- Legend -->
+      <ul class="flex flex-col gap-2">
+        <li
+          v-for="item in data"
+          :key="item.label"
+          class="flex items-center justify-between text-sm"
+        >
+          <div class="flex items-center gap-2">
+            <span
+              class="size-2.5 rounded-full shrink-0"
+              :style="{ backgroundColor: item.color }"
+            />
+            <span class="text-muted">{{ item.label }}</span>
+          </div>
+          <span class="font-medium tabular-nums">Rp. {{ item.value.toLocaleString() }}</span>
+        </li>
+      </ul>
+    </template>
+
+    <div
+      v-else
+      class="flex flex-col items-center justify-center py-10 text-center"
+    >
+      <UIcon
+        name="i-lucide-pie-chart"
+        class="size-10 text-muted/50 mb-2"
+      />
+      <p class="text-sm font-medium text-muted">
+        No spending recorded this month
+      </p>
+    </div>
 
     <!-- Footer -->
     <template #footer>

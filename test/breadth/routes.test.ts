@@ -9,6 +9,8 @@ describe('Route Breadth Page Existence Checks (Static Smoke Tests)', () => {
     'index.vue',
     'login.vue',
     'register.vue',
+    'forgot-password.vue',
+    'reset-password.vue',
     'categories.vue',
     'transactions.vue',
     'budgets/index.vue'

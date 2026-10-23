@@ -2,21 +2,40 @@ import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
 
-const isDev = process.env.NODE_ENV === 'development'
-const isTest = process.env.NODE_ENV === 'test'
+type DrizzleDb = ReturnType<typeof drizzle>
 
-const defaultLocalDb = isTest ? 'file:local.test.db' : isDev ? 'file:local.dev.db' : undefined
-const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || defaultLocalDb
+let _db: DrizzleDb | null = null
 
-if (!url) {
-  throw new Error('TURSO_DATABASE_URL or DATABASE_URL must be configured outside development and test environments.')
+export function getDb(): DrizzleDb {
+  if (!_db) {
+    const isDev = process.env.NODE_ENV === 'development'
+    const isTest = process.env.NODE_ENV === 'test'
+    const isLocal = isDev || isTest
+
+    const url = isTest
+      ? 'file:local.test.db'
+      : isDev
+        ? 'file:local.dev.db'
+        : (process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL)
+
+    if (!url) {
+      throw new Error('TURSO_DATABASE_URL must be configured in production.')
+    }
+
+    const client = createClient({
+      url,
+      authToken: isLocal ? undefined : process.env.TURSO_AUTH_TOKEN
+    })
+
+    _db = drizzle({ client })
+  }
+  return _db
 }
 
-const authToken = process.env.TURSO_AUTH_TOKEN
-
-const client = createClient({
-  url,
-  authToken
+export const db = new Proxy({} as DrizzleDb, {
+  get(_target, prop, receiver) {
+    const instance = getDb()
+    const value = Reflect.get(instance, prop, receiver)
+    return typeof value === 'function' ? value.bind(instance) : value
+  }
 })
-
-export const db = drizzle({ client })

@@ -5,11 +5,12 @@ import { z } from 'zod'
 
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
 import { throwSafeServerError } from '~~/server/utils/safeError'
+import { passwordSchema } from '~~/server/utils/validator'
 
 const registerSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
+  password: passwordSchema
 })
 
 export default defineEventHandler(async (event) => {
