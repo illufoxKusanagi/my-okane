@@ -1,3 +1,54 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+definePageMeta({
+  layout: false
+})
+
+const route = useRoute()
+
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+const isRegistered = ref(false)
+
+onMounted(() => {
+  if (route.query.email) {
+    email.value = String(route.query.email)
+  }
+  if (route.query.registered === 'true') {
+    isRegistered.value = true
+  }
+})
+
+const { fetch: fetchSession } = useUserSession()
+
+async function handleLogin() {
+  if (loading.value) return
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: email.value.trim(),
+        password: password.value
+      }
+    })
+
+    await fetchSession()
+    await navigateTo('/')
+  } catch (err: unknown) {
+    errorMessage.value = describeApiError(err, 'Invalid email or password.')
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <div
     class="min-h-screen flex items-center justify-center bg-default px-4 sm:px-6 lg:px-8"
@@ -76,6 +127,17 @@
             required
             class="w-full"
           >
+            <template #hint>
+              <ULink
+                to="/forgot-password"
+                class="text-xs text-primary font-medium hover:underline cursor-pointer"
+                tabindex="0"
+                @click.stop
+              >
+                Forgot password?
+              </ULink>
+            </template>
+
             <UInput
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
@@ -100,15 +162,6 @@
             </UInput>
           </UFormField>
 
-          <div class="flex justify-end">
-            <NuxtLink
-              to="/forgot-password"
-              class="text-xs font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Forgot password?
-            </NuxtLink>
-          </div>
-
           <UButton
             type="submit"
             color="primary"
@@ -123,65 +176,13 @@
 
       <p class="text-center text-sm text-muted">
         Don't have an account?
-        <NuxtLink
+        <ULink
           to="/register"
-          class="font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+          class="font-medium text-primary hover:underline transition-colors"
         >
           Sign up for free
-        </NuxtLink>
+        </ULink>
       </p>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-definePageMeta({
-  layout: false
-})
-
-const route = useRoute()
-
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
-const loading = ref(false)
-const errorMessage = ref('')
-const isRegistered = ref(false)
-
-onMounted(() => {
-  if (route.query.email) {
-    email.value = String(route.query.email)
-  }
-  if (route.query.registered === 'true') {
-    isRegistered.value = true
-  }
-})
-
-const { fetch: fetchSession } = useUserSession()
-
-async function handleLogin() {
-  if (loading.value) return
-  loading.value = true
-  errorMessage.value = ''
-
-  try {
-    await $fetch('/api/auth/login', {
-      method: 'POST',
-      body: {
-        email: email.value.trim(),
-        password: password.value
-      }
-    })
-
-    await fetchSession()
-
-    await navigateTo('/')
-  } catch (err: unknown) {
-    errorMessage.value = describeApiError(err, 'Invalid email or password.')
-  } finally {
-    loading.value = false
-  }
-}
-</script>
