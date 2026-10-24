@@ -1,135 +1,135 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from 'vitest'
 import {
   validateCategory,
   validateTransaction,
   validateUpdateCategory,
-  validateUpdateTransaction,
-} from "~~/server/utils/validator";
+  validateUpdateTransaction
+} from '~~/server/utils/validator'
 
-describe("Validator utilities", () => {
-  describe("Category validation", () => {
-    it("should validate a correct category", () => {
+describe('Validator utilities', () => {
+  describe('Category validation', () => {
+    it('should validate a correct category', () => {
       const data = {
-        name: "Food",
-        type: "spending",
-        icon: "i-lucide-utensils",
-        color: "blue",
-      };
-      const result = validateCategory(data);
-      expect(result.success).toBe(true);
-    });
-
-    it("should fail validation if name is empty", () => {
-      const data = {
-        name: "",
-        type: "spending",
-      };
-      const result = validateCategory(data);
-      expect(result.success).toBe(false);
-    });
-
-    it("should fail validation if type is invalid", () => {
-      const data = {
-        name: "Food",
-        type: "invalid-type",
-      };
-      const result = validateCategory(data);
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe("Transaction validation", () => {
-    it("should validate a correct transaction", () => {
-      const data = {
-        name: "Lunch",
-        type: "spending",
-        amount: 25000,
-        categoryId: "018f3a2c-1234-7abc-8def-0123456789ab",
-        notes: "Indomaret",
-        transactionDate: "2026-08-03",
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.transactionDate).toBeInstanceOf(Date);
+        name: 'Food',
+        type: 'spending',
+        icon: 'i-lucide-utensils',
+        color: 'blue'
       }
-    });
+      const result = validateCategory(data)
+      expect(result.success).toBe(true)
+    })
 
-    it("should fail validation if amount is zero or negative", () => {
+    it('should fail validation if name is empty', () => {
       const data = {
-        name: "Lunch",
-        type: "spending",
+        name: '',
+        type: 'spending'
+      }
+      const result = validateCategory(data)
+      expect(result.success).toBe(false)
+    })
+
+    it('should fail validation if type is invalid', () => {
+      const data = {
+        name: 'Food',
+        type: 'invalid-type'
+      }
+      const result = validateCategory(data)
+      expect(result.success).toBe(false)
+    })
+  })
+
+  describe('Transaction validation', () => {
+    it('should validate a correct transaction', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
+        amount: 25000,
+        categoryId: '018f3a2c-1234-7abc-8def-0123456789ab',
+        notes: 'Indomaret',
+        transactionDate: '2026-08-03'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.transactionDate).toBeInstanceOf(Date)
+      }
+    })
+
+    it('should fail validation if amount is zero or negative', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
         amount: -5,
-        categoryId: "018f3a2c-1234-7abc-8def-0123456789ab",
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(false);
-    });
+        categoryId: '018f3a2c-1234-7abc-8def-0123456789ab'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
 
-    it("should fail validation if categoryId is missing", () => {
+    it('should fail validation if categoryId is missing', () => {
       const data = {
-        name: "Lunch",
-        type: "spending",
+        name: 'Lunch',
+        type: 'spending',
+        amount: 25000
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
+
+    it('should reject invalid calendar dates like 2026-02-31', () => {
+      const data = {
+        name: 'Lunch',
+        type: 'spending',
         amount: 25000,
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(false);
-    });
+        categoryId: '018f3a2c-1234-7abc-8def-0123456789ab',
+        transactionDate: '2026-02-31'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
 
-    it("should reject invalid calendar dates like 2026-02-31", () => {
+    it('should reject non-ISO date formats like 02/28/2014', () => {
       const data = {
-        name: "Lunch",
-        type: "spending",
+        name: 'Lunch',
+        type: 'spending',
         amount: 25000,
-        categoryId: "018f3a2c-1234-7abc-8def-0123456789ab",
-        transactionDate: "2026-02-31",
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(false);
-    });
+        categoryId: '018f3a2c-1234-7abc-8def-0123456789ab',
+        transactionDate: '02/28/2014'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(false)
+    })
 
-    it("should reject non-ISO date formats like 02/28/2014", () => {
+    it('should accept valid calendar dates', () => {
       const data = {
-        name: "Lunch",
-        type: "spending",
+        name: 'Lunch',
+        type: 'spending',
         amount: 25000,
-        categoryId: "018f3a2c-1234-7abc-8def-0123456789ab",
-        transactionDate: "02/28/2014",
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(false);
-    });
+        categoryId: '018f3a2c-1234-7abc-8def-0123456789ab',
+        transactionDate: '2026-02-28'
+      }
+      const result = validateTransaction(data)
+      expect(result.success).toBe(true)
+    })
+  })
 
-    it("should accept valid calendar dates", () => {
+  describe('Update category validation', () => {
+    it('should allow partial fields on update', () => {
       const data = {
-        name: "Lunch",
-        type: "spending",
-        amount: 25000,
-        categoryId: "018f3a2c-1234-7abc-8def-0123456789ab",
-        transactionDate: "2026-02-28",
-      };
-      const result = validateTransaction(data);
-      expect(result.success).toBe(true);
-    });
-  });
+        color: 'rose'
+      }
+      const result = validateUpdateCategory(data)
+      expect(result.success).toBe(true)
+    })
+  })
 
-  describe("Update category validation", () => {
-    it("should allow partial fields on update", () => {
+  describe('Update transaction validation', () => {
+    it('should allow partial fields on update', () => {
       const data = {
-        color: "rose",
-      };
-      const result = validateUpdateCategory(data);
-      expect(result.success).toBe(true);
-    });
-  });
-
-  describe("Update transaction validation", () => {
-    it("should allow partial fields on update", () => {
-      const data = {
-        amount: 50000,
-      };
-      const result = validateUpdateTransaction(data);
-      expect(result.success).toBe(true);
-    });
-  });
-});
+        amount: 50000
+      }
+      const result = validateUpdateTransaction(data)
+      expect(result.success).toBe(true)
+    })
+  })
+})

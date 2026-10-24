@@ -40,7 +40,18 @@ export async function sendPasswordResetEmail(
       return
     }
 
-    const appUrl = useRuntimeConfig().appUrl as string
+    let configAppUrl = ''
+    try {
+      configAppUrl = (useRuntimeConfig().appUrl as string) || ''
+    } catch {
+      // Outside Nuxt context
+    }
+    const appUrl
+      = configAppUrl
+        || getEnv('NUXT_APP_URL')
+        || process.env.NUXT_APP_URL
+        || ''
+
     if (!appUrl) {
       console.error(
         '[email] NUXT_APP_URL is not configured; password reset email not sent.'

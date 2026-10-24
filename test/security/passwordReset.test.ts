@@ -79,17 +79,18 @@ describe('Reset token expiry (10-minute TTL)', () => {
 })
 
 describe('buildResetPasswordUrl', () => {
-  it('should place the token in the URL fragment, not the query string', () => {
+  it('should include the token in both the query string and URL fragment', () => {
     const url = buildResetPasswordUrl('https://myokane.example', 'tok_123')
     expect(url).toBe(
-      'https://myokane.example/reset-password#token=tok_123'
+      'https://myokane.example/reset-password?token=tok_123#token=tok_123'
     )
-    expect(url).not.toContain('?')
+    expect(url).toContain('?token=tok_123')
+    expect(url).toContain('#token=tok_123')
   })
 
   it('should strip trailing slashes from the app URL', () => {
     expect(buildResetPasswordUrl('https://myokane.example///', 't')).toBe(
-      'https://myokane.example/reset-password#token=t'
+      'https://myokane.example/reset-password?token=t#token=t'
     )
   })
 })

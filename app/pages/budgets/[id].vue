@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
-import AppModal from "~/components/ui/AppModal.vue";
-import DeleteConfirmModal from "~/components/ui/DeleteConfirmModal.vue";
-import TransactionFormFields from "~/components/transactions/TransactionFormFields.vue";
-import PocketHeroCard from "~/components/budgets/PocketHeroCard.vue";
-import PocketStatsCard from "~/components/budgets/PocketStatsCard.vue";
-import TransactionListItem from "~/components/transactions/TransactionListItem.vue";
-import { usePocketDetailsController } from "./usePocketDetailsController";
+import { useRoute, useRouter } from 'vue-router'
+import AppModal from '~/components/ui/AppModal.vue'
+import DeleteConfirmModal from '~/components/ui/DeleteConfirmModal.vue'
+import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
+import PocketHeroCard from '~/components/budgets/PocketHeroCard.vue'
+import PocketStatsCard from '~/components/budgets/PocketStatsCard.vue'
+import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
+import { usePocketDetailsController } from './usePocketDetailsController'
 
-const route = useRoute();
-const router = useRouter();
-const categoryId = String(route.params.id);
+const route = useRoute()
+const router = useRouter()
+const categoryId = String(route.params.id)
 
 const {
   currentMonth,
@@ -34,10 +34,10 @@ const {
   openTxModal,
   handleSaveTransaction,
   confirmDeleteTx,
-  handleDeleteConfirm,
-} = usePocketDetailsController(categoryId);
+  handleDeleteConfirm
+} = usePocketDetailsController(categoryId)
 
-const { formatMonthLabel } = useFormatters();
+const { formatMonthLabel } = useFormatters()
 </script>
 
 <template>
@@ -59,7 +59,10 @@ const { formatMonthLabel } = useFormatters();
     </div>
 
     <!-- Loading Skeletons -->
-    <div v-if="pending" class="flex flex-col gap-6 w-full">
+    <div
+      v-if="pending"
+      class="flex flex-col gap-6 w-full"
+    >
       <USkeleton class="h-64 rounded-3xl w-full" />
       <USkeleton class="h-24 rounded-2xl w-full" />
       <div class="flex flex-col gap-3 mt-2">
@@ -73,7 +76,10 @@ const { formatMonthLabel } = useFormatters();
     </div>
 
     <!-- Loaded Pocket Content -->
-    <div v-else-if="pocket" class="flex flex-col gap-6 w-full">
+    <div
+      v-else-if="pocket"
+      class="flex flex-col gap-6 w-full"
+    >
       <PocketHeroCard
         :pocket="pocket"
         :pocket-number="pocketNumber"
@@ -104,7 +110,10 @@ const { formatMonthLabel } = useFormatters();
         </div>
 
         <!-- List -->
-        <div v-if="pocketTransactions.length > 0" class="flex flex-col gap-3">
+        <div
+          v-if="pocketTransactions.length > 0"
+          class="flex flex-col gap-3"
+        >
           <TransactionListItem
             v-for="tx in pocketTransactions"
             :key="tx.id"
@@ -138,8 +147,13 @@ const { formatMonthLabel } = useFormatters();
       v-else
       class="flex flex-col items-center justify-center py-20 w-full border border-dashed border-muted rounded-3xl text-center bg-white/30 dark:bg-neutral-900/20"
     >
-      <UIcon name="i-lucide-folder-x" class="w-12 h-12 text-neutral-400 mb-3" />
-      <h3 class="text-lg font-bold text-highlighted">Pocket not found</h3>
+      <UIcon
+        name="i-lucide-folder-x"
+        class="w-12 h-12 text-neutral-400 mb-3"
+      />
+      <h3 class="text-lg font-bold text-highlighted">
+        Pocket not found
+      </h3>
       <p class="text-sm text-muted mt-1 mb-4">
         This pocket might have been deleted or does not exist.
       </p>
@@ -191,8 +205,7 @@ const { formatMonthLabel } = useFormatters();
       @confirm="handleDeleteConfirm"
     >
       Are you sure you want to delete
-      <strong>{{ txToDelete?.name }}</strong
-      >? This action cannot be undone.
+      <strong>{{ txToDelete?.name }}</strong>? This action cannot be undone.
     </DeleteConfirmModal>
   </div>
 </template>
