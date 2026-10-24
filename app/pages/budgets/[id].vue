@@ -38,6 +38,10 @@ const {
 } = usePocketDetailsController(categoryId)
 
 const { formatMonthLabel } = useFormatters()
+
+useSeoMeta({
+  title: () => pocket.value ? `${pocket.value.name} Pocket` : 'Pocket Details'
+})
 </script>
 
 <template>

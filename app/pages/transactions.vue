@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import DeleteConfirmModal from '~/components/ui/DeleteConfirmModal.vue'
+import TransactionFormModal from '~/components/transactions/TransactionFormModal.vue'
 import TransactionFilterBar from '~/components/transactions/TransactionFilterBar.vue'
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
 import { useTransactionsController } from './useTransactionsController'
+
+useSeoMeta({
+  title: 'Transactions'
+})
 
 const {
   categories,

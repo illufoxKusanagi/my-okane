@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createError } from 'h3'
+import { scrubResetTokens, scrubResetTokenBreadcrumb } from '~~/sentry.scrub'
 
 /**
  * Guards against regression of the error-leakage fix: no handler may attach
@@ -49,5 +50,43 @@ describe('Error response hygiene', () => {
     const serialized = JSON.stringify((leaked as { data?: unknown }).data)
     // Sanity check: the detector flags exactly the pattern we removed
     expect(serialized).toContain('stack')
+  })
+
+  it('scrubs reset tokens from Sentry event request url, query_string, and headers', () => {
+    const event = {
+      message: 'Password reset error: ?token=secret_123',
+      request: {
+        url: 'https://myokane.ariefsatria.my.id/reset-password?token=secret_123#token=secret_123',
+        query_string: 'token=secret_123&foo=bar',
+        headers: {
+          'referer': 'https://mail.google.com/reset-password?token=secret_123',
+          'user-agent': 'Mozilla/5.0'
+        }
+      }
+    }
+
+    const scrubbed = scrubResetTokens(event)
+    expect(scrubbed.message).not.toContain('secret_123')
+    expect(scrubbed.request?.url).not.toContain('secret_123')
+    expect(scrubbed.request?.query_string).not.toContain('secret_123')
+    expect(scrubbed.request?.headers?.referer).not.toContain('secret_123')
+    expect(scrubbed.request?.query_string).toContain('token=[redacted]')
+  })
+
+  it('scrubs reset tokens from Sentry navigation breadcrumbs data (from, to, url)', () => {
+    const breadcrumb = {
+      category: 'navigation',
+      data: {
+        from: '/reset-password?token=secret_123#token=secret_123',
+        to: '/login?token=secret_123',
+        url: '/reset-password?token=secret_123'
+      }
+    }
+
+    const scrubbed = scrubResetTokenBreadcrumb(breadcrumb)
+    expect(scrubbed.data?.from).not.toContain('secret_123')
+    expect(scrubbed.data?.to).not.toContain('secret_123')
+    expect(scrubbed.data?.url).not.toContain('secret_123')
+    expect(scrubbed.data?.from).toContain('token=[redacted]')
   })
 })

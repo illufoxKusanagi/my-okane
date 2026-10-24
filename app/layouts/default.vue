@@ -1,11 +1,22 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import AccountSettingsModal from '~/components/account/AccountSettingsModal.vue'
 
+const route = useRoute()
 const open = ref(true)
 const { user, clear } = useUserSession()
 const isAccountSettingsOpen = ref(false)
+
+const closeSidebarIfMobile = () => {
+  if (import.meta.client && window.innerWidth < 1024) {
+    open.value = false
+  }
+}
+
+watch(() => route.path, closeSidebarIfMobile)
+
+onMounted(closeSidebarIfMobile)
 
 const handleLogout = async () => {
   try {
@@ -164,6 +175,7 @@ const items: NavigationMenuItem[] = [
           :items="items"
           orientation="vertical"
           :ui="{ link: 'py-2 overflow-hidden' }"
+          @click="closeSidebarIfMobile"
         />
       </USidebar>
 

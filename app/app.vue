@@ -6,7 +6,8 @@ const color = computed(() =>
 )
 
 useHead({
-  titleTemplate: '%s - My Okane',
+  titleTemplate: (titleChunk?: string) =>
+    titleChunk ? `${titleChunk} - My Okane` : 'My Okane',
   meta: [
     { charset: 'utf-8' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -14,7 +15,12 @@ useHead({
   ],
   link: [
     { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-    { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/pwa-192x192.png' },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '192x192',
+      href: '/pwa-192x192.png'
+    },
     { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
   ],
   htmlAttrs: {

@@ -5,6 +5,10 @@ import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 import CategoryCard from '~/components/categories/CategoryCard.vue'
 import { useCategoriesController } from './useCategoriesController'
 
+useSeoMeta({
+  title: 'Categories'
+})
+
 const {
   currentTab,
   isLoading,

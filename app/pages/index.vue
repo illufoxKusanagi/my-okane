@@ -3,8 +3,17 @@ import { ref, computed } from 'vue'
 import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
 
-const { transactions, isLoading, getTotalIncome, getTotalSpending, getCategories }
-  = useFinance()
+useSeoMeta({
+  title: 'Dashboard'
+})
+
+const {
+  transactions,
+  isLoading,
+  getTotalIncome,
+  getTotalSpending,
+  getCategories
+} = useFinance()
 
 const totalIncome = computed(() => getTotalIncome())
 const totalSpending = computed(() => getTotalSpending())
@@ -19,9 +28,12 @@ const _now = new Date()
 const currentMonthStr = ref(
   `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}`
 )
-const { data: budgetData, status: budgetStatus } = await useFetch('/api/budgets', {
-  query: { month: currentMonthStr }
-})
+const { data: budgetData, status: budgetStatus } = await useFetch(
+  '/api/budgets',
+  {
+    query: { month: currentMonthStr }
+  }
+)
 
 const isBudgetLoading = computed(() => budgetStatus.value === 'pending')
 
@@ -59,7 +71,9 @@ const weeklyRemaining = computed(
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8">
+  <div
+    class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
+  >
     <!-- Hero Budget Slider / Skeleton -->
     <USkeleton
       v-if="isBudgetLoading"

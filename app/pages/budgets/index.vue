@@ -6,6 +6,10 @@ import MonthlyLimitCard from '~/components/budgets/MonthlyLimitCard.vue'
 import PocketCard from '~/components/budgets/PocketCard.vue'
 import { useBudgetsController } from './useBudgetsController'
 
+useSeoMeta({
+  title: 'Budgets'
+})
+
 const {
   currentMonth,
   budgetData,

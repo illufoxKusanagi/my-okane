@@ -27,25 +27,31 @@ export default defineEventHandler(async (event) => {
       const session = await requireUserSession(event)
       const userId = session.user?.id
 
-      if (userId) {
-        // Session revocation: a password reset bumps credentialsVersion, so
-        // any session signed with an older version is invalid. Fails closed
-        // on database errors (request rejects rather than trusting a stale session).
-        const rows = await db
-          .select({ credentialsVersion: users.credentialsVersion })
-          .from(users)
-          .where(eq(users.id, userId))
-          .limit(1)
-        const currentVersion = rows[0]?.credentialsVersion ?? 0
-        const sessionVersion = session.user.credentialsVersion ?? 0
+      if (typeof userId !== 'string' || !userId) {
+        await clearUserSession(event)
+        throw createError({
+          statusCode: 401,
+          statusMessage: 'Session invalid. Please sign in again.'
+        })
+      }
 
-        if (currentVersion !== sessionVersion) {
-          await clearUserSession(event)
-          throw createError({
-            statusCode: 401,
-            statusMessage: 'Session expired. Please sign in again.'
-          })
-        }
+      // Session revocation: a password reset bumps credentialsVersion, so
+      // any session signed with an older version is invalid. Fails closed
+      // on database errors (request rejects rather than trusting a stale session).
+      const rows = await db
+        .select({ credentialsVersion: users.credentialsVersion })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1)
+      const currentVersion = rows[0]?.credentialsVersion ?? 0
+      const sessionVersion = session.user.credentialsVersion ?? 0
+
+      if (currentVersion !== sessionVersion) {
+        await clearUserSession(event)
+        throw createError({
+          statusCode: 401,
+          statusMessage: 'Session expired. Please sign in again.'
+        })
       }
     }
   }

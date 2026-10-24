@@ -136,6 +136,10 @@ definePageMeta({
   layout: false
 })
 
+useSeoMeta({
+  title: 'Sign Up'
+})
+
 const name = ref('')
 const email = ref('')
 const password = ref('')

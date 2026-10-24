@@ -76,9 +76,11 @@ function extractHeader(event: H3Event, name: string): string | undefined {
 
 function getClientIp(event: H3Event): string {
   try {
-    // Cloudflare Workers sets cf-connecting-ip
-    const cfIp = extractHeader(event, 'cf-connecting-ip')
-    if (cfIp) return cfIp.trim()
+    // Cloudflare Workers sets cf-connecting-ip (trusted only when Cloudflare context is present)
+    if (event.context?.cloudflare) {
+      const cfIp = extractHeader(event, 'cf-connecting-ip')
+      if (cfIp) return cfIp.trim()
+    }
 
     // On Vercel the edge proxy sanitizes x-forwarded-for with the real client IP,
     // so it is trustworthy there. Self-hosted deployments fall back to the socket
@@ -90,9 +92,6 @@ function getClientIp(event: H3Event): string {
         if (last) return last
       }
     }
-
-    const realIp = extractHeader(event, 'x-real-ip')
-    if (realIp) return realIp.trim()
   } catch {
     // Fallback if event is mocked or header extraction fails
   }

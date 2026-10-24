@@ -12,6 +12,10 @@ const errorTitle = computed(() => {
   return props.error?.statusMessage || 'An Unexpected Error Occurred'
 })
 
+useSeoMeta({
+  title: () => errorTitle.value
+})
+
 const errorDescription = computed(() => {
   if (is404.value) {
     return 'The page you are looking for doesn\'t exist, has been removed, or is temporarily unavailable.'
