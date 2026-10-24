@@ -1,5 +1,6 @@
 import { type H3Event, getRequestIP, setResponseHeader, createError, getHeader } from 'h3'
 import { Redis } from '@upstash/redis'
+import { getEnv } from '~~/server/utils/runtimeEnv'
 
 interface RateLimitConfig {
   uniqueKey: string
@@ -23,8 +24,17 @@ let redisClient: Redis | null | undefined
 
 function getRedis(): Redis | null {
   if (redisClient === undefined) {
-    const url = process.env.UPSTASH_REDIS_REST_URL
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN
+    let configUrl = ''
+    let configToken = ''
+    try {
+      const config = useRuntimeConfig()
+      configUrl = (config.upstashRedisRestUrl as string) || ''
+      configToken = (config.upstashRedisRestToken as string) || ''
+    } catch {
+      // Outside Nuxt context
+    }
+    const url = configUrl || getEnv('UPSTASH_REDIS_REST_URL') || process.env.UPSTASH_REDIS_REST_URL
+    const token = configToken || getEnv('UPSTASH_REDIS_REST_TOKEN') || process.env.UPSTASH_REDIS_REST_TOKEN
     redisClient = url && token ? new Redis({ url, token }) : null
   }
   return redisClient
