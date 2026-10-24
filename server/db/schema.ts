@@ -1,8 +1,11 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
+import { v7 as uuidv7 } from 'uuid'
 
 export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
@@ -19,7 +22,9 @@ export const users = sqliteTable('users', {
 export const transactions = sqliteTable(
   'transactions',
   {
-    id: integer('id').primaryKey({ autoIncrement: true }),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     name: text('transaction_name').notNull(),
     type: text('transaction_type').notNull(),
     amount: integer('amount').notNull(),
@@ -27,10 +32,10 @@ export const transactions = sqliteTable(
     transactionDate: integer('transaction_date', { mode: 'timestamp' })
       .default(sql`(unixepoch())`)
       .notNull(),
-    categoryId: integer('category_id')
+    categoryId: text('category_id')
       .references(() => categories.id, { onDelete: 'cascade' })
       .notNull(),
-    userId: integer('user_id')
+    userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })
@@ -47,29 +52,32 @@ export const transactions = sqliteTable(
 export const categories = sqliteTable(
   'categories',
   {
-    id: integer('id').primaryKey({ autoIncrement: true }),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     name: text('name').notNull(),
     type: text('type').notNull(),
     icon: text('icon').default('i-lucide-folder'),
     color: text('color').default('blue'),
-    userId: integer('user_id')
+    userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull()
   },
-  table => [
-    index('categories_user_id_idx').on(table.userId)
-  ]
+  table => [index('categories_user_id_idx').on(table.userId)]
 )
 
 export const budgets = sqliteTable(
   'budgets',
   {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    userId: integer('user_id')
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
-    categoryId: integer('category_id')
-      .references(() => categories.id, { onDelete: 'cascade' }), // nullable for overall/global budget
+    categoryId: text('category_id').references(() => categories.id, {
+      onDelete: 'cascade'
+    }), // nullable for overall/global budget
     amount: integer('amount').notNull(),
     month: text('month').notNull(), // format 'YYYY-MM'
     createdAt: integer('created_at', { mode: 'timestamp' })

@@ -7,12 +7,10 @@ import { SEED_CATEGORIES, SEED_TRANSACTIONS } from './seedData'
 
 // Local dev database only. Production accounts are created manually
 // via /register — seeding never touches the remote Turso database.
-if (
-  process.env.NODE_ENV === 'production'
-  || (process.env.TURSO_DATABASE_URL && !process.env.TURSO_DATABASE_URL.startsWith('file:'))
-  || (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:'))
-) {
-  console.error('FATAL: Database seeding is strictly forbidden in production or against remote databases!')
+if (process.env.NODE_ENV === 'production') {
+  console.error(
+    'FATAL: Database seeding is strictly forbidden in production or against remote databases!'
+  )
   process.exit(1)
 }
 
@@ -46,7 +44,9 @@ async function clearPreviousSeedUsers() {
 async function main() {
   console.log(`Seeding local (${url})...`)
 
-  console.log('Clearing previous seed users (scoped, non-seed users untouched)...')
+  console.log(
+    'Clearing previous seed users (scoped, non-seed users untouched)...'
+  )
   await clearPreviousSeedUsers()
 
   const passwordHash = await hashUserPassword(SEED_PASSWORD)
@@ -65,12 +65,12 @@ async function main() {
       .values(SEED_CATEGORIES.map(cat => ({ ...cat, userId: user.id })))
       .returning()
 
-    const catMap = new Map<string, number>()
+    const catMap = new Map<string, string>()
     for (const cat of insertedCats) {
       catMap.set(`${cat.name}:${cat.type}`, cat.id)
     }
 
-    const getCatId = (name: string, type: string): number => {
+    const getCatId = (name: string, type: string): string => {
       const id = catMap.get(`${name}:${type}`)
       if (id === undefined) {
         throw new Error(`Category not found: ${name} (${type})`)

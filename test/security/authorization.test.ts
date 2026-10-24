@@ -16,12 +16,12 @@ describe('getAuthUserId Security Authorization Guards', () => {
 
     // Stub requireUserSession to return a valid mock user session
     mockRequireUserSession.mockResolvedValue({
-      user: { id: 42, name: 'Secure User', email: 'secure@example.com' },
+      user: { id: 'usr_018f3a2c-1234-7abc-8def-0123456789ab', name: 'Secure User', email: 'secure@example.com' },
       secure: true
     } as unknown as Awaited<ReturnType<typeof requireUserSession>>)
 
     const userId = await getAuthUserId(mockEvent)
-    expect(userId).toBe(42)
+    expect(userId).toBe('usr_018f3a2c-1234-7abc-8def-0123456789ab')
   })
 
   it('should throw a 401 Unauthorized error if session is missing or invalid', async () => {

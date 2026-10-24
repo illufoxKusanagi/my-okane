@@ -1,72 +1,72 @@
 <script setup lang="ts">
-import AppModal from '~/components/ui/AppModal.vue'
+import AppModal from "~/components/ui/AppModal.vue";
 
 const props = defineProps({
   label: {
     type: String,
-    required: true
+    required: true,
   },
   icon: {
-    type: String
+    type: String,
   },
   color: {
-    type: String
+    type: String,
   },
   amount: {
     type: Number,
-    required: true
+    required: true,
   },
   type: {
-    type: String as () => 'income' | 'spending',
-    default: 'income'
-  }
-})
+    type: String as () => "income" | "spending",
+    default: "income",
+  },
+});
 
-const { addTransaction, getCategories } = useFinance()
-const { formatCurrency, toDateInputValue } = useFormatters()
+const { addTransaction, getCategories } = useFinance();
+const { formatCurrency, toDateInputValue } = useFormatters();
 
 const iconName = computed(
   () =>
-    props.icon
-    ?? (props.type === 'income'
-      ? 'i-lucide-arrow-down-left'
-      : 'i-lucide-arrow-up-right')
-)
+    props.icon ??
+    (props.type === "income"
+      ? "i-lucide-arrow-down-left"
+      : "i-lucide-arrow-up-right"),
+);
 
-const transactionName = ref('')
-const selectedCategory = ref<number | undefined>(undefined)
-const transactionAmount = ref(0)
-const transactionDate = ref(toDateInputValue(new Date()))
-const isSaving = ref(false)
+const transactionName = ref("");
+const selectedCategory = ref<string | undefined>(undefined);
+const transactionAmount = ref(0);
+const transactionDate = ref(toDateInputValue(new Date()));
+const isSaving = ref(false);
 const categories = computed(() =>
-  getCategories(props.type).map(cat => ({ label: cat.name, value: cat.id }))
-)
+  getCategories(props.type).map((cat) => ({ label: cat.name, value: cat.id })),
+);
 
 watch(
   categories,
   (newCats) => {
-    if (!newCats.some(cat => cat.value === selectedCategory.value)) {
-      selectedCategory.value = newCats[0]?.value
+    if (!newCats.some((cat) => cat.value === selectedCategory.value)) {
+      selectedCategory.value = newCats[0]?.value;
     }
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
-const isOpen = ref(false)
+const isOpen = ref(false);
 
 const isInvalid = computed(
   () =>
-    !transactionName.value.trim()
-    || selectedCategory.value === undefined
-    || !(transactionAmount.value > 0)
-    || !transactionDate.value
-)
+    !transactionName.value.trim() ||
+    selectedCategory.value === undefined ||
+    !(transactionAmount.value > 0) ||
+    !transactionDate.value,
+);
 
 const handleAddTransaction = async () => {
-  const categoryId = selectedCategory.value
-  if (categoryId === undefined || isInvalid.value || isSaving.value) return
+  const categoryId = selectedCategory.value;
+  if (categoryId === undefined || isInvalid.value || isSaving.value) return;
 
-  isSaving.value = true
+  isSaving.value = true;
   try {
     await addTransaction(
       transactionName.value,
@@ -74,18 +74,18 @@ const handleAddTransaction = async () => {
       transactionAmount.value,
       props.type,
       undefined,
-      transactionDate.value
-    )
-    transactionName.value = ''
-    const cats = getCategories(props.type)
-    selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined
-    transactionAmount.value = 0
-    transactionDate.value = toDateInputValue(new Date())
-    isOpen.value = false
+      transactionDate.value,
+    );
+    transactionName.value = "";
+    const cats = getCategories(props.type);
+    selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined;
+    transactionAmount.value = 0;
+    transactionDate.value = toDateInputValue(new Date());
+    isOpen.value = false;
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>
@@ -94,15 +94,12 @@ const handleAddTransaction = async () => {
       'flex flex-row items-center justify-between h-28 border rounded-2xl p-6 w-full relative overflow-hidden transition-all duration-300 hover:scale-[1.01]',
       type === 'income'
         ? 'bg-gradient-to-br from-emerald-500/10 to-teal-500/5 dark:from-emerald-950/20 dark:to-teal-950/10 border-emerald-200/50 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300'
-        : 'bg-gradient-to-br from-rose-500/10 to-pink-500/5 dark:from-rose-950/20 dark:to-pink-950/10 border-rose-200/50 dark:border-rose-900/30 text-rose-800 dark:text-rose-300'
+        : 'bg-gradient-to-br from-rose-500/10 to-pink-500/5 dark:from-rose-950/20 dark:to-pink-950/10 border-rose-200/50 dark:border-rose-900/30 text-rose-800 dark:text-rose-300',
     ]"
   >
     <div class="flex flex-col gap-1 z-10">
       <div class="flex flex-row gap-2 items-center opacity-80">
-        <UIcon
-          :name="iconName"
-          class="w-5 h-5"
-        />
+        <UIcon :name="iconName" class="w-5 h-5" />
         <p class="text-xs font-semibold uppercase tracking-wider">
           {{ label }}
         </p>
@@ -116,7 +113,7 @@ const handleAddTransaction = async () => {
     <div
       :class="[
         'absolute -right-6 -bottom-6 w-24 h-24 rounded-full blur-2xl opacity-20 pointer-events-none',
-        type === 'income' ? 'bg-emerald-500' : 'bg-rose-500'
+        type === 'income' ? 'bg-emerald-500' : 'bg-rose-500',
       ]"
     />
 
@@ -156,11 +153,7 @@ const handleAddTransaction = async () => {
       </UFormField>
 
       <UFormField label="Date">
-        <UInput
-          v-model="transactionDate"
-          type="date"
-          class="w-full"
-        />
+        <UInput v-model="transactionDate" type="date" class="w-full" />
       </UFormField>
 
       <UFormField label="Amount">
@@ -171,7 +164,7 @@ const handleAddTransaction = async () => {
             style: 'currency',
             currency: 'IDR',
             currencyDisplay: 'code',
-            currencySign: 'accounting'
+            currencySign: 'accounting',
           }"
         />
       </UFormField>

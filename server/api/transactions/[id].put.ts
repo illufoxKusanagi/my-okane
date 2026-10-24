@@ -1,59 +1,59 @@
-import { db } from '~~/server/db'
-import { transactions, categories } from '~~/server/db/schema'
-import { validateUpdateTransaction } from '~~/server/utils/validator'
-import { and, eq } from 'drizzle-orm'
-import { throwSafeServerError } from '~~/server/utils/safeError'
+import { db } from "~~/server/db";
+import { transactions, categories } from "~~/server/db/schema";
+import { validateUpdateTransaction } from "~~/server/utils/validator";
+import { and, eq } from "drizzle-orm";
+import { throwSafeServerError } from "~~/server/utils/safeError";
 
 export default defineEventHandler(async (event) => {
-  const idStr = event.context.params?.id
-  if (!idStr) {
+  const id = event.context.params?.id?.trim();
+  if (!id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Transaction ID is required'
-    })
+      statusMessage: "Transaction ID is required",
+    });
   }
 
-  const id = parseInt(idStr, 10)
-  if (isNaN(id)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid Transaction ID'
-    })
-  }
-
-  const body = await readBody(event)
-  const validation = validateUpdateTransaction(body)
+  const body = await readBody(event);
+  const validation = validateUpdateTransaction(body);
 
   if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Validation failed',
-      data: validation.error.issues
-    })
+      statusMessage: "Validation failed",
+      data: validation.error.issues,
+    });
   }
 
   try {
-    const userId = await getAuthUserId(event)
+    const userId = await getAuthUserId(event);
 
     if (validation.data.categoryId !== undefined) {
       const category = await db
         .select()
         .from(categories)
-        .where(and(eq(categories.id, validation.data.categoryId), eq(categories.userId, userId)))
-        .limit(1)
+        .where(
+          and(
+            eq(categories.id, validation.data.categoryId),
+            eq(categories.userId, userId),
+          ),
+        )
+        .limit(1);
 
       if (category.length === 0) {
         throw createError({
           statusCode: 400,
-          statusMessage: 'Category not found or does not belong to the user'
-        })
+          statusMessage: "Category not found or does not belong to the user",
+        });
       }
 
-      if (validation.data.type !== undefined && category[0]?.type !== validation.data.type) {
+      if (
+        validation.data.type !== undefined &&
+        category[0]?.type !== validation.data.type
+      ) {
         throw createError({
           statusCode: 400,
-          statusMessage: `Category type (${category[0]?.type}) does not match transaction type (${validation.data.type})`
-        })
+          statusMessage: `Category type (${category[0]?.type}) does not match transaction type (${validation.data.type})`,
+        });
       }
     }
 
@@ -65,23 +65,26 @@ export default defineEventHandler(async (event) => {
         amount: validation.data.amount,
         categoryId: validation.data.categoryId,
         notes: validation.data.notes,
-        transactionDate: validation.data.transactionDate
+        transactionDate: validation.data.transactionDate,
       })
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
-      .returning()
+      .returning();
 
     if (updatedTransaction.length === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Transaction not found'
-      })
+        statusMessage: "Transaction not found",
+      });
     }
 
     return {
       success: true,
-      data: updatedTransaction[0]
-    }
+      data: updatedTransaction[0],
+    };
   } catch (error: unknown) {
-    throwSafeServerError(error, { context: 'update transaction', fallbackMessage: 'Failed to update transaction' })
+    throwSafeServerError(error, {
+      context: "update transaction",
+      fallbackMessage: "Failed to update transaction",
+    });
   }
-})
+});
