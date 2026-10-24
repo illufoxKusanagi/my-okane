@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { colorClassMap } from "~/constants/ui";
+import { colorClassMap } from '~/constants/ui'
 
 defineProps<{
   transaction: {
-    id: string;
-    name: string;
-    amount: number;
-    type: "income" | "spending";
-    transactionDate: string | Date;
-    notes?: string | null;
-    categoryName?: string | null;
-    categoryIcon?: string | null;
-    categoryColor?: string | null;
-    categoryId?: string;
-  };
+    id: string
+    name: string
+    amount: number
+    type: 'income' | 'spending'
+    transactionDate: string | Date
+    notes?: string | null
+    categoryName?: string | null
+    categoryIcon?: string | null
+    categoryColor?: string | null
+    categoryId?: string
+  }
   /** Override icon (e.g. pocket detail pages use the pocket icon) */
-  icon?: string;
+  icon?: string
   /** Override color (e.g. pocket detail pages use the pocket color) */
-  color?: string;
-}>();
+  color?: string
+}>()
 
 const emit = defineEmits<{
-  edit: [];
-  delete: [];
-}>();
+  edit: []
+  delete: []
+}>()
 
-const { formatDate } = useFormatters();
+const { formatDate } = useFormatters()
 </script>
 
 <template>
@@ -37,8 +37,8 @@ const { formatDate } = useFormatters();
       <div
         :class="[
           'w-10 h-10 rounded-xl flex items-center justify-center border shrink-0',
-          colorClassMap[color || transaction.categoryColor || 'slate'] ||
-            colorClassMap.slate,
+          colorClassMap[color || transaction.categoryColor || 'slate']
+            || colorClassMap.slate
         ]"
       >
         <UIcon
@@ -65,7 +65,10 @@ const { formatDate } = useFormatters();
             </span>
           </template>
         </div>
-        <p v-if="transaction.notes" class="text-xs text-dimmed mt-1 truncate">
+        <p
+          v-if="transaction.notes"
+          class="text-xs text-dimmed mt-1 truncate"
+        >
           {{ transaction.notes }}
         </p>
       </div>
@@ -78,7 +81,7 @@ const { formatDate } = useFormatters();
       <span
         :class="[
           'text-base sm:text-lg font-extrabold tabular-nums',
-          transaction.type === 'income' ? 'text-emerald-500' : 'text-rose-500',
+          transaction.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
         ]"
       >
         {{ transaction.type === "income" ? "+" : "-" }} Rp.

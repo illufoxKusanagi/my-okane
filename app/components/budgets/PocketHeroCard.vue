@@ -1,26 +1,26 @@
 <script setup lang="ts">
 defineProps<{
   pocket: {
-    name: string;
-    type: string;
-    icon: string | null;
-    color: string | null;
-    budgetAmount: number;
-    spent: number;
-    earned: number;
-    remaining: number;
-    budgetId: string | null;
-  };
-  pocketNumber: string;
-}>();
+    name: string
+    type: string
+    icon: string | null
+    color: string | null
+    budgetAmount: number
+    spent: number
+    earned: number
+    remaining: number
+    budgetId: string | null
+  }
+  pocketNumber: string
+}>()
 
 const emit = defineEmits<{
-  "add-transaction": [];
-  "set-budget": [];
-  "reset-budget": [];
-}>();
+  'add-transaction': []
+  'set-budget': []
+  'reset-budget': []
+}>()
 
-const { formatCurrency } = useFormatters();
+const { formatCurrency } = useFormatters()
 </script>
 
 <template>
@@ -35,7 +35,10 @@ const { formatCurrency } = useFormatters();
     <div
       class="w-16 h-16 rounded-2xl flex items-center justify-center border-2 border-white/20 mb-4 bg-white/10 shadow-inner"
     >
-      <UIcon :name="pocket.icon || 'i-lucide-folder'" class="w-9 h-9" />
+      <UIcon
+        :name="pocket.icon || 'i-lucide-folder'"
+        class="w-9 h-9"
+      />
     </div>
 
     <!-- Pocket Number -->
@@ -68,13 +71,17 @@ const { formatCurrency } = useFormatters();
         >
           {{ formatCurrency(pocket.remaining) }}
         </h1>
-        <p class="text-xs opacity-80 mt-1">Remaining Budget</p>
+        <p class="text-xs opacity-80 mt-1">
+          Remaining Budget
+        </p>
       </template>
       <template v-else>
         <h1 class="text-4xl font-extrabold tracking-tight">
           {{ formatCurrency(pocket.earned) }}
         </h1>
-        <p class="text-xs opacity-80 mt-1">Total Earned</p>
+        <p class="text-xs opacity-80 mt-1">
+          Total Earned
+        </p>
       </template>
     </div>
 

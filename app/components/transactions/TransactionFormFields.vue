@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import type { Category } from "~/composables/useFinance";
+import type { Category } from '~/composables/useFinance'
 
 withDefaults(
   defineProps<{
-    showType?: boolean;
-    showCategory?: boolean;
-    categories?: Category[];
+    showType?: boolean
+    showCategory?: boolean
+    categories?: Category[]
   }>(),
   {
     showType: false,
     showCategory: false,
-    categories: () => [],
-  },
-);
+    categories: () => []
+  }
+)
 
-const name = defineModel<string>("name", { required: true });
-const amount = defineModel<number>("amount", { required: true });
-const notes = defineModel<string>("notes", { required: true });
-const date = defineModel<string>("date", { required: true });
-const type = defineModel<"income" | "spending">("type", {
-  default: "spending",
-});
-const categoryId = defineModel<string | undefined>("categoryId");
+const name = defineModel<string>('name', { required: true })
+const amount = defineModel<number>('amount', { required: true })
+const notes = defineModel<string>('notes', { required: true })
+const date = defineModel<string>('date', { required: true })
+const type = defineModel<'income' | 'spending'>('type', {
+  default: 'spending'
+})
+const categoryId = defineModel<string | undefined>('categoryId')
 </script>
 
 <template>
@@ -34,18 +34,24 @@ const categoryId = defineModel<string | undefined>("categoryId");
     />
   </UFormField>
 
-  <UFormField v-if="showType" label="Transaction Type">
+  <UFormField
+    v-if="showType"
+    label="Transaction Type"
+  >
     <USelect
       v-model="type"
       class="w-full"
       :items="[
         { label: 'Spending', value: 'spending' },
-        { label: 'Income', value: 'income' },
+        { label: 'Income', value: 'income' }
       ]"
     />
   </UFormField>
 
-  <UFormField v-if="showCategory" label="Category">
+  <UFormField
+    v-if="showCategory"
+    label="Category"
+  >
     <USelect
       v-model="categoryId"
       class="w-full"
@@ -62,13 +68,17 @@ const categoryId = defineModel<string | undefined>("categoryId");
         style: 'currency',
         currency: 'IDR',
         currencyDisplay: 'code',
-        currencySign: 'accounting',
+        currencySign: 'accounting'
       }"
     />
   </UFormField>
 
   <UFormField label="Date">
-    <UInput v-model="date" type="date" class="w-full" />
+    <UInput
+      v-model="date"
+      type="date"
+      class="w-full"
+    />
   </UFormField>
 
   <UFormField label="Notes (Optional)">

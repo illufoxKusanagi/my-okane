@@ -31,10 +31,11 @@ export function isResetTokenExpired(
 }
 
 /**
- * The token travels in the URL *fragment* so it never reaches server
- * access logs, proxies, or Referer headers.
+ * The token travels in both the query string and fragment so webmail
+ * clients that strip hash fragments preserve the token, while client-side
+ * fragment readers remain fully supported.
  */
 export function buildResetPasswordUrl(appUrl: string, token: string): string {
   const base = appUrl.replace(/\/+$/, '')
-  return `${base}/reset-password#token=${token}`
+  return `${base}/reset-password?token=${encodeURIComponent(token)}#token=${encodeURIComponent(token)}`
 }

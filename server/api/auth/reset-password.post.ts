@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
         resetTokenHash: null,
         resetTokenExpiresAt: null,
         // Revokes every other session issued before this reset.
-        credentialsVersion: user.credentialsVersion + 1
+        credentialsVersion: (user.credentialsVersion ?? 0) + 1
       })
       .where(eq(users.id, user.id))
 

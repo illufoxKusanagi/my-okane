@@ -1,129 +1,129 @@
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue'
 
 export function useBudgetsController() {
   // Local-time month string (YYYY-MM); toISOString() would report the
   // previous month for negative-UTC-offset users early in the month.
-  const now = new Date();
+  const now = new Date()
   const currentMonth = ref(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
-  );
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  )
 
   const {
     data: budgetData,
     status,
-    refresh,
-  } = useFetch("/api/budgets", {
-    query: { month: currentMonth },
-  });
+    refresh
+  } = useFetch('/api/budgets', {
+    query: { month: currentMonth }
+  })
 
-  const pending = computed(() => status.value === "pending");
+  const pending = computed(() => status.value === 'pending')
 
-  const { addCategory } = useFinance();
+  const { addCategory } = useFinance()
 
-  const isModalOpen = ref(false);
-  const selectedCategoryId = ref<string | null>(null);
-  const budgetAmount = ref<number | null>(null);
+  const isModalOpen = ref(false)
+  const selectedCategoryId = ref<string | null>(null)
+  const budgetAmount = ref<number | null>(null)
 
-  const isCreatePocketModalOpen = ref(false);
-  const pocketName = ref("");
-  const pocketType = ref<"spending" | "income">("spending");
-  const pocketColor = ref("blue");
-  const pocketIcon = ref("i-lucide-folder");
-  const pocketBudgetLimit = ref<number | null>(null);
+  const isCreatePocketModalOpen = ref(false)
+  const pocketName = ref('')
+  const pocketType = ref<'spending' | 'income'>('spending')
+  const pocketColor = ref('blue')
+  const pocketIcon = ref('i-lucide-folder')
+  const pocketBudgetLimit = ref<number | null>(null)
 
   const openCreatePocketModal = () => {
-    pocketName.value = "";
-    pocketType.value = "spending";
-    pocketColor.value = "blue";
-    pocketIcon.value = "i-lucide-folder";
-    pocketBudgetLimit.value = null;
-    isCreatePocketModalOpen.value = true;
-  };
+    pocketName.value = ''
+    pocketType.value = 'spending'
+    pocketColor.value = 'blue'
+    pocketIcon.value = 'i-lucide-folder'
+    pocketBudgetLimit.value = null
+    isCreatePocketModalOpen.value = true
+  }
 
-  const toast = useToast();
+  const toast = useToast()
 
   const handleCreatePocket = async () => {
-    if (!pocketName.value.trim()) return;
+    if (!pocketName.value.trim()) return
 
     try {
       const newCategory = await addCategory(
         pocketName.value,
         pocketType.value,
         pocketIcon.value,
-        pocketColor.value,
-      );
+        pocketColor.value
+      )
 
       if (
-        newCategory &&
-        pocketType.value === "spending" &&
-        pocketBudgetLimit.value !== null &&
-        pocketBudgetLimit.value > 0
+        newCategory
+        && pocketType.value === 'spending'
+        && pocketBudgetLimit.value !== null
+        && pocketBudgetLimit.value > 0
       ) {
-        await $fetch("/api/budgets", {
-          method: "POST",
+        await $fetch('/api/budgets', {
+          method: 'POST',
           body: {
             categoryId: newCategory.id,
             amount: pocketBudgetLimit.value,
-            month: currentMonth.value,
-          },
-        });
+            month: currentMonth.value
+          }
+        })
       }
 
-      isCreatePocketModalOpen.value = false;
-      refresh();
+      isCreatePocketModalOpen.value = false
+      refresh()
     } catch (error) {
-      console.error("Failed to create pocket:", error);
+      console.error('Failed to create pocket:', error)
       toast.add({
-        title: "Failed to Create Pocket",
+        title: 'Failed to Create Pocket',
         description: describeApiError(error),
-        color: "error",
-      });
+        color: 'error'
+      })
     }
-  };
+  }
 
   const prevMonth = () => {
-    const parts = currentMonth.value.split("-").map(Number);
-    const year = parts[0] ?? new Date().getFullYear();
-    const month = parts[1] ?? new Date().getMonth() + 1;
-    const date = new Date(Date.UTC(year, month - 2, 1));
-    currentMonth.value = date.toISOString().slice(0, 7);
-  };
+    const parts = currentMonth.value.split('-').map(Number)
+    const year = parts[0] ?? new Date().getFullYear()
+    const month = parts[1] ?? new Date().getMonth() + 1
+    const date = new Date(Date.UTC(year, month - 2, 1))
+    currentMonth.value = date.toISOString().slice(0, 7)
+  }
 
   const nextMonth = () => {
-    const parts = currentMonth.value.split("-").map(Number);
-    const year = parts[0] ?? new Date().getFullYear();
-    const month = parts[1] ?? new Date().getMonth() + 1;
-    const date = new Date(Date.UTC(year, month, 1));
-    currentMonth.value = date.toISOString().slice(0, 7);
-  };
+    const parts = currentMonth.value.split('-').map(Number)
+    const year = parts[0] ?? new Date().getFullYear()
+    const month = parts[1] ?? new Date().getMonth() + 1
+    const date = new Date(Date.UTC(year, month, 1))
+    currentMonth.value = date.toISOString().slice(0, 7)
+  }
 
   const openBudgetModal = (categoryId: string | null, currentAmount = 0) => {
-    selectedCategoryId.value = categoryId;
-    budgetAmount.value = currentAmount || null;
-    isModalOpen.value = true;
-  };
+    selectedCategoryId.value = categoryId
+    budgetAmount.value = currentAmount || null
+    isModalOpen.value = true
+  }
 
   const handleSaveBudget = async () => {
     try {
-      await $fetch("/api/budgets", {
-        method: "POST",
+      await $fetch('/api/budgets', {
+        method: 'POST',
         body: {
           categoryId: selectedCategoryId.value,
           amount: budgetAmount.value || 0,
-          month: currentMonth.value,
-        },
-      });
-      isModalOpen.value = false;
-      refresh();
+          month: currentMonth.value
+        }
+      })
+      isModalOpen.value = false
+      refresh()
     } catch (error) {
-      console.error("Failed to save budget:", error);
+      console.error('Failed to save budget:', error)
       toast.add({
-        title: "Failed to Save Budget",
+        title: 'Failed to Save Budget',
         description: describeApiError(error),
-        color: "error",
-      });
+        color: 'error'
+      })
     }
-  };
+  }
 
   return {
     currentMonth,
@@ -144,6 +144,6 @@ export function useBudgetsController() {
     prevMonth,
     nextMonth,
     openBudgetModal,
-    handleSaveBudget,
-  };
+    handleSaveBudget
+  }
 }

@@ -29,9 +29,13 @@ describe('auth.global route middleware', () => {
   describe('Unauthenticated visitor (loggedIn = false)', () => {
     it.each([
       ['/login'],
+      ['/login/'],
       ['/register'],
+      ['/register/'],
       ['/forgot-password'],
-      ['/reset-password']
+      ['/forgot-password/'],
+      ['/reset-password'],
+      ['/reset-password/']
     ])('allows guest access to public route "%s" without redirecting', (path) => {
       const to = { path } as RouteLocationNormalized
       const result = authMiddleware(to, {} as RouteLocationNormalized)

@@ -1,44 +1,44 @@
-import { budgets } from "~~/server/db/schema";
-import { db } from "~~/server/db";
-import { and, eq } from "drizzle-orm";
-import { throwSafeServerError } from "~~/server/utils/safeError";
+import { budgets } from '~~/server/db/schema'
+import { db } from '~~/server/db'
+import { and, eq } from 'drizzle-orm'
+import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
   try {
-    const userId = await getAuthUserId(event);
-    const id = getRouterParam(event, "id")?.trim();
+    const userId = await getAuthUserId(event)
+    const id = getRouterParam(event, 'id')?.trim()
 
     if (!id) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid budget ID",
-      });
+        statusMessage: 'Invalid budget ID'
+      })
     }
 
     const existing = await db
       .select()
       .from(budgets)
       .where(and(eq(budgets.id, id), eq(budgets.userId, userId)))
-      .limit(1);
+      .limit(1)
 
     if (existing.length === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Budget not found",
-      });
+        statusMessage: 'Budget not found'
+      })
     }
 
     await db
       .delete(budgets)
-      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)));
+      .where(and(eq(budgets.id, id), eq(budgets.userId, userId)))
 
     return {
-      success: true,
-    };
+      success: true
+    }
   } catch (error: unknown) {
     throwSafeServerError(error, {
-      context: "delete budget",
-      fallbackMessage: "Failed to delete budget",
-    });
+      context: 'delete budget',
+      fallbackMessage: 'Failed to delete budget'
+    })
   }
-});
+})
