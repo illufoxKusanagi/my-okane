@@ -116,10 +116,16 @@ describe('checkRateLimit utility', () => {
     await expect(checkRateLimit(event, config)).resolves.toBeUndefined()
   })
 
-  it('should extract cf-connecting-ip without event.node.req on Cloudflare Workers', async () => {
+  it('should extract cf-connecting-ip on Cloudflare Workers with context', async () => {
     mockGetRequestIP.mockReturnValue(undefined)
-    const event1 = { headers: new Headers({ 'cf-connecting-ip': '203.0.113.10' }) } as unknown as H3Event
-    const event2 = { headers: new Headers({ 'cf-connecting-ip': '203.0.113.20' }) } as unknown as H3Event
+    const event1 = {
+      context: { cloudflare: {} },
+      headers: new Headers({ 'cf-connecting-ip': '203.0.113.10' })
+    } as unknown as H3Event
+    const event2 = {
+      context: { cloudflare: {} },
+      headers: new Headers({ 'cf-connecting-ip': '203.0.113.20' })
+    } as unknown as H3Event
     const config = {
       uniqueKey: 'cf_test',
       windowMs: 1000,
@@ -132,5 +138,22 @@ describe('checkRateLimit utility', () => {
 
     // Different Cloudflare connecting IP should not be blocked
     await expect(checkRateLimit(event2, config)).resolves.toBeUndefined()
+  })
+
+  it('should ignore forged cf-connecting-ip header when Cloudflare context is missing', async () => {
+    mockGetRequestIP.mockReturnValue('198.51.100.5')
+    const forgedEvent = {
+      headers: new Headers({ 'cf-connecting-ip': '203.0.113.99' })
+    } as unknown as H3Event
+    const config = {
+      uniqueKey: 'spoof_test',
+      windowMs: 1000,
+      limit: 1,
+      message: 'Too many attempts'
+    }
+
+    await expect(checkRateLimit(forgedEvent, config)).resolves.toBeUndefined()
+    // Should be tracked by socket IP (198.51.100.5), not spoofed IP
+    await expect(checkRateLimit(forgedEvent, config)).rejects.toThrow()
   })
 })

@@ -5,6 +5,10 @@ definePageMeta({
   layout: false
 })
 
+useSeoMeta({
+  title: 'Reset Password'
+})
+
 const route = useRoute()
 
 const isReady = ref(false)

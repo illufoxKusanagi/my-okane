@@ -51,10 +51,6 @@ export function useFinanceState(): FinanceState {
 export function watchFinanceSession(state: FinanceState): void {
   const { user } = useUserSession()
 
-  if (!state.isInitialized.value && import.meta.client && user.value) {
-    state.fetchAll()
-  }
-
   if (import.meta.client) {
     watch(
       user,

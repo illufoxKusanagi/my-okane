@@ -12,7 +12,6 @@ const props = withDefaults(
 )
 
 const { addCategory } = useFinance()
-const toast = useToast()
 
 const newCategoryName = ref('')
 const selectedColor = ref('blue')
@@ -38,12 +37,6 @@ const handleAddCategory = async () => {
     isOpen.value = false
   } catch (error) {
     console.error('Failed to add category:', error)
-    toast.add({
-      title: 'Failed to Add Category',
-      description: 'Something went wrong. Please try again.',
-      color: 'error',
-      icon: 'i-lucide-circle-alert'
-    })
   } finally {
     isSaving.value = false
   }

@@ -5,6 +5,10 @@ definePageMeta({
   layout: false
 })
 
+useSeoMeta({
+  title: 'Sign In'
+})
+
 const route = useRoute()
 
 const email = ref('')

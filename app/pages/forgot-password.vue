@@ -5,6 +5,10 @@ definePageMeta({
   layout: false
 })
 
+useSeoMeta({
+  title: 'Forgot Password'
+})
+
 const email = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
