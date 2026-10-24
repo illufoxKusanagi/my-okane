@@ -1,59 +1,59 @@
-import { db } from '~~/server/db'
-import { users } from '~~/server/db/schema'
-import { eq } from 'drizzle-orm'
-import { z } from 'zod'
+import { db } from "~~/server/db";
+import { users } from "~~/server/db/schema";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
-import { checkRateLimit } from '~~/server/utils/rateLimiter'
-import { throwSafeServerError } from '~~/server/utils/safeError'
+import { checkRateLimit } from "~~/server/utils/rateLimiter";
+import { throwSafeServerError } from "~~/server/utils/safeError";
 
 const loginSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required')
-})
+  email: z.email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
 export default defineEventHandler(async (event) => {
   await checkRateLimit(event, {
-    uniqueKey: 'auth_login',
+    uniqueKey: "auth_login",
     windowMs: 15 * 60 * 1000,
     limit: 5,
-    message: 'Too many login attempts from this IP.'
-  })
+    message: "Too many login attempts from this IP.",
+  });
 
-  const body = await readBody(event)
+  const body = await readBody(event);
 
-  const validation = loginSchema.safeParse(body)
+  const validation = loginSchema.safeParse(body);
   if (!validation.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: validation.error.issues[0]?.message || 'Validation failed'
-    })
+      statusMessage: validation.error.issues[0]?.message || "Validation failed",
+    });
   }
 
-  const { email, password } = validation.data
+  const { email, password } = validation.data;
 
   try {
     const userResult = await db
       .select()
       .from(users)
       .where(eq(users.email, email.toLowerCase().trim()))
-      .limit(1)
+      .limit(1);
 
-    const user = userResult[0]
+    const user = userResult[0];
     if (!user) {
       // Mitigate timing-based user enumeration with constant-time verification
-      await verifyUserPassword(password, DUMMY_PASSWORD_HASH)
+      await verifyUserPassword(password, DUMMY_PASSWORD_HASH);
       throw createError({
         statusCode: 401,
-        statusMessage: 'Invalid email or password'
-      })
+        statusMessage: "Invalid email or password",
+      });
     }
 
-    const match = await verifyUserPassword(password, user.passwordHash)
+    const match = await verifyUserPassword(password, user.passwordHash);
     if (!match) {
       throw createError({
         statusCode: 401,
-        statusMessage: 'Invalid email or password'
-      })
+        statusMessage: "Invalid email or password",
+      });
     }
 
     // Any outstanding reset token is now moot — the authenticated user has
@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
     await db
       .update(users)
       .set({ resetTokenHash: null, resetTokenExpiresAt: null })
-      .where(eq(users.id, user.id))
+      .where(eq(users.id, user.id));
 
     // credentialsVersion is consumed by server/middleware/auth.ts to revoke
     // sessions after a password reset. The #auth-utils User augmentation does
@@ -71,22 +71,25 @@ export default defineEventHandler(async (event) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        credentialsVersion: user.credentialsVersion ?? 0
-      }
-    } as Parameters<typeof setUserSession>[1])
+        credentialsVersion: user.credentialsVersion ?? 0,
+      },
+    } as unknown as Parameters<typeof setUserSession>[1]);
 
     // Successful login: refund the attempt so only failures count toward the brute-force budget.
-    await resetRateLimit(event, 'auth_login')
+    await resetRateLimit(event, "auth_login");
 
     return {
       success: true,
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
-      }
-    }
+        email: user.email,
+      },
+    };
   } catch (error: unknown) {
-    throwSafeServerError(error, { context: 'login', fallbackMessage: 'Login failed' })
+    throwSafeServerError(error, {
+      context: "login",
+      fallbackMessage: "Login failed",
+    });
   }
-})
+});

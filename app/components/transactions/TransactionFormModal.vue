@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import AppModal from '~/components/ui/AppModal.vue'
-import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
-import type { Category, Transaction } from '~/composables/useFinance'
+import AppModal from "~/components/ui/AppModal.vue";
+import TransactionFormFields from "~/components/transactions/TransactionFormFields.vue";
+import type { Category, Transaction } from "~/composables/useFinance";
 
-const isOpen = defineModel<boolean>('open', { required: true })
+const isOpen = defineModel<boolean>("open", { required: true });
 
 const props = defineProps<{
-  editingTransaction: Transaction | null
-  categories: Category[]
-}>()
+  editingTransaction: Transaction | null;
+  categories: Category[];
+}>();
 
-const txName = defineModel<string>('name', { required: true })
-const txType = defineModel<'income' | 'spending'>('type', { required: true })
-const txAmount = defineModel<number>('amount', { required: true })
-const txCategoryId = defineModel<number | undefined>('categoryId', {
-  required: true
-})
-const txNotes = defineModel<string>('notes', { required: true })
-const txDate = defineModel<string>('date', { required: true })
+const txName = defineModel<string>("name", { required: true });
+const txType = defineModel<"income" | "spending">("type", { required: true });
+const txAmount = defineModel<number>("amount", { required: true });
+const txCategoryId = defineModel<string | undefined>("categoryId", {
+  required: true,
+});
+const txNotes = defineModel<string>("notes", { required: true });
+const txDate = defineModel<string>("date", { required: true });
 
 defineEmits<{
-  submit: []
-}>()
+  submit: [];
+}>();
 
 const isInvalid = computed(
   () =>
-    !txName.value.trim()
-    || !txCategoryId.value
-    || !(txAmount.value > 0)
-    || !txDate.value
-)
+    !txName.value.trim() ||
+    !txCategoryId.value ||
+    !(txAmount.value > 0) ||
+    !txDate.value,
+);
 </script>
 
 <template>

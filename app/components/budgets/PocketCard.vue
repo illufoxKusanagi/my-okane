@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { colorClassMap } from '~/constants/ui'
+import { colorClassMap } from "~/constants/ui";
 
 defineProps<{
   pocket: {
-    id: number
-    name: string
-    type: string
-    icon: string | null
-    color: string | null
-    budgetAmount: number
-    spent: number
-    earned: number
-    remaining: number
-  }
-}>()
+    id: string;
+    name: string;
+    type: string;
+    icon: string | null;
+    color: string | null;
+    budgetAmount: number;
+    spent: number;
+    earned: number;
+    remaining: number;
+  };
+}>();
 
 const emit = defineEmits<{
-  'set-budget': [pocketId: number, currentAmount: number]
-}>()
+  "set-budget": [pocketId: string, currentAmount: number];
+}>();
 
-const { formatCurrency, getProgressColor } = useFormatters()
+const { formatCurrency, getProgressColor } = useFormatters();
 </script>
 
 <template>
@@ -36,13 +36,10 @@ const { formatCurrency, getProgressColor } = useFormatters()
         <div
           :class="[
             'w-11 h-11 rounded-2xl flex items-center justify-center border',
-            colorClassMap[pocket.color || 'slate'] || colorClassMap.slate
+            colorClassMap[pocket.color || 'slate'] || colorClassMap.slate,
           ]"
         >
-          <UIcon
-            :name="pocket.icon || 'i-lucide-folder'"
-            class="w-6 h-6"
-          />
+          <UIcon :name="pocket.icon || 'i-lucide-folder'" class="w-6 h-6" />
         </div>
         <UButton
           icon="i-lucide-sliders-horizontal"
@@ -60,9 +57,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
       >
         {{ pocket.name }}
       </h4>
-      <p class="text-xs text-muted capitalize mb-3">
-        {{ pocket.type }} Pocket
-      </p>
+      <p class="text-xs text-muted capitalize mb-3">{{ pocket.type }} Pocket</p>
 
       <!-- Remaining/Earned Display -->
       <template v-if="pocket.type === 'spending'">
@@ -78,14 +73,10 @@ const { formatCurrency, getProgressColor } = useFormatters()
             >
               {{ formatCurrency(pocket.remaining) }}
             </p>
-            <p class="text-xs text-muted">
-              remaining
-            </p>
+            <p class="text-xs text-muted">remaining</p>
           </template>
           <template v-else>
-            <p class="text-sm font-semibold text-dimmed py-1">
-              No limit set
-            </p>
+            <p class="text-sm font-semibold text-dimmed py-1">No limit set</p>
           </template>
         </div>
       </template>
@@ -96,9 +87,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
           >
             {{ formatCurrency(pocket.earned) }}
           </p>
-          <p class="text-xs text-muted">
-            total earned
-          </p>
+          <p class="text-xs text-muted">total earned</p>
         </div>
       </template>
     </div>
@@ -119,10 +108,7 @@ const { formatCurrency, getProgressColor } = useFormatters()
         size="xs"
       />
     </div>
-    <div
-      v-else-if="pocket.type === 'spending'"
-      class="mt-2"
-    >
+    <div v-else-if="pocket.type === 'spending'" class="mt-2">
       <UButton
         label="Set Limit"
         size="xs"
