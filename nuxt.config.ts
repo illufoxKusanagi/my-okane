@@ -20,7 +20,12 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/pwa-192x192.png' },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          href: '/pwa-192x192.png'
+        },
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
       ]
     }
@@ -29,6 +34,12 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
+    tursoDatabaseUrl: process.env.TURSO_DATABASE_URL || '',
+    tursoAuthToken: process.env.TURSO_AUTH_TOKEN || '',
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    resendFrom: process.env.RESEND_FROM || '',
+    upstashRedisRestUrl: process.env.UPSTASH_REDIS_REST_URL || '',
+    upstashRedisRestToken: process.env.UPSTASH_REDIS_REST_TOKEN || '',
     appUrl: process.env.NUXT_APP_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     session: {
@@ -55,7 +66,8 @@ export default defineNuxtConfig({
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'camera=(self), microphone=(), geolocation=()',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io; object-src \'none\'; base-uri \'self\'; form-action \'self\';'
+        'Content-Security-Policy':
+          'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io; object-src \'none\'; base-uri \'self\'; form-action \'self\';'
       }
     }
   },
@@ -69,7 +81,11 @@ export default defineNuxtConfig({
     preset: 'cloudflare-module',
     cloudflare: {
       wrangler: {
-        compatibility_flags: ['nodejs_compat', 'nodejs_compat_populate_process_env']
+        compatibility_flags: [
+          'nodejs_compat',
+          'nodejs_compat_populate_process_env'
+        ],
+        keep_vars: true
       }
     },
     alias: {
