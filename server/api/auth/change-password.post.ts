@@ -8,7 +8,7 @@ import { passwordSchema } from '~~/server/utils/validator'
 import { hashUserPassword, verifyUserPassword } from '~~/server/utils/password'
 
 const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().min(1, 'Current password is required').max(128, 'Password too long'),
   newPassword: passwordSchema
 })
 

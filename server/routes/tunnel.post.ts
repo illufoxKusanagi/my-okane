@@ -1,4 +1,4 @@
-import { defineEventHandler, readRawBody } from 'h3'
+import { defineEventHandler, getHeader, readRawBody } from 'h3'
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
 
 const SENTRY_HOST = process.env.SENTRY_HOST || 'o4507028420657152.ingest.us.sentry.io'
@@ -13,6 +13,8 @@ const KNOWN_PROJECT_IDS: string[] = (() => {
   }
 })()
 
+const MAX_ENVELOPE_SIZE = 256 * 1024 // 256 KB — generous for Sentry envelopes, prevents OOM
+
 export default defineEventHandler(async (event) => {
   // Rate limit tunnel requests to prevent external reflection spam
   await checkRateLimit(event, {
@@ -22,9 +24,31 @@ export default defineEventHandler(async (event) => {
     message: 'Too many tunnel requests.'
   })
 
-  const body = await readRawBody(event)
+  // Pre-read size boundary: reject oversized bodies before they touch memory.
+  const contentLengthHeader = getHeader(event, 'content-length')
+  if (contentLengthHeader) {
+    const parsed = Number(contentLengthHeader)
+    if (!Number.isNaN(parsed) && parsed > MAX_ENVELOPE_SIZE) {
+      return new Response('Payload too large', { status: 413 })
+    }
+  }
+
+  let body: string
+  try {
+    const raw = await readRawBody(event)
+    body = raw || ''
+  } catch {
+    return new Response('Failed to read body', { status: 400 })
+  }
+
   if (!body) {
     return new Response('No body', { status: 400 })
+  }
+
+  // Post-read byte boundary: content-length can be absent, forged, or wrong.
+  // Buffer.byteLength counts actual UTF-8 bytes, not UTF-16 code units.
+  if (Buffer.byteLength(body) > MAX_ENVELOPE_SIZE) {
+    return new Response('Payload too large', { status: 413 })
   }
 
   try {

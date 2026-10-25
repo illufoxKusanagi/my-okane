@@ -27,34 +27,43 @@ export default defineEventHandler(async (event) => {
   try {
     const userId = await getAuthUserId(event)
 
-    if (validation.data.categoryId !== undefined) {
-      const category = await db
-        .select()
-        .from(categories)
-        .where(
-          and(
-            eq(categories.id, validation.data.categoryId),
-            eq(categories.userId, userId)
-          )
-        )
-        .limit(1)
+    // Fetch the existing transaction so partial updates can be validated
+    // against the *effective* type and category (new value ?? persisted value).
+    const [existing] = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .limit(1)
 
-      if (category.length === 0) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'Category not found or does not belong to the user'
-        })
-      }
+    if (!existing) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Transaction not found'
+      })
+    }
 
-      if (
-        validation.data.type !== undefined
-        && category[0]?.type !== validation.data.type
-      ) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: `Category type (${category[0]?.type}) does not match transaction type (${validation.data.type})`
-        })
-      }
+    const effectiveType = validation.data.type ?? existing.type
+    const effectiveCategoryId = validation.data.categoryId ?? existing.categoryId
+
+    // Fetch and validate the effective category against the effective type.
+    const [category] = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, effectiveCategoryId), eq(categories.userId, userId)))
+      .limit(1)
+
+    if (!category) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Category not found or does not belong to the user'
+      })
+    }
+
+    if (category.type !== effectiveType) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Category type (${category.type}) does not match transaction type (${effectiveType})`
+      })
     }
 
     const updatedTransaction = await db
