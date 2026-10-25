@@ -8,8 +8,8 @@ import { throwSafeServerError } from '~~/server/utils/safeError'
 import { passwordSchema } from '~~/server/utils/validator'
 
 const registerSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.email('Invalid email address'),
+  name: z.string().trim().min(1, 'Name is required').max(100, 'Name too long'),
+  email: z.string().trim().email('Invalid email address').max(254, 'Email too long'),
   password: passwordSchema
 })
 

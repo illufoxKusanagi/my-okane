@@ -40,8 +40,15 @@ export default defineEventHandler(async (event) => {
 
       if (cat.length === 0) {
         throw createError({
-          statusCode: 403,
-          statusMessage: 'Forbidden: Category does not belong to this user'
+          statusCode: 404,
+          statusMessage: 'Category not found'
+        })
+      }
+
+      if (cat[0]!.type !== 'spending') {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'Budgets can only be assigned to spending categories'
         })
       }
     }

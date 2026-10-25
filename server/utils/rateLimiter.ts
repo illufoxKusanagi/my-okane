@@ -7,6 +7,7 @@ interface RateLimitConfig {
   windowMs: number
   limit: number
   message: string
+  customKey?: string
 }
 
 const rateLimitMap = new Map<string, number[]>()
@@ -114,7 +115,7 @@ export async function checkRateLimit(event: H3Event, config: RateLimitConfig): P
 
 async function checkRateLimitRedis(redis: Redis, event: H3Event, config: RateLimitConfig): Promise<void> {
   const ip = getClientIp(event)
-  const key = `ratelimit:${config.uniqueKey}:${ip}`
+  const key = `ratelimit:${config.uniqueKey}:${config.customKey ?? ip}`
   const windowSecs = Math.ceil(config.windowMs / 1000)
 
   // Throws on failure, which the caller converts to fail-open.
@@ -140,7 +141,7 @@ async function checkRateLimitRedis(redis: Redis, event: H3Event, config: RateLim
 
 function checkRateLimitInMemory(event: H3Event, config: RateLimitConfig): void {
   const ip = getClientIp(event)
-  const mapKey = `${ip}:${config.uniqueKey}`
+  const mapKey = `${config.customKey ?? ip}:${config.uniqueKey}`
   const now = Date.now()
 
   // Evict stale buckets when map grows, avoiding global timers disallowed in serverless / Cloudflare
@@ -177,19 +178,19 @@ function checkRateLimitInMemory(event: H3Event, config: RateLimitConfig): void {
  * Clears the counter for the given bucket, e.g. after a successful login so
  * only *failed* attempts consume the brute-force budget.
  */
-export async function resetRateLimit(event: H3Event, uniqueKey: string): Promise<void> {
+export async function resetRateLimit(event: H3Event, uniqueKey: string, customKey?: string): Promise<void> {
   const ip = getClientIp(event)
 
   const redis = getRedis()
   if (redis) {
     try {
-      await redis.del(`ratelimit:${uniqueKey}:${ip}`)
+      await redis.del(`ratelimit:${uniqueKey}:${customKey ?? ip}`)
     } catch (error) {
       console.error('[rate-limit] Redis reset failed:', error)
     }
   }
 
-  rateLimitMap.delete(`${ip}:${uniqueKey}`)
+  rateLimitMap.delete(`${customKey ?? ip}:${uniqueKey}`)
 }
 
 export function resetRateLimits() {

@@ -4,6 +4,7 @@ import type { ReceiptScanResult } from '../../utils/receiptTypes'
 import * as Sentry from '@sentry/nuxt'
 import { eq } from 'drizzle-orm'
 import { checkRateLimit } from '~~/server/utils/rateLimiter'
+import { getEnv } from '~~/server/utils/runtimeEnv'
 import { matchesMagicBytes } from '~~/server/utils/imageValidation'
 import { throwSafeServerError } from '~~/server/utils/safeError'
 import { receiptScanSchema } from '~~/server/utils/receiptSchema'
@@ -25,13 +26,17 @@ export default defineEventHandler(async (event) => {
     message: 'Receipt scanning limit reached for this hour.'
   })
 
-  const config = useRuntimeConfig()
-  const apiKey = config.geminiApiKey
+  let apiKey = ''
+  try {
+    apiKey = ((useRuntimeConfig().geminiApiKey as unknown) as string) || ''
+  } catch {
+    // Outside Nuxt context
+  }
+  apiKey = (apiKey || getEnv('GEMINI_API_KEY') || process.env.GEMINI_API_KEY || '').trim()
   if (!apiKey) {
     throw createError({
       statusCode: 500,
-      statusMessage:
-        'Gemini API key is not configured. Please add GEMINI_API_KEY to your .env file.'
+      statusMessage: 'Gemini API key is not configured.'
     })
   }
 
