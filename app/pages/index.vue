@@ -62,6 +62,7 @@ const weeklySpent = computed(() =>
     .filter(t => t.type === 'spending')
     .reduce((sum, t) => sum + t.amount, 0)
 )
+// Weekly budget approximation dividing monthly budget evenly across 4 weeks
 const weeklyBudgetLimit = computed(() =>
   Math.round(monthlyBudgetLimit.value / 4)
 )

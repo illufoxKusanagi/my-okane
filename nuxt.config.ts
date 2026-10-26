@@ -144,10 +144,27 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
-      navigateFallbackDenylist: [/^\/api/, /^\/_nuxt/]
+      navigateFallbackDenylist: [/^\/api/, /^\/_nuxt/],
+      runtimeCaching: [
+        {
+          urlPattern: /^\/api\//,
+          handler: 'NetworkFirst',
+          method: 'GET',
+          options: {
+            cacheName: 'api-cache',
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 5
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }
+      ]
     },
     devOptions: {
-      enabled: false,
+      enabled: true,
       type: 'module'
     }
   },
