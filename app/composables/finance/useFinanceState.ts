@@ -12,30 +12,43 @@ export interface FinanceState {
   reset: () => void
 }
 
+let inFlightFetch: Promise<void> | null = null
+let isSessionWatcherActive = false
+
 export function useFinanceState(): FinanceState {
   const transactions = useState<Transaction[]>('finance:transactions', () => [])
   const categories = useState<Category[]>('finance:categories', () => [])
   const isInitialized = useState<boolean>('finance:isInitialized', () => false)
 
   const fetchAll = async () => {
-    try {
-      const [txData, catData] = await Promise.all([
-        $fetch<Transaction[]>('/api/transactions'),
-        $fetch<Category[]>('/api/categories')
-      ])
-      transactions.value = txData
-      categories.value = catData
-      isInitialized.value = true
-    } catch (error) {
-      console.error('Failed to fetch finance data:', error)
-      Sentry.captureException(error)
-    }
+    if (inFlightFetch) return inFlightFetch
+    if (isInitialized.value) return
+
+    inFlightFetch = (async () => {
+      try {
+        const [txData, catData] = await Promise.all([
+          $fetch<Transaction[]>('/api/transactions'),
+          $fetch<Category[]>('/api/categories')
+        ])
+        transactions.value = txData
+        categories.value = catData
+        isInitialized.value = true
+      } catch (error) {
+        console.error('Failed to fetch finance data:', error)
+        Sentry.captureException(error)
+      } finally {
+        inFlightFetch = null
+      }
+    })()
+
+    return inFlightFetch
   }
 
   const reset = () => {
     transactions.value = []
     categories.value = []
     isInitialized.value = false
+    inFlightFetch = null
   }
 
   const isLoading = computed(() => !isInitialized.value)
@@ -45,23 +58,24 @@ export function useFinanceState(): FinanceState {
 
 /**
  * Session lifecycle bootstrap: fetches on mount when a session exists and
- * re-syncs/resets whenever the user session changes. Called exactly once per
- * `useFinance()` invocation to preserve historical side-effect semantics.
+ * re-syncs/resets whenever the user session changes. Guarded by isSessionWatcherActive
+ * so it registers exactly once globally across all consumer components.
  */
 export function watchFinanceSession(state: FinanceState): void {
+  if (isSessionWatcherActive || !import.meta.client) return
+  isSessionWatcherActive = true
+
   const { user } = useUserSession()
 
-  if (import.meta.client) {
-    watch(
-      user,
-      (newUser) => {
-        if (newUser) {
-          state.fetchAll()
-        } else {
-          state.reset()
-        }
-      },
-      { immediate: true }
-    )
-  }
+  watch(
+    user,
+    (newUser) => {
+      if (newUser) {
+        state.fetchAll()
+      } else {
+        state.reset()
+      }
+    },
+    { immediate: true }
+  )
 }

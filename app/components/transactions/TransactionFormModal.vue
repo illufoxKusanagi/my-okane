@@ -8,6 +8,7 @@ const isOpen = defineModel<boolean>('open', { required: true })
 const props = defineProps<{
   editingTransaction: Transaction | null
   categories: Category[]
+  loading?: boolean
 }>()
 
 const txName = defineModel<string>('name', { required: true })
@@ -37,6 +38,7 @@ const isInvalid = computed(
     v-model:open="isOpen"
     :title="props.editingTransaction ? 'Edit Transaction' : 'Add Transaction'"
     :submit-label="props.editingTransaction ? 'Save Changes' : 'Create'"
+    :loading="props.loading"
     :disabled="isInvalid"
     @submit="$emit('submit')"
   >

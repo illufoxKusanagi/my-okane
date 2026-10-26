@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
+import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
 
 const props = defineProps({
   label: {
@@ -37,16 +38,15 @@ const transactionName = ref('')
 const selectedCategory = ref<string | undefined>(undefined)
 const transactionAmount = ref(0)
 const transactionDate = ref(toDateInputValue(new Date()))
+const transactionNotes = ref('')
 const isSaving = ref(false)
-const categories = computed(() =>
-  getCategories(props.type).map(cat => ({ label: cat.name, value: cat.id }))
-)
+const categories = computed(() => getCategories(props.type))
 
 watch(
   categories,
   (newCats) => {
-    if (!newCats.some(cat => cat.value === selectedCategory.value)) {
-      selectedCategory.value = newCats[0]?.value
+    if (!newCats.some(cat => cat.id === selectedCategory.value)) {
+      selectedCategory.value = newCats[0]?.id
     }
   },
   { immediate: true }
@@ -73,10 +73,11 @@ const handleAddTransaction = async () => {
       categoryId,
       transactionAmount.value,
       props.type,
-      undefined,
+      transactionNotes.value.trim() || undefined,
       transactionDate.value
     )
     transactionName.value = ''
+    transactionNotes.value = ''
     const cats = getCategories(props.type)
     selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined
     transactionAmount.value = 0
@@ -138,43 +139,15 @@ const handleAddTransaction = async () => {
       :disabled="isInvalid"
       @submit="handleAddTransaction"
     >
-      <UFormField label="Transaction Name">
-        <UInput
-          v-model="transactionName"
-          class="w-full"
-          placeholder="Enter name"
-          autofocus
-        />
-      </UFormField>
-
-      <UFormField label="Category">
-        <USelect
-          v-model="selectedCategory"
-          class="w-full"
-          :items="categories"
-        />
-      </UFormField>
-
-      <UFormField label="Date">
-        <UInput
-          v-model="transactionDate"
-          type="date"
-          class="w-full"
-        />
-      </UFormField>
-
-      <UFormField label="Amount">
-        <UInputNumber
-          v-model="transactionAmount"
-          class="w-full"
-          :format-options="{
-            style: 'currency',
-            currency: 'IDR',
-            currencyDisplay: 'code',
-            currencySign: 'accounting'
-          }"
-        />
-      </UFormField>
+      <TransactionFormFields
+        v-model:name="transactionName"
+        v-model:category-id="selectedCategory"
+        v-model:amount="transactionAmount"
+        v-model:date="transactionDate"
+        v-model:notes="transactionNotes"
+        show-category
+        :categories="categories"
+      />
     </AppModal>
   </div>
 </template>

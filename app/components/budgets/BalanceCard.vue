@@ -1,9 +1,15 @@
 <script setup lang="ts">
-defineProps<{
-  balance: number
-  totalIncome: number
-  totalSpending: number
-}>()
+withDefaults(
+  defineProps<{
+    balance: number
+    totalIncome: number
+    totalSpending: number
+    loading?: boolean
+  }>(),
+  {
+    loading: false
+  }
+)
 
 const { formatCurrency } = useFormatters()
 </script>
@@ -25,9 +31,18 @@ const { formatCurrency } = useFormatters()
         />
         <span class="text-sm font-semibold tracking-wide uppercase">Main Account Balance</span>
       </div>
-      <h2 class="text-3xl font-extrabold tracking-tight mb-4">
-        {{ formatCurrency(balance) }}
-      </h2>
+      <div class="h-10 flex items-center mb-4">
+        <USkeleton
+          v-if="loading"
+          class="h-9 w-44 rounded-xl bg-white/20"
+        />
+        <h2
+          v-else
+          class="text-3xl font-extrabold tracking-tight"
+        >
+          {{ formatCurrency(balance) }}
+        </h2>
+      </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-sm">
@@ -35,7 +50,14 @@ const { formatCurrency } = useFormatters()
         <p class="opacity-80 text-xs">
           This Month Income
         </p>
-        <p class="font-bold text-emerald-300">
+        <USkeleton
+          v-if="loading"
+          class="h-5 w-24 rounded-lg bg-white/20 mt-1"
+        />
+        <p
+          v-else
+          class="font-bold text-emerald-300 mt-1"
+        >
           +{{ formatCurrency(totalIncome) }}
         </p>
       </div>
@@ -43,7 +65,14 @@ const { formatCurrency } = useFormatters()
         <p class="opacity-80 text-xs">
           This Month Spent
         </p>
-        <p class="font-bold text-rose-300">
+        <USkeleton
+          v-if="loading"
+          class="h-5 w-24 rounded-lg bg-white/20 mt-1"
+        />
+        <p
+          v-else
+          class="font-bold text-rose-300 mt-1"
+        >
           -{{ formatCurrency(totalSpending) }}
         </p>
       </div>

@@ -48,6 +48,7 @@ export function usePocketDetailsController(categoryId: string) {
   })
 
   const isBudgetModalOpen = ref(false)
+  const isSaving = ref(false)
   const budgetAmount = ref<number | null>(null)
 
   const isTxModalOpen = ref(false)
@@ -66,6 +67,8 @@ export function usePocketDetailsController(categoryId: string) {
   }
 
   const handleSaveBudget = async () => {
+    if (isSaving.value) return
+    isSaving.value = true
     try {
       await $fetch('/api/budgets', {
         method: 'POST',
@@ -79,11 +82,14 @@ export function usePocketDetailsController(categoryId: string) {
       refresh()
     } catch (error) {
       console.error('Failed to save budget:', error)
+    } finally {
+      isSaving.value = false
     }
   }
 
   const handleDeleteBudget = async () => {
-    if (!pocket.value?.budgetId) return
+    if (!pocket.value?.budgetId || isSaving.value) return
+    isSaving.value = true
     try {
       await $fetch(`/api/budgets/${pocket.value.budgetId}`, {
         method: 'DELETE'
@@ -91,6 +97,8 @@ export function usePocketDetailsController(categoryId: string) {
       refresh()
     } catch (error) {
       console.error('Failed to delete budget:', error)
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -118,11 +126,13 @@ export function usePocketDetailsController(categoryId: string) {
       || !(txAmount.value > 0)
       || !txDate.value
       || !pocket.value
+      || isSaving.value
     ) {
       return
     }
 
     const type = pocket.value.type === 'income' ? 'income' : 'spending'
+    isSaving.value = true
     try {
       if (editingTx.value) {
         await updateTransaction(
@@ -148,6 +158,8 @@ export function usePocketDetailsController(categoryId: string) {
       refresh()
     } catch (error) {
       console.error('Failed to save transaction:', error)
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -157,13 +169,15 @@ export function usePocketDetailsController(categoryId: string) {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!txToDelete.value) return
+    if (!txToDelete.value || isSaving.value) return
+    isSaving.value = true
     try {
       await deleteTransaction(txToDelete.value.id)
       refresh()
     } catch (error) {
       console.error('Failed to delete transaction:', error)
     } finally {
+      isSaving.value = false
       isDeleteConfirmOpen.value = false
       txToDelete.value = null
     }
@@ -176,6 +190,7 @@ export function usePocketDetailsController(categoryId: string) {
     pocketNumber,
     status,
     pending,
+    isSaving,
     isBudgetModalOpen,
     budgetAmount,
     isTxModalOpen,

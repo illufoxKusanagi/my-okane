@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
+import BalanceCard from '~/components/budgets/BalanceCard.vue'
 
 useSeoMeta({
   title: 'Dashboard'
@@ -36,11 +37,20 @@ const { data: budgetData, status: budgetStatus } = await useFetch(
 )
 
 const isBudgetLoading = computed(() => budgetStatus.value === 'pending')
+const isPageLoading = computed(() => isBudgetLoading.value || isLoading.value)
+
+// All-time main account balance: total cumulative income minus total cumulative spending
+const mainAccountBalance = computed(
+  () => totalIncome.value - totalSpending.value
+)
+
+// Monthly income & spent for current month sub-labels on BalanceCard
+const monthlyIncome = computed(() => budgetData.value?.totalIncome ?? 0)
+const monthlySpent = computed(() => budgetData.value?.totalSpending ?? 0)
 
 const monthlyBudgetLimit = computed(
   () => budgetData.value?.globalBudget?.amount || 0
 )
-const monthlySpent = computed(() => budgetData.value?.totalSpending || 0)
 const monthlyRemaining = computed(
   () => budgetData.value?.globalBudget?.remaining || 0
 )
@@ -75,26 +85,38 @@ const weeklyRemaining = computed(
   <div
     class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
   >
-    <!-- Hero Budget Slider / Skeleton -->
-    <USkeleton
-      v-if="isBudgetLoading"
-      class="h-64 rounded-3xl w-full"
-    />
-    <BudgetSliderCard
-      v-else
-      :current-view="currentView"
-      :monthly-budget-limit="monthlyBudgetLimit"
-      :monthly-spent="monthlySpent"
-      :monthly-remaining="monthlyRemaining"
-      :weekly-budget-limit="weeklyBudgetLimit"
-      :weekly-spent="weeklySpent"
-      :weekly-remaining="weeklyRemaining"
-      @set-view="currentView = $event"
-    />
+    <!-- Hero Financial Overview: Balance & Budget Slider / Skeletons -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <BalanceCard
+        :balance="mainAccountBalance"
+        :total-income="monthlyIncome"
+        :total-spending="monthlySpent"
+        :loading="isPageLoading"
+        class="h-full"
+      />
+      <div
+        v-if="isPageLoading"
+        class="w-full"
+      >
+        <USkeleton class="h-60 rounded-3xl w-full" />
+      </div>
+      <BudgetSliderCard
+        v-else-if="budgetData"
+        :current-view="currentView"
+        :monthly-budget-limit="monthlyBudgetLimit"
+        :monthly-spent="monthlySpent"
+        :monthly-remaining="monthlyRemaining"
+        :weekly-budget-limit="weeklyBudgetLimit"
+        :weekly-spent="weeklySpent"
+        :weekly-remaining="weeklyRemaining"
+        class="h-full"
+        @set-view="currentView = $event"
+      />
+    </div>
 
     <!-- Income and Spending Quick-Add Summary Cards / Skeletons -->
     <div
-      v-if="isLoading"
+      v-if="isPageLoading"
       class="grid grid-cols-1 md:grid-cols-2 gap-5"
     >
       <USkeleton class="h-28 rounded-2xl w-full" />
@@ -118,7 +140,7 @@ const weeklyRemaining = computed(
 
     <!-- Charts / Skeletons -->
     <div
-      v-if="isBudgetLoading || isLoading"
+      v-if="isPageLoading"
       class="grid grid-cols-1 lg:grid-cols-3 gap-5"
     >
       <USkeleton class="h-80 rounded-2xl w-full lg:col-span-1" />
@@ -141,7 +163,7 @@ const weeklyRemaining = computed(
         <AddCategoryModal type="spending" />
       </div>
       <div
-        v-if="isLoading"
+        v-if="isPageLoading"
         class="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <USkeleton
@@ -177,7 +199,7 @@ const weeklyRemaining = computed(
         <AddCategoryModal type="income" />
       </div>
       <div
-        v-if="isLoading"
+        v-if="isPageLoading"
         class="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <USkeleton

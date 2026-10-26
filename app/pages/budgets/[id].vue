@@ -6,6 +6,7 @@ import TransactionFormFields from '~/components/transactions/TransactionFormFiel
 import PocketHeroCard from '~/components/budgets/PocketHeroCard.vue'
 import PocketStatsCard from '~/components/budgets/PocketStatsCard.vue'
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
+import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 import { usePocketDetailsController } from './usePocketDetailsController'
 
 const route = useRoute()
@@ -18,6 +19,7 @@ const {
   pocketTransactions,
   pocketNumber,
   pending,
+  isSaving,
   isBudgetModalOpen,
   budgetAmount,
   isTxModalOpen,
@@ -173,14 +175,12 @@ useSeoMeta({
       v-model:open="isBudgetModalOpen"
       title="Configure Pocket Limit"
       submit-label="Save Limit"
+      :loading="isSaving"
       @submit="handleSaveBudget"
     >
       <UFormField label="Limit Amount">
-        <UInput
+        <CurrencyInput
           v-model="budgetAmount"
-          type="number"
-          placeholder="e.g. 1000000"
-          class="w-full"
           autofocus
         />
       </UFormField>
@@ -191,6 +191,7 @@ useSeoMeta({
       v-model:open="isTxModalOpen"
       :title="editingTx ? 'Edit Transaction' : 'Add Transaction'"
       submit-label="Save"
+      :loading="isSaving"
       :disabled="!txName.trim() || !(txAmount > 0) || !txDate"
       @submit="handleSaveTransaction"
     >
@@ -206,6 +207,7 @@ useSeoMeta({
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
       title="Delete Transaction?"
+      :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
       Are you sure you want to delete

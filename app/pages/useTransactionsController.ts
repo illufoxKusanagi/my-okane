@@ -91,6 +91,7 @@ export function useTransactionsController() {
   } = useTransactionsFilter(transactions)
 
   const isModalOpen = ref(false)
+  const isSaving = ref(false)
   const editingTransaction = ref<Transaction | null>(null)
 
   const txName = ref('')
@@ -133,10 +134,12 @@ export function useTransactionsController() {
       || !txCategoryId.value
       || !(txAmount.value > 0)
       || !txDate.value
+      || isSaving.value
     ) {
       return
     }
 
+    isSaving.value = true
     try {
       if (editingTransaction.value) {
         await updateTransaction(
@@ -162,6 +165,8 @@ export function useTransactionsController() {
     } catch (error) {
       console.error('Failed to save transaction:', error)
       Sentry.captureException(error)
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -182,16 +187,24 @@ export function useTransactionsController() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (transactionToDelete.value) {
+    if (!transactionToDelete.value || isSaving.value) return
+    isSaving.value = true
+    try {
       await deleteTransaction(transactionToDelete.value.id)
       isDeleteConfirmOpen.value = false
       transactionToDelete.value = null
+    } catch (error) {
+      console.error('Failed to delete transaction:', error)
+      Sentry.captureException(error)
+    } finally {
+      isSaving.value = false
     }
   }
 
   return {
     categories,
     isLoading,
+    isSaving,
     isScanning,
     scanError,
     fileInput,

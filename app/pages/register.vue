@@ -112,6 +112,7 @@
             block
             size="lg"
             :loading="loading"
+            :disabled="loading"
           >
             Create Account
           </UButton>
