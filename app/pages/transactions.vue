@@ -12,6 +12,7 @@ useSeoMeta({
 const {
   categories,
   isLoading,
+  isSaving,
   isScanning,
   fileInput,
   isMobile,
@@ -180,6 +181,7 @@ const {
       v-model:date="txDate"
       :editing-transaction="editingTransaction"
       :categories="formCategories"
+      :loading="isSaving"
       @submit="handleSaveTransaction"
     />
 
@@ -187,6 +189,7 @@ const {
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
       title="Delete Transaction?"
+      :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
       Are you sure you want to delete this transaction for

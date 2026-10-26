@@ -12,6 +12,7 @@ useSeoMeta({
 const {
   currentTab,
   isLoading,
+  isSaving,
   isModalOpen,
   editingCategory,
   categoryName,
@@ -118,6 +119,7 @@ const categoryTabs = [
       v-model:open="isModalOpen"
       :title="editingCategory ? 'Edit Category' : 'Create New Category'"
       :submit-label="editingCategory ? 'Save Changes' : 'Create'"
+      :loading="isSaving"
       :disabled="!categoryName.trim()"
       @submit="handleSaveCategory"
     >
@@ -133,6 +135,7 @@ const categoryTabs = [
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
       title="Delete Category?"
+      :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
       Are you sure you want to delete

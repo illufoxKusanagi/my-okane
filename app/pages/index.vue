@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
 import BalanceCard from '~/components/budgets/BalanceCard.vue'
@@ -29,7 +29,7 @@ const _now = new Date()
 const currentMonthStr = ref(
   `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}`
 )
-const { data: budgetData, status: budgetStatus, refresh: refreshBudgets } = await useFetch(
+const { data: budgetData, status: budgetStatus } = await useFetch(
   '/api/budgets',
   {
     query: { month: currentMonthStr }
@@ -47,15 +47,6 @@ const mainAccountBalance = computed(
 // Monthly income & spent for current month sub-labels on BalanceCard
 const monthlyIncome = computed(() => budgetData.value?.totalIncome ?? 0)
 const monthlySpent = computed(() => budgetData.value?.totalSpending ?? 0)
-
-// Refresh budgetData whenever user transactions change (e.g. after adding income/spending)
-watch(
-  transactions,
-  () => {
-    refreshBudgets()
-  },
-  { deep: true }
-)
 
 const monthlyBudgetLimit = computed(
   () => budgetData.value?.globalBudget?.amount || 0

@@ -8,6 +8,7 @@ export function useCategoriesController() {
   const currentTab = ref<'spending' | 'income'>('spending')
 
   const isModalOpen = ref(false)
+  const isSaving = ref(false)
   const editingCategory = ref<Category | null>(null)
 
   const categoryName = ref('')
@@ -41,25 +42,30 @@ export function useCategoriesController() {
   }
 
   const handleSaveCategory = async () => {
-    if (!categoryName.value.trim()) return
+    if (!categoryName.value.trim() || isSaving.value) return
 
-    if (editingCategory.value) {
-      await updateCategory(
-        editingCategory.value.id,
-        categoryName.value,
-        categoryType.value,
-        categoryIcon.value,
-        categoryColor.value
-      )
-    } else {
-      await addCategory(
-        categoryName.value,
-        categoryType.value,
-        categoryIcon.value,
-        categoryColor.value
-      )
+    isSaving.value = true
+    try {
+      if (editingCategory.value) {
+        await updateCategory(
+          editingCategory.value.id,
+          categoryName.value,
+          categoryType.value,
+          categoryIcon.value,
+          categoryColor.value
+        )
+      } else {
+        await addCategory(
+          categoryName.value,
+          categoryType.value,
+          categoryIcon.value,
+          categoryColor.value
+        )
+      }
+      isModalOpen.value = false
+    } finally {
+      isSaving.value = false
     }
-    isModalOpen.value = false
   }
 
   const confirmDeleteCategory = (cat: Category) => {
@@ -68,16 +74,21 @@ export function useCategoriesController() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (categoryToDelete.value) {
+    if (!categoryToDelete.value || isSaving.value) return
+    isSaving.value = true
+    try {
       await deleteCategory(categoryToDelete.value.id)
       isDeleteConfirmOpen.value = false
       categoryToDelete.value = null
+    } finally {
+      isSaving.value = false
     }
   }
 
   return {
     currentTab,
     isLoading,
+    isSaving,
     isModalOpen,
     editingCategory,
     categoryName,

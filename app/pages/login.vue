@@ -172,6 +172,7 @@ async function handleLogin() {
             block
             size="lg"
             :loading="loading"
+            :disabled="loading"
           >
             Sign In
           </UButton>

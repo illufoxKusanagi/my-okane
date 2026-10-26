@@ -19,6 +19,7 @@ const {
   pocketTransactions,
   pocketNumber,
   pending,
+  isSaving,
   isBudgetModalOpen,
   budgetAmount,
   isTxModalOpen,
@@ -174,6 +175,7 @@ useSeoMeta({
       v-model:open="isBudgetModalOpen"
       title="Configure Pocket Limit"
       submit-label="Save Limit"
+      :loading="isSaving"
       @submit="handleSaveBudget"
     >
       <UFormField label="Limit Amount">
@@ -189,6 +191,7 @@ useSeoMeta({
       v-model:open="isTxModalOpen"
       :title="editingTx ? 'Edit Transaction' : 'Add Transaction'"
       submit-label="Save"
+      :loading="isSaving"
       :disabled="!txName.trim() || !(txAmount > 0) || !txDate"
       @submit="handleSaveTransaction"
     >
@@ -204,6 +207,7 @@ useSeoMeta({
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
       title="Delete Transaction?"
+      :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
       Are you sure you want to delete

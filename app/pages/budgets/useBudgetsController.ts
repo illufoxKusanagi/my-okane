@@ -21,6 +21,7 @@ export function useBudgetsController() {
   const { addCategory } = useFinance()
 
   const isModalOpen = ref(false)
+  const isSaving = ref(false)
   const selectedCategoryId = ref<string | null>(null)
   const budgetAmount = ref<number | null>(null)
 
@@ -43,8 +44,9 @@ export function useBudgetsController() {
   const toast = useToast()
 
   const handleCreatePocket = async () => {
-    if (!pocketName.value.trim()) return
+    if (!pocketName.value.trim() || isSaving.value) return
 
+    isSaving.value = true
     try {
       const newCategory = await addCategory(
         pocketName.value,
@@ -78,6 +80,8 @@ export function useBudgetsController() {
         description: describeApiError(error),
         color: 'error'
       })
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -104,6 +108,8 @@ export function useBudgetsController() {
   }
 
   const handleSaveBudget = async () => {
+    if (isSaving.value) return
+    isSaving.value = true
     try {
       await $fetch('/api/budgets', {
         method: 'POST',
@@ -122,6 +128,8 @@ export function useBudgetsController() {
         description: describeApiError(error),
         color: 'error'
       })
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -130,6 +138,7 @@ export function useBudgetsController() {
     budgetData,
     status,
     pending,
+    isSaving,
     isModalOpen,
     selectedCategoryId,
     budgetAmount,

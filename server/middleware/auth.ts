@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     await checkRateLimit(event, {
       uniqueKey: 'global_api_ddos',
       windowMs: 60000,
-      limit: 100,
+      limit: process.env.NODE_ENV === 'development' ? 1000 : 100,
       message: 'DDoS protection: Too many requests.'
     })
 

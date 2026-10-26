@@ -14,6 +14,7 @@ const {
   currentMonth,
   budgetData,
   pending,
+  isSaving,
   isModalOpen,
   selectedCategoryId,
   budgetAmount,
@@ -160,6 +161,7 @@ const { formatMonthLabel } = useFormatters()
           : 'Configure Pocket Budget'
       "
       submit-label="Save Budget"
+      :loading="isSaving"
       @submit="handleSaveBudget"
     >
       <UFormField label="Budget Limit Amount">
@@ -175,6 +177,7 @@ const { formatMonthLabel } = useFormatters()
       v-model:open="isCreatePocketModalOpen"
       title="Create New Pocket (Category)"
       submit-label="Create Pocket"
+      :loading="isSaving"
       :disabled="!pocketName.trim()"
       @submit="handleCreatePocket"
     >
