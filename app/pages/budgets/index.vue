@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import AppModal from '~/components/ui/AppModal.vue'
-import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
-import BalanceCard from '~/components/budgets/BalanceCard.vue'
-import MonthlyLimitCard from '~/components/budgets/MonthlyLimitCard.vue'
-import PocketCard from '~/components/budgets/PocketCard.vue'
-import { useBudgetsController } from './useBudgetsController'
+import AppModal from "~/components/ui/AppModal.vue";
+import CategoryFormFields from "~/components/categories/CategoryFormFields.vue";
+import BalanceCard from "~/components/budgets/BalanceCard.vue";
+import MonthlyLimitCard from "~/components/budgets/MonthlyLimitCard.vue";
+import PocketCard from "~/components/budgets/PocketCard.vue";
+import { useBudgetsController } from "./useBudgetsController";
 
 useSeoMeta({
-  title: 'Budgets'
-})
+  title: "Budgets",
+});
 
 const {
   currentMonth,
@@ -28,14 +28,16 @@ const {
   prevMonth,
   nextMonth,
   openBudgetModal,
-  handleSaveBudget
-} = useBudgetsController()
+  handleSaveBudget,
+} = useBudgetsController();
 
-const { formatMonthLabel } = useFormatters()
+const { formatMonthLabel } = useFormatters();
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8">
+  <div
+    class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
+  >
     <!-- Month Selection Header -->
     <div
       class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-elevated/70 border border-muted/50 p-5 rounded-2xl shadow-sm backdrop-blur-md"
@@ -48,9 +50,7 @@ const { formatMonthLabel } = useFormatters()
           aria-label="Previous month"
           @click="prevMonth"
         />
-        <span
-          class="text-lg font-bold text-highlighted min-w-44 text-center"
-        >
+        <span class="text-lg font-bold text-highlighted min-w-44 text-center">
           {{ formatMonthLabel(currentMonth) }}
         </span>
         <UButton
@@ -62,11 +62,12 @@ const { formatMonthLabel } = useFormatters()
         />
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-col md:flex-row w-full md:w-fit items-center gap-2">
         <UButton
           label="Create Pocket"
           icon="i-lucide-plus"
           color="primary"
+          class="w-full"
           @click="openCreatePocketModal"
         />
         <UButton
@@ -74,25 +75,18 @@ const { formatMonthLabel } = useFormatters()
           icon="i-lucide-sliders-horizontal"
           color="neutral"
           variant="outline"
-          @click="
-            openBudgetModal(null, budgetData?.globalBudget?.amount)
-          "
+          class="w-full text-center items-center"
+          @click="openBudgetModal(null, budgetData?.globalBudget?.amount)"
         />
       </div>
     </div>
 
     <!-- Stats Overview Cards / Skeletons (Bank Jago-style) -->
-    <div
-      v-if="pending"
-      class="grid grid-cols-1 md:grid-cols-2 gap-5"
-    >
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <USkeleton class="h-44 rounded-3xl w-full" />
       <USkeleton class="h-44 rounded-3xl w-full" />
     </div>
-    <div
-      v-else-if="budgetData"
-      class="grid grid-cols-1 md:grid-cols-2 gap-5"
-    >
+    <div v-else-if="budgetData" class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <BalanceCard
         :balance="budgetData.balance"
         :total-income="budgetData.totalIncome"
@@ -109,10 +103,8 @@ const { formatMonthLabel } = useFormatters()
     <div class="flex flex-col gap-4 mt-2">
       <div class="flex items-center justify-between">
         <div>
-          <h3
-            class="text-xl font-extrabold text-highlighted tracking-tight"
-          >
-            Your Pockets (Kantong)
+          <h3 class="text-xl font-extrabold text-highlighted tracking-tight">
+            Your Pockets
           </h3>
           <p class="text-xs text-muted mt-1">
             Each pocket is a category — spending pockets can have a monthly
@@ -163,7 +155,11 @@ const { formatMonthLabel } = useFormatters()
     <!-- Budget Configuration Modal -->
     <AppModal
       v-model:open="isModalOpen"
-      :title="selectedCategoryId === null ? 'Configure Overall Budget' : 'Configure Pocket Budget'"
+      :title="
+        selectedCategoryId === null
+          ? 'Configure Overall Budget'
+          : 'Configure Pocket Budget'
+      "
       submit-label="Save Budget"
       @submit="handleSaveBudget"
     >

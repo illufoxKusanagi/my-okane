@@ -95,21 +95,23 @@ const items: NavigationMenuItem[] = [
     class="flex min-w-0 flex-col flex-1 h-dvh overflow-hidden bg-muted/20 dark:bg-neutral-950"
     style="--ui-header-height: 3.5rem"
   >
-    <!-- Top Header matching data_warehouse architecture -->
+    <!-- Top Header matching AppSidebar architecture -->
     <UHeader
       toggle-side="left"
-      title="My Okane"
       :ui="{
-        root: 'h-auto border-b-0 bg-transparent',
-        container: 'max-w-none flex items-center justify-between gap-3 px-4 py-2 min-h-[56px]',
-        left: 'flex items-center gap-3 min-w-0',
-        right: 'flex items-center gap-2',
+        root: 'h-auto border-b-0',
+        container:
+          'max-w-none flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3',
+        left: 'flex items-center gap-2 sm:gap-3 min-w-0 flex-1',
+        right: 'flex items-center justify-end gap-1.5 sm:gap-2 shrink-0',
         toggle: 'flex'
       }"
     >
       <template #toggle>
         <UButton
-          :icon="open ? 'i-lucide-panel-left-close' : 'i-lucide-panel-left-open'"
+          :icon="
+            open ? 'i-lucide-panel-left-close' : 'i-lucide-panel-left-open'
+          "
           color="neutral"
           variant="ghost"
           aria-label="Toggle sidebar"
@@ -118,22 +120,17 @@ const items: NavigationMenuItem[] = [
       </template>
 
       <template #left>
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <UIcon
-              name="i-lucide-wallet"
-              class="size-5 text-primary"
-            />
-          </div>
-          <div class="flex flex-col leading-tight min-w-0">
-            <span class="font-bold text-base text-highlighted truncate">My Okane</span>
-            <span class="text-xs text-muted truncate">Personal Finance</span>
-          </div>
+        <div class="flex flex-col leading-tight min-w-0">
+          <h1
+            class="text-lg sm:text-xl xl:text-2xl font-bold tracking-tight text-highlighted truncate"
+          >
+            Hi {{ user?.name || "User" }}
+          </h1>
         </div>
       </template>
 
       <template #right>
-        <ColorModeButton />
+        <ColorModeButton class="h-9 shrink-0" />
 
         <UDropdownMenu
           v-if="user"
@@ -146,14 +143,11 @@ const items: NavigationMenuItem[] = [
             trailing-icon="i-lucide-chevrons-up-down"
             color="neutral"
             variant="ghost"
-            class="hidden sm:inline-flex"
-            aria-label="User menu"
-          />
-          <UButton
-            :avatar="{ text: userInitials }"
-            color="neutral"
-            variant="ghost"
-            class="sm:hidden"
+            class="h-9 shrink-0"
+            :ui="{
+              label: 'hidden sm:inline truncate max-w-32',
+              trailingIcon: 'hidden sm:inline'
+            }"
             aria-label="User menu"
           />
         </UDropdownMenu>
@@ -165,21 +159,59 @@ const items: NavigationMenuItem[] = [
       <USidebar
         v-model:open="open"
         variant="floating"
-        collapsible="offcanvas"
-        :ui="{
-          container: 'absolute inset-y-0 start-0 h-full p-2 border-transparent',
-          body: 'px-3 mx-0'
-        }"
+        collapsible="icon"
+        :ui="{ container: 'absolute start-0 h-full border-transparent' }"
       >
+        <template #header>
+          <div class="flex flex-row justify-between w-full">
+            <div class="flex items-center gap-2.5 w-full min-w-0">
+              <!-- <UButton
+                :icon="
+                  open
+                    ? 'i-lucide-panel-left-close'
+                    : 'i-lucide-panel-left-open'
+                "
+                color="neutral"
+                variant="ghost"
+                aria-label="Toggle sidebar"
+                class="lg:hidden"
+                @click="open = !open"
+              /> -->
+              <img
+                src="/pwa-192x192.png"
+                alt="My Okane"
+                class="size-8 rounded-md"
+              >
+              <p
+                v-if="open"
+                class="font-semibold text-highlighted truncate leading-none"
+              >
+                My Okane
+              </p>
+            </div>
+            <UButton
+              :icon="
+                open ? 'i-lucide-panel-left-close' : 'i-lucide-panel-left-open'
+              "
+              color="neutral"
+              variant="ghost"
+              aria-label="Toggle sidebar"
+              class="lg:hidden"
+              @click="open = !open"
+            />
+          </div>
+        </template>
+
         <UNavigationMenu
           :items="items"
+          :collapsed="!open"
           orientation="vertical"
-          :ui="{ link: 'py-2 overflow-hidden' }"
+          tooltip
           @click="closeSidebarIfMobile"
         />
       </USidebar>
 
-      <div class="flex-1 min-h-0 min-w-0 flex flex-col p-2 lg:p-3">
+      <div class="flex-1 min-h-0 min-w-0 flex flex-col py-4 pr-4 pl-4 lg:pl-0">
         <UCard
           class="flex-1 min-h-0 min-w-0 flex flex-col shadow-xs"
           :ui="{ body: 'flex-1 min-h-0 min-w-0 overflow-y-auto p-0 sm:p-0' }"

@@ -22,7 +22,9 @@ export function useTransactionsController() {
 
   const isMobile = ref(false)
   onMounted(() => {
-    isMobile.value = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+    isMobile.value
+      = window.matchMedia('(pointer: coarse)').matches
+        || window.innerWidth < 768
   })
 
   const triggerFileSelect = () => {
