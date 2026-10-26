@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import AppModal from "~/components/ui/AppModal.vue";
-import CategoryFormFields from "~/components/categories/CategoryFormFields.vue";
-import BalanceCard from "~/components/budgets/BalanceCard.vue";
-import MonthlyLimitCard from "~/components/budgets/MonthlyLimitCard.vue";
-import PocketCard from "~/components/budgets/PocketCard.vue";
-import { useBudgetsController } from "./useBudgetsController";
+import AppModal from '~/components/ui/AppModal.vue'
+import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
+import MonthlyLimitCard from '~/components/budgets/MonthlyLimitCard.vue'
+import PocketCard from '~/components/budgets/PocketCard.vue'
+import CurrencyInput from '~/components/ui/CurrencyInput.vue'
+import { useBudgetsController } from './useBudgetsController'
 
 useSeoMeta({
-  title: "Budgets",
-});
+  title: 'Budgets'
+})
 
 const {
   currentMonth,
@@ -28,10 +28,10 @@ const {
   prevMonth,
   nextMonth,
   openBudgetModal,
-  handleSaveBudget,
-} = useBudgetsController();
+  handleSaveBudget
+} = useBudgetsController()
 
-const { formatMonthLabel } = useFormatters();
+const { formatMonthLabel } = useFormatters()
 </script>
 
 <template>
@@ -82,17 +82,16 @@ const { formatMonthLabel } = useFormatters();
     </div>
 
     <!-- Stats Overview Cards / Skeletons (Bank Jago-style) -->
-    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <USkeleton class="h-44 rounded-3xl w-full" />
+    <div
+      v-if="pending"
+      class="w-full"
+    >
       <USkeleton class="h-44 rounded-3xl w-full" />
     </div>
-    <div v-else-if="budgetData" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <BalanceCard
-        :balance="budgetData.balance"
-        :total-income="budgetData.totalIncome"
-        :total-spending="budgetData.totalSpending"
-      />
-
+    <div
+      v-else-if="budgetData"
+      class="w-full"
+    >
       <MonthlyLimitCard
         :global-budget="budgetData.globalBudget"
         @set-budget="(amt) => openBudgetModal(null, amt)"
@@ -164,11 +163,8 @@ const { formatMonthLabel } = useFormatters();
       @submit="handleSaveBudget"
     >
       <UFormField label="Budget Limit Amount">
-        <UInput
+        <CurrencyInput
           v-model="budgetAmount"
-          type="number"
-          placeholder="e.g. 500000"
-          class="w-full"
           autofocus
         />
       </UFormField>
@@ -193,12 +189,7 @@ const { formatMonthLabel } = useFormatters();
         v-if="pocketType === 'spending'"
         label="Monthly Budget Limit (Optional)"
       >
-        <UInput
-          v-model="pocketBudgetLimit"
-          type="number"
-          placeholder="e.g. 500000"
-          class="w-full"
-        />
+        <CurrencyInput v-model="pocketBudgetLimit" />
       </UFormField>
     </AppModal>
   </div>

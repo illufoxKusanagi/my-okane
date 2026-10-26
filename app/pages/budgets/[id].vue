@@ -6,6 +6,7 @@ import TransactionFormFields from '~/components/transactions/TransactionFormFiel
 import PocketHeroCard from '~/components/budgets/PocketHeroCard.vue'
 import PocketStatsCard from '~/components/budgets/PocketStatsCard.vue'
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
+import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 import { usePocketDetailsController } from './usePocketDetailsController'
 
 const route = useRoute()
@@ -176,11 +177,8 @@ useSeoMeta({
       @submit="handleSaveBudget"
     >
       <UFormField label="Limit Amount">
-        <UInput
+        <CurrencyInput
           v-model="budgetAmount"
-          type="number"
-          placeholder="e.g. 1000000"
-          class="w-full"
           autofocus
         />
       </UFormField>

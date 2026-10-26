@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppModal from '~/components/ui/AppModal.vue'
+import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 
 const props = defineProps({
   label: {
@@ -164,16 +165,7 @@ const handleAddTransaction = async () => {
       </UFormField>
 
       <UFormField label="Amount">
-        <UInputNumber
-          v-model="transactionAmount"
-          class="w-full"
-          :format-options="{
-            style: 'currency',
-            currency: 'IDR',
-            currencyDisplay: 'code',
-            currencySign: 'accounting'
-          }"
-        />
+        <CurrencyInput v-model="transactionAmount" />
       </UFormField>
     </AppModal>
   </div>

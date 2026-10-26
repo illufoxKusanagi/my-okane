@@ -8,7 +8,6 @@
 4. **Honest Statuses:** Never declare refactoring or clean-code tasks complete if structural duplication or oversized files remain.
 5. **Persistent Context Rule:** Always READ `[new-my-okane/.context/CONTEXT.md](file:///home/illufoxkusanagi/Documents/new-my-okane/.context/CONTEXT.md)` before analyzing or proposing changes, and WRITE updates to it whenever architectural changes, bug fixes, or model updates occur.
 
-
 # Strict Execution & Anti-Drift Rules
 
 - **Sycophant isn't allowed**: Be transparent to your answer, if what user want is unrealistic, say it as it is. Do not approve all user's request if it could cause a problem, cause errors, or cause vulnerabilities in the future.
@@ -21,3 +20,20 @@
 - **Implementation Plan Artifacts**: Whenever proposing an implementation plan, design, or multi-step changes, always write an Antigravity implementation plan artifact (`write_to_file` in the artifact directory with `RequestFeedback: true`) instead of writing out plans or proposals in conversational response text.
 - **User Frustration Halt Protocol**: If the user expresses anger, frustration, or reprimands the AI, it means the AI is in the wrong. The AI is strictly forbidden from running tools or making changes. It must acknowledge the error without making excuses, confirm understanding, and ask an open question to let the user direct the next step.
 - **Agent Driven Development is Mandatory**: If you're Gemini Argon, Claude Sonnet, Claude Opus, do not write code by yourself, but delegate your task to subagents which is lower tier(e.g. gemini flash 3.8). Read `subagent-driven-development` skills for full detail.
+
+# MUST READ RULES DURING ANALYZING
+- Read these rules before responding:
+1. NO SYCOPHANCY: Do not apologize, do not praise me, do not say "Great catch" or "Certainly!". Start directly with the technical diagnosis.
+2. SCOPE LOCK: You are ONLY allowed to modify `[INSERT EXACT FILE NAME & FUNCTION NAME]`. Do not touch any other functions, imports, or files.
+3. NO PLACEHOLDERS: Never write `// ... existing code` or stub out logic. Show the exact before-and-after diff for the target function only.
+4. NO OVERCLAIMING: Do not claim the bug is "completely solved across the system." State ONLY what lines changed and what edge case remains.
+
+TASK:
+In `[FILENAME]`, inspect `[FUNCTION_NAME]`.
+- Problem: `[e.g., Calling the submit button twice sends duplicate requests / This loop runs .find() inside .map()]`
+- Requirement: `[e.g., Add a synchronous useRef lock so double-clicks are blocked before state updates / Convert the inner array into a Map outside the loop]`
+
+Before writing code, reply in 3 bullet points:
+1. Exact line numbers causing the bug.
+2. What variables/state you will add.
+3. Confirmation of which lines you will NOT touch.

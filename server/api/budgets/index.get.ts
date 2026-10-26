@@ -52,6 +52,29 @@ export default defineEventHandler(async (event) => {
       )
     const totalIncome = Number(totalIncomeResult[0]?.total || 0)
 
+    const allTimeSpendingResult = await db
+      .select({ total: sql<number>`sum(${transactions.amount})` })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, 'spending')
+        )
+      )
+    const allTimeSpending = Number(allTimeSpendingResult[0]?.total || 0)
+
+    const allTimeIncomeResult = await db
+      .select({ total: sql<number>`sum(${transactions.amount})` })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, 'income')
+        )
+      )
+    const allTimeIncome = Number(allTimeIncomeResult[0]?.total || 0)
+    const cumulativeBalance = allTimeIncome - allTimeSpending
+
     const allCategories = await db
       .select()
       .from(categories)
@@ -116,7 +139,7 @@ export default defineEventHandler(async (event) => {
         : null,
       totalIncome,
       totalSpending,
-      balance: totalIncome - totalSpending,
+      balance: cumulativeBalance,
       pockets
     }
   } catch (error: unknown) {

@@ -1,0 +1,6 @@
+[x] Move main account balance to dashboard
+[x] Add proper delimiter for rupiah money input
+[x] Increment for income/spending should be +1k, not +1
+- Paid feature for receipt scan
+- Use email and verify by otp code and make the session
+- Add localization to support bahasa Indonesia

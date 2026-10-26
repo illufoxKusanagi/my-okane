@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Category } from '~/composables/useFinance'
+import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 
 withDefaults(
   defineProps<{
@@ -61,16 +62,7 @@ const categoryId = defineModel<string | undefined>('categoryId')
   </UFormField>
 
   <UFormField label="Amount">
-    <UInputNumber
-      v-model="amount"
-      class="w-full"
-      :format-options="{
-        style: 'currency',
-        currency: 'IDR',
-        currencyDisplay: 'code',
-        currencySign: 'accounting'
-      }"
-    />
+    <CurrencyInput v-model="amount" />
   </UFormField>
 
   <UFormField label="Date">
