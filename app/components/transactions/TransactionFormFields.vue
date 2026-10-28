@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import type { Category } from '~/composables/useFinance'
+import { computed, watch } from 'vue'
+import type { Category, WalletWithBalance } from '~/composables/useFinance'
 import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     showType?: boolean
     showCategory?: boolean
+    showWallet?: boolean
     categories?: Category[]
+    wallets?: WalletWithBalance[]
   }>(),
   {
     showType: false,
     showCategory: false,
-    categories: () => []
+    showWallet: false,
+    categories: () => [],
+    wallets: undefined
   }
 )
 
@@ -23,6 +28,30 @@ const type = defineModel<'income' | 'spending'>('type', {
   default: 'spending'
 })
 const categoryId = defineModel<string | undefined>('categoryId')
+const walletId = defineModel<string | undefined>('walletId')
+
+const { wallets: systemWallets } = useWallets()
+const { formatCurrency } = useFormatters()
+
+const availableWallets = computed(() => props.wallets ?? systemWallets.value)
+
+const walletItems = computed(() =>
+  availableWallets.value.map(w => ({
+    label: `${w.name} (${formatCurrency(w.balance)})`,
+    value: w.id
+  }))
+)
+
+watch(
+  availableWallets,
+  (list) => {
+    if (!walletId.value && list.length > 0) {
+      const def = list.find(w => w.isDefault) || list[0]
+      if (def) walletId.value = def.id
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -58,6 +87,18 @@ const categoryId = defineModel<string | undefined>('categoryId')
       class="w-full"
       :items="categories.map((c) => ({ label: c.name, value: c.id }))"
       :placeholder="$t('transactions.fields.selectCategory')"
+    />
+  </UFormField>
+
+  <UFormField
+    v-if="showWallet && availableWallets.length > 0"
+    :label="$t('wallets.name')"
+  >
+    <USelect
+      v-model="walletId"
+      class="w-full"
+      :items="walletItems"
+      :placeholder="$t('wallets.namePlaceholder')"
     />
   </UFormField>
 

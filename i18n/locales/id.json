@@ -173,6 +173,25 @@
     "backToDashboard": "Kembali ke Dasbor",
     "tryAgain": "Coba Lagi"
   },
+  "wallets": {
+    "title": "Akun & Dompet", "netWorth": "Total Kekayaan Bersih", "addAccount": "Tambah Akun",
+    "transfer": "Transfer", "editAccount": "Ubah Akun", "deleteAccount": "Hapus Akun",
+    "deleteAccountConfirm": "Apakah Anda yakin ingin menghapus {name}? Transaksi yang terhubung dengan akun ini akan tetap tersimpan di riwayat Anda.",
+    "setAsDefault": "Jadikan Utama", "default": "Utama", "balance": "Saldo",
+    "accountNumber": "Nomor Akun / Kartu (4 Digit Terakhir)", "accountNumberPlaceholder": "contoh: 4829",
+    "accountNumberHint": "Harus tepat 4 digit", "defaultAccountDesc": "Akun utama untuk transaksi cepat",
+    "name": "Nama Akun", "namePlaceholder": "contoh: BCA Debit, GoPay, Tabungan Darurat",
+    "type": "Tipe Akun", "initialBalance": "Saldo Awal", "color": "Warna Tema Kartu",
+    "sourceAccount": "Dari Akun", "targetAccount": "Ke Akun", "transferAmount": "Jumlah Transfer",
+    "transferNotes": "Catatan Transfer (Opsional)", "transferNotesPlaceholder": "contoh: Alokasi tabungan",
+    "transferSuccess": "Transfer berhasil", "createTitle": "Tambah Kartu Bank / Akun Baru",
+    "editTitle": "Ubah Kartu Bank / Akun", "transferTitle": "Transfer Antar Akun",
+    "types": {
+      "bank": "Rekening Bank", "cash": "Dompet Tunai", "ewallet": "Dompet Digital",
+      "savings": "Tabungan", "credit": "Kartu Kredit"
+    },
+    "allAccounts": "Semua Akun", "noAccounts": "Belum ada akun. Buat kartu pertama Anda."
+  },
   "toasts": {
     "txAdded": "Transaksi Ditambahkan",
     "txAddedDesc": "Berhasil menambahkan \"{name}\".",
@@ -195,6 +214,10 @@
     "pocketCreateFailed": "Gagal Membuat Kantong",
     "budgetSaveFailed": "Gagal Menyimpan Anggaran",
     "receiptScanFailed": "Gagal Memindai Struk",
-    "receiptScanFailedDesc": "Gagal memindai struk."
+    "receiptScanFailedDesc": "Gagal memindai struk.",
+    "walletCreated": "Akun Dibuat", "walletCreatedDesc": "Berhasil membuat \"{name}\".", "walletCreateFailed": "Gagal Membuat Akun",
+    "walletUpdated": "Akun Diperbarui", "walletUpdatedDesc": "Berhasil memperbarui \"{name}\".", "walletUpdateFailed": "Gagal Memperbarui Akun",
+    "walletDeleted": "Akun Dihapus", "walletDeletedDesc": "Akun berhasil dihapus.", "walletDeleteFailed": "Gagal Menghapus Akun",
+    "transferCompleted": "Transfer Berhasil", "transferCompletedDesc": "Berhasil mentransfer {amount}.", "transferFailed": "Transfer Gagal"
   }
 }

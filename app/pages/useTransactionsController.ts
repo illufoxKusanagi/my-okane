@@ -9,6 +9,7 @@ export function useTransactionsController() {
     transactions, categories, isLoading,
     addTransaction, updateTransaction, deleteTransaction, getCategories
   } = useFinance()
+  const { defaultWallet, fetchWallets } = useWallets()
 
   const { isScanning, scanError, scan } = useReceiptScan()
   const fileInput = ref<HTMLInputElement | null>(null)
@@ -23,9 +24,7 @@ export function useTransactionsController() {
     return fallbackMap[key] ?? key
   }
   try {
-    if (typeof useI18n === 'function') {
-      t = useI18n().t
-    }
+    if (typeof useI18n === 'function') t = useI18n().t
   } catch {
     // Non-Nuxt / test context fallback
   }
@@ -35,9 +34,7 @@ export function useTransactionsController() {
     isMobile.value = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
   })
 
-  const triggerFileSelect = () => {
-    fileInput.value?.click()
-  }
+  const triggerFileSelect = () => fileInput.value?.click()
 
   const onFileSelected = async (event: Event) => {
     const target = event.target as HTMLInputElement
@@ -48,21 +45,16 @@ export function useTransactionsController() {
       const result = await scan(file)
       if (result) {
         editingTransaction.value = null
-        txName.value
-          = result.suggestedTransactionName || result.storeName || 'Receipt Scan'
+        txName.value = result.suggestedTransactionName || result.storeName || 'Receipt Scan'
         txAmount.value = result.totalAmount || 0
         txType.value = 'spending'
+        txWalletId.value = defaultWallet.value?.id
         txDate.value = result.transactionDate || toDateInputValue(new Date())
-        txNotes.value
-          = `Scanned from receipt at ${result.storeName || 'Unknown Merchant'}.\n\nItems:\n`
-            + result.items
-              .map(item => `- ${item.name}: ${formatCurrency(item.price)}`)
-              .join('\n')
+        txNotes.value = `Scanned from receipt at ${result.storeName || 'Unknown Merchant'}.\n\nItems:\n`
+          + result.items.map(item => `- ${item.name}: ${formatCurrency(item.price)}`).join('\n')
 
         const matchedCat = categories.value.find(
-          c =>
-            c.name.toLowerCase() === result.suggestedCategory.toLowerCase()
-            && c.type === 'spending'
+          c => c.name.toLowerCase() === result.suggestedCategory.toLowerCase() && c.type === 'spending'
         )
         if (matchedCat) {
           txCategoryId.value = matchedCat.id
@@ -98,15 +90,14 @@ export function useTransactionsController() {
   const txType = ref<'income' | 'spending'>('spending')
   const txAmount = ref(0)
   const txCategoryId = ref<string | undefined>(undefined)
+  const txWalletId = ref<string | undefined>(undefined)
   const txNotes = ref('')
   const txDate = ref(toDateInputValue(new Date()))
 
   const isDeleteConfirmOpen = ref(false)
   const transactionToDelete = ref<Transaction | null>(null)
 
-  const formCategories = computed(() => {
-    return getCategories(txType.value)
-  })
+  const formCategories = computed(() => getCategories(txType.value))
 
   watch(txType, (newType) => {
     const cats = getCategories(newType)
@@ -120,6 +111,7 @@ export function useTransactionsController() {
     txType.value = 'spending'
     txAmount.value = 0
     txNotes.value = ''
+    txWalletId.value = defaultWallet.value?.id
     txDate.value = toDateInputValue(new Date())
     const cats = getCategories('spending')
     txCategoryId.value = cats.length > 0 ? cats[0]?.id : undefined
@@ -127,13 +119,7 @@ export function useTransactionsController() {
   }
 
   const handleSaveTransaction = async () => {
-    if (
-      !txName.value.trim()
-      || !txCategoryId.value
-      || !(txAmount.value > 0)
-      || !txDate.value
-      || isSaving.value
-    ) {
+    if (!txName.value.trim() || !txCategoryId.value || !(txAmount.value > 0) || !txDate.value || isSaving.value) {
       return
     }
 
@@ -147,7 +133,8 @@ export function useTransactionsController() {
           txAmount.value,
           txType.value,
           txNotes.value,
-          txDate.value
+          txDate.value,
+          txWalletId.value
         )
       } else {
         await addTransaction(
@@ -156,9 +143,11 @@ export function useTransactionsController() {
           txAmount.value,
           txType.value,
           txNotes.value,
-          txDate.value
+          txDate.value,
+          txWalletId.value
         )
       }
+      await fetchWallets(true)
       isModalOpen.value = false
     } catch (error) {
       console.error('Failed to save transaction:', error)
@@ -174,6 +163,7 @@ export function useTransactionsController() {
     txType.value = t.type
     txAmount.value = t.amount
     txCategoryId.value = t.categoryId
+    txWalletId.value = t.walletId || undefined
     txNotes.value = t.notes || ''
     txDate.value = toDateInputValue(t.transactionDate)
     isModalOpen.value = true
@@ -189,6 +179,7 @@ export function useTransactionsController() {
     isSaving.value = true
     try {
       await deleteTransaction(transactionToDelete.value.id)
+      await fetchWallets(true)
       isDeleteConfirmOpen.value = false
       transactionToDelete.value = null
     } catch (error) {
@@ -218,6 +209,7 @@ export function useTransactionsController() {
     txType,
     txAmount,
     txCategoryId,
+    txWalletId,
     txNotes,
     txDate,
     isDeleteConfirmOpen,

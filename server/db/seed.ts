@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/libsql'
 import { createClient } from '@libsql/client'
 import { inArray } from 'drizzle-orm'
-import { budgets, categories, transactions, users } from './schema'
+import { budgets, categories, transactions, users, wallets } from './schema'
 import { hashUserPassword } from '../utils/password'
 import { SEED_CATEGORIES, SEED_TRANSACTIONS } from './seedData'
 
@@ -27,6 +27,36 @@ const SEED_USERS = [
   { name: 'Bob', email: 'bob@myokane.com' }
 ]
 
+const SEED_WALLETS = [
+  {
+    name: 'BCA Debit',
+    type: 'bank',
+    accountNumber: '8839',
+    color: 'emerald',
+    icon: 'i-lucide-credit-card',
+    initialBalance: 5000000,
+    isDefault: true
+  },
+  {
+    name: 'GoPay',
+    type: 'ewallet',
+    accountNumber: '6789',
+    color: 'cyan',
+    icon: 'i-lucide-wallet',
+    initialBalance: 500000,
+    isDefault: false
+  },
+  {
+    name: 'Emergency Savings',
+    type: 'savings',
+    accountNumber: '1102',
+    color: 'indigo',
+    icon: 'i-lucide-landmark',
+    initialBalance: 20000000,
+    isDefault: false
+  }
+]
+
 async function clearPreviousSeedUsers() {
   const emails = SEED_USERS.map(u => u.email)
   const existing = await db
@@ -38,6 +68,7 @@ async function clearPreviousSeedUsers() {
   await db.delete(transactions).where(inArray(transactions.userId, ids))
   await db.delete(budgets).where(inArray(budgets.userId, ids))
   await db.delete(categories).where(inArray(categories.userId, ids))
+  await db.delete(wallets).where(inArray(wallets.userId, ids))
   await db.delete(users).where(inArray(users.id, ids))
 }
 
@@ -65,6 +96,13 @@ async function main() {
       .values(SEED_CATEGORIES.map(cat => ({ ...cat, userId: user.id })))
       .returning()
 
+    const insertedWallets = await db
+      .insert(wallets)
+      .values(SEED_WALLETS.map(w => ({ ...w, userId: user.id })))
+      .returning()
+
+    const defaultWallet = insertedWallets.find(w => w.isDefault) ?? insertedWallets[0]
+
     const catMap = new Map<string, string>()
     for (const cat of insertedCats) {
       catMap.set(`${cat.name}:${cat.type}`, cat.id)
@@ -85,13 +123,14 @@ async function main() {
       notes: tx.notes,
       transactionDate: tx.transactionDate,
       categoryId: getCatId(tx.category.name, tx.category.type),
+      walletId: defaultWallet?.id,
       userId: user.id
     }))
 
     await db.insert(transactions).values(initialTransactions)
 
     console.log(
-      `  ${seedUser.email}: 1 user, ${insertedCats.length} categories, ${initialTransactions.length} transactions`
+      `  ${seedUser.email}: 1 user, ${insertedWallets.length} wallets, ${insertedCats.length} categories, ${initialTransactions.length} transactions`
     )
   }
 

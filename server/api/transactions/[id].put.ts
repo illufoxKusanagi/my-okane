@@ -73,6 +73,7 @@ export default defineEventHandler(async (event) => {
         type: validation.data.type,
         amount: validation.data.amount,
         categoryId: validation.data.categoryId,
+        walletId: validation.data.walletId,
         notes: validation.data.notes,
         transactionDate: validation.data.transactionDate
       })

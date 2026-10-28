@@ -1,6 +1,6 @@
 import { budgets, categories, transactions } from '~~/server/db/schema'
 import { db } from '~~/server/db'
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import { throwSafeServerError } from '~~/server/utils/safeError'
 
 export default defineEventHandler(async (event) => {
@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'spending'),
+          isNull(transactions.transferWalletId),
           sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )
@@ -47,6 +48,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'income'),
+          isNull(transactions.transferWalletId),
           sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )
@@ -58,7 +60,8 @@ export default defineEventHandler(async (event) => {
       .where(
         and(
           eq(transactions.userId, userId),
-          eq(transactions.type, 'spending')
+          eq(transactions.type, 'spending'),
+          isNull(transactions.transferWalletId)
         )
       )
     const allTimeSpending = Number(allTimeSpendingResult[0]?.total || 0)
@@ -69,7 +72,8 @@ export default defineEventHandler(async (event) => {
       .where(
         and(
           eq(transactions.userId, userId),
-          eq(transactions.type, 'income')
+          eq(transactions.type, 'income'),
+          isNull(transactions.transferWalletId)
         )
       )
     const allTimeIncome = Number(allTimeIncomeResult[0]?.total || 0)
@@ -87,7 +91,7 @@ export default defineEventHandler(async (event) => {
         and(
           eq(budgets.userId, userId),
           eq(budgets.month, month),
-          sql`${budgets.categoryId} is not null`
+          isNotNull(budgets.categoryId)
         )
       )
 
@@ -100,6 +104,7 @@ export default defineEventHandler(async (event) => {
       .where(
         and(
           eq(transactions.userId, userId),
+          isNull(transactions.transferWalletId),
           sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
         )
       )

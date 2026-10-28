@@ -19,6 +19,29 @@ export const users = sqliteTable('users', {
     .notNull()
 })
 
+export const wallets = sqliteTable(
+  'wallets',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    name: text('name').notNull(),
+    type: text('type').notNull(), // 'bank' | 'cash' | 'ewallet' | 'savings' | 'credit'
+    accountNumber: text('account_number'),
+    color: text('color').default('emerald'),
+    icon: text('icon').default('i-lucide-credit-card'),
+    initialBalance: integer('initial_balance').notNull().default(0),
+    isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull()
+  },
+  table => [index('wallets_user_id_idx').on(table.userId)]
+)
+
 export const transactions = sqliteTable(
   'transactions',
   {
@@ -35,6 +58,12 @@ export const transactions = sqliteTable(
     categoryId: text('category_id')
       .references(() => categories.id, { onDelete: 'cascade' })
       .notNull(),
+    walletId: text('wallet_id').references(() => wallets.id, {
+      onDelete: 'set null'
+    }),
+    transferWalletId: text('transfer_wallet_id').references(() => wallets.id, {
+      onDelete: 'set null'
+    }),
     userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
@@ -45,7 +74,8 @@ export const transactions = sqliteTable(
   table => [
     index('transactions_user_id_idx').on(table.userId),
     index('transactions_category_id_idx').on(table.categoryId),
-    index('transactions_user_date_idx').on(table.userId, table.transactionDate)
+    index('transactions_user_date_idx').on(table.userId, table.transactionDate),
+    index('transactions_wallet_id_idx').on(table.walletId)
   ]
 )
 
@@ -98,3 +128,5 @@ export type NewTransaction = typeof transactions.$inferInsert
 export type NewCategory = typeof categories.$inferInsert
 export type Budget = typeof budgets.$inferSelect
 export type NewBudget = typeof budgets.$inferInsert
+export type Wallet = typeof wallets.$inferSelect
+export type NewWallet = typeof wallets.$inferInsert

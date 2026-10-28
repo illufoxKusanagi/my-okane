@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppModal from '~/components/ui/AppModal.vue'
 import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
 import type { Category, Transaction } from '~/composables/useFinance'
@@ -17,6 +18,7 @@ const txAmount = defineModel<number>('amount', { required: true })
 const txCategoryId = defineModel<string | undefined>('categoryId', {
   required: true
 })
+const txWalletId = defineModel<string | undefined>('walletId')
 const txNotes = defineModel<string>('notes', { required: true })
 const txDate = defineModel<string>('date', { required: true })
 
@@ -46,11 +48,13 @@ const isInvalid = computed(
       v-model:name="txName"
       v-model:type="txType"
       v-model:category-id="txCategoryId"
+      v-model:wallet-id="txWalletId"
       v-model:amount="txAmount"
       v-model:date="txDate"
       v-model:notes="txNotes"
       show-type
       show-category
+      show-wallet
       :categories="categories"
     />
   </AppModal>

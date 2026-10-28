@@ -16,7 +16,7 @@ const { formatCurrency } = useFormatters()
 
 <template>
   <div
-    class="flex flex-col justify-between p-6 rounded-3xl bg-primary-600 dark:bg-primary-950/40 text-white border border-primary-500/20 dark:border-primary-900/30 shadow-lg relative overflow-hidden group transition-all duration-300"
+    class="flex flex-col justify-between h-full w-full p-6 rounded-3xl bg-primary-600 dark:bg-primary-950/40 text-white border border-primary-500/20 dark:border-primary-900/30 shadow-lg relative overflow-hidden group transition-all duration-300"
   >
     <!-- Decorative Circle -->
     <div
@@ -29,7 +29,9 @@ const { formatCurrency } = useFormatters()
           name="i-lucide-wallet"
           class="w-5 h-5"
         />
-        <span class="text-sm font-semibold tracking-wide uppercase">{{ $t('dashboard.mainAccountBalance') }}</span>
+        <span class="text-sm font-semibold tracking-wide uppercase">{{
+          $t("dashboard.mainAccountBalance")
+        }}</span>
       </div>
       <div class="h-10 flex items-center mb-4">
         <USkeleton
@@ -48,7 +50,7 @@ const { formatCurrency } = useFormatters()
     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-sm">
       <div>
         <p class="opacity-80 text-xs">
-          {{ $t('dashboard.thisMonthIncome') }}
+          {{ $t("dashboard.thisMonthIncome") }}
         </p>
         <USkeleton
           v-if="loading"
@@ -63,7 +65,7 @@ const { formatCurrency } = useFormatters()
       </div>
       <div>
         <p class="opacity-80 text-xs">
-          {{ $t('dashboard.thisMonthSpent') }}
+          {{ $t("dashboard.thisMonthSpent") }}
         </p>
         <USkeleton
           v-if="loading"

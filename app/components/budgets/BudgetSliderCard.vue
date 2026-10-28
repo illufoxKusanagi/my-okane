@@ -1,13 +1,19 @@
 <script setup lang="ts">
-const props = defineProps<{
-  currentView: 'month' | 'week'
-  monthlyBudgetLimit: number
-  monthlySpent: number
-  monthlyRemaining: number
-  weeklyBudgetLimit: number
-  weeklySpent: number
-  weeklyRemaining: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    currentView: 'month' | 'week'
+    monthlyBudgetLimit: number
+    monthlySpent: number
+    monthlyRemaining: number
+    weeklyBudgetLimit: number
+    weeklySpent: number
+    weeklyRemaining: number
+    loading?: boolean
+  }>(),
+  {
+    loading: false
+  }
+)
 
 const emit = defineEmits<{
   (e: 'set-view', view: 'month' | 'week'): void
@@ -47,7 +53,7 @@ const viewLabel = computed(() =>
 
 <template>
   <div
-    class="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-primary-600 to-primary-700 dark:from-neutral-900 dark:to-neutral-900/60 text-white border border-primary-500/20 dark:border-neutral-800/50 shadow-lg transition-all duration-300 select-none"
+    class="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-primary-600 to-primary-700 dark:from-neutral-900 dark:to-neutral-900/60 text-white border border-primary-500/20 dark:border-neutral-800/50 shadow-lg transition-all duration-300 select-none h-full w-full"
   >
     <div class="px-4 sm:px-8 text-center flex flex-col items-center">
       <!-- Title -->
@@ -97,8 +103,16 @@ const viewLabel = computed(() =>
         </button>
       </div>
 
+      <!-- Loading Skeleton -->
+      <template v-if="loading">
+        <div class="flex flex-col items-center py-2">
+          <USkeleton class="h-8 w-44 rounded-xl bg-white/20 mb-2" />
+          <USkeleton class="h-4 w-32 rounded-lg bg-white/20" />
+        </div>
+      </template>
+
       <!-- Over Budget -->
-      <template v-if="isOverBudget">
+      <template v-else-if="isOverBudget">
         <h2 class="text-3xl font-extrabold tracking-tight text-rose-200 dark:text-rose-300">
           {{ formatCurrency(-activeRemaining) }} {{ $t('dashboard.over') }}
         </h2>
@@ -152,7 +166,7 @@ const viewLabel = computed(() =>
 
       <!-- Progress bar -->
       <div
-        v-if="activeLimit > 0"
+        v-if="!loading && activeLimit > 0"
         class="w-full max-w-md mt-5"
       >
         <div

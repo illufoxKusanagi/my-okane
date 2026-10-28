@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import AppModal from '~/components/ui/AppModal.vue'
 import TransactionFormFields from '~/components/transactions/TransactionFormFields.vue'
 
@@ -24,6 +25,7 @@ const props = defineProps({
 })
 
 const { addTransaction, getCategories } = useFinance()
+const { defaultWallet, fetchWallets } = useWallets()
 const { formatCurrency, toDateInputValue } = useFormatters()
 
 const iconName = computed(
@@ -36,11 +38,22 @@ const iconName = computed(
 
 const transactionName = ref('')
 const selectedCategory = ref<string | undefined>(undefined)
+const selectedWalletId = ref<string | undefined>(undefined)
 const transactionAmount = ref(0)
 const transactionDate = ref(toDateInputValue(new Date()))
 const transactionNotes = ref('')
 const isSaving = ref(false)
 const categories = computed(() => getCategories(props.type))
+
+watch(
+  defaultWallet,
+  (dw) => {
+    if (dw && !selectedWalletId.value) {
+      selectedWalletId.value = dw.id
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   categories,
@@ -74,12 +87,15 @@ const handleAddTransaction = async () => {
       transactionAmount.value,
       props.type,
       transactionNotes.value.trim() || undefined,
-      transactionDate.value
+      transactionDate.value,
+      selectedWalletId.value
     )
+    await fetchWallets(true)
     transactionName.value = ''
     transactionNotes.value = ''
     const cats = getCategories(props.type)
     selectedCategory.value = cats.length > 0 ? cats[0]?.id : undefined
+    selectedWalletId.value = defaultWallet.value?.id
     transactionAmount.value = 0
     transactionDate.value = toDateInputValue(new Date())
     isOpen.value = false
@@ -142,10 +158,12 @@ const handleAddTransaction = async () => {
       <TransactionFormFields
         v-model:name="transactionName"
         v-model:category-id="selectedCategory"
+        v-model:wallet-id="selectedWalletId"
         v-model:amount="transactionAmount"
         v-model:date="transactionDate"
         v-model:notes="transactionNotes"
         show-category
+        show-wallet
         :categories="categories"
       />
     </AppModal>

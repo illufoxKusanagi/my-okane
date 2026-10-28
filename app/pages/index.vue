@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import BalanceCard from '~/components/budgets/BalanceCard.vue'
 import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
-import BalanceCard from '~/components/budgets/BalanceCard.vue'
+import WalletDeck from '~/components/wallets/WalletDeck.vue'
+import BudgetSliderCard from '~/components/budgets/BudgetSliderCard.vue'
 
 const { t } = useI18n()
 
@@ -13,13 +15,20 @@ useSeoMeta({
 const {
   transactions,
   isLoading,
+  fetchAll,
   getTotalIncome,
   getTotalSpending,
   getCategories
 } = useFinance()
+const { wallets, totalNetWorth, fetchWallets } = useWallets()
 
 const totalIncome = computed(() => getTotalIncome())
 const totalSpending = computed(() => getTotalSpending())
+const totalBalance = computed(() =>
+  wallets.value.length > 0
+    ? totalNetWorth.value
+    : totalIncome.value - totalSpending.value
+)
 const spendingCategories = computed(() => getCategories('spending'))
 const incomeCategories = computed(() => getCategories('income'))
 
@@ -31,31 +40,38 @@ const _now = new Date()
 const currentMonthStr = ref(
   `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}`
 )
-const { data: budgetData, status: budgetStatus } = await useFetch(
-  '/api/budgets',
-  {
-    query: { month: currentMonthStr }
+const { data: budgetData, status: budgetStatus, refresh: refreshBudgets }
+  = useFetch('/api/budgets', {
+    query: { month: currentMonthStr.value }
+  })
+
+onMounted(() => {
+  fetchAll()
+  fetchWallets(true)
+  if (!budgetData.value) {
+    refreshBudgets()
   }
-)
+})
 
 const isBudgetLoading = computed(() => budgetStatus.value === 'pending')
 const isPageLoading = computed(() => isBudgetLoading.value || isLoading.value)
 
-// All-time main account balance: total cumulative income minus total cumulative spending
-const mainAccountBalance = computed(
-  () => totalIncome.value - totalSpending.value
-)
+// Monthly income and spent for current month sub-labels
+const monthlyIncome = computed(() => budgetData.value?.totalIncome ?? totalIncome.value)
+const monthlySpent = computed(() => budgetData.value?.totalSpending ?? totalSpending.value)
 
-// Monthly income & spent for current month sub-labels on BalanceCard
-const monthlyIncome = computed(() => budgetData.value?.totalIncome ?? 0)
-const monthlySpent = computed(() => budgetData.value?.totalSpending ?? 0)
-
-const monthlyBudgetLimit = computed(
-  () => budgetData.value?.globalBudget?.amount || 0
+const totalPocketBudgetLimit = computed(() =>
+  budgetData.value?.pockets?.reduce((sum, p) => sum + (p.budgetAmount || 0), 0) ?? 0
 )
-const monthlyRemaining = computed(
-  () => budgetData.value?.globalBudget?.remaining || 0
+const monthlyBudgetLimit = computed(() =>
+  budgetData.value?.globalBudget?.amount || totalPocketBudgetLimit.value || 0
 )
+const monthlyRemaining = computed(() => {
+  if (budgetData.value?.globalBudget?.amount) {
+    return budgetData.value.globalBudget.remaining
+  }
+  return totalPocketBudgetLimit.value > 0 ? totalPocketBudgetLimit.value - monthlySpent.value : 0
+})
 
 const startOfWeekDate = computed(() => {
   const now = new Date()
@@ -87,23 +103,15 @@ const weeklyRemaining = computed(
   <div
     class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
   >
-    <!-- Hero Financial Overview: Balance & Budget Slider / Skeletons -->
+    <!-- Hero Financial Overview: Balance Card & Budget Slider / Skeletons -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <BalanceCard
-        :balance="mainAccountBalance"
+        :balance="totalBalance"
         :total-income="monthlyIncome"
         :total-spending="monthlySpent"
         :loading="isPageLoading"
-        class="h-full"
       />
-      <div
-        v-if="isPageLoading"
-        class="w-full"
-      >
-        <USkeleton class="h-60 rounded-3xl w-full" />
-      </div>
       <BudgetSliderCard
-        v-else-if="budgetData"
         :current-view="currentView"
         :monthly-budget-limit="monthlyBudgetLimit"
         :monthly-spent="monthlySpent"
@@ -111,10 +119,13 @@ const weeklyRemaining = computed(
         :weekly-budget-limit="weeklyBudgetLimit"
         :weekly-spent="weeklySpent"
         :weekly-remaining="weeklyRemaining"
-        class="h-full"
+        :loading="isBudgetLoading"
         @set-view="currentView = $event"
       />
     </div>
+
+    <!-- Accounts & Banking Cards Carousel -->
+    <WalletDeck :loading="isPageLoading" />
 
     <!-- Income and Spending Quick-Add Summary Cards / Skeletons -->
     <div
@@ -160,7 +171,7 @@ const weeklyRemaining = computed(
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-3">
         <p class="text-lg font-bold tracking-tight text-highlighted">
-          {{ $t('dashboard.spendingByCategory') }}
+          {{ $t("dashboard.spendingByCategory") }}
         </p>
         <AddCategoryModal type="spending" />
       </div>
@@ -188,7 +199,7 @@ const weeklyRemaining = computed(
         v-else
         class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
       >
-        {{ $t('dashboard.noSpendingData') }}
+        {{ $t("dashboard.noSpendingData") }}
       </div>
     </div>
 
@@ -196,7 +207,7 @@ const weeklyRemaining = computed(
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-3">
         <p class="text-lg font-bold tracking-tight text-highlighted">
-          {{ $t('dashboard.incomeByCategory') }}
+          {{ $t("dashboard.incomeByCategory") }}
         </p>
         <AddCategoryModal type="income" />
       </div>
@@ -224,7 +235,7 @@ const weeklyRemaining = computed(
         v-else
         class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
       >
-        {{ $t('dashboard.noIncomeData') }}
+        {{ $t("dashboard.noIncomeData") }}
       </div>
     </div>
   </div>

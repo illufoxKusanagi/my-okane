@@ -43,7 +43,7 @@ export const CategorySchema = z.object({
   color: z.enum(ALLOWED_COLORS).optional()
 })
 
-function isValidCalendarDate(val: string): boolean {
+export function isValidCalendarDate(val: string): boolean {
   const match
     = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(val)
   if (!match) {
@@ -69,6 +69,7 @@ export const TransactionSchema = z.object({
     .positive('Amount must be positive')
     .max(1_000_000_000_000, 'Amount is unrealistically large'),
   categoryId: z.string().min(1, 'Category ID is required'),
+  walletId: z.string().optional().nullable(),
   notes: z.string().max(2000, 'Notes too long').optional().nullable(),
   transactionDate: z
     .string()
