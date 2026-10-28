@@ -5,8 +5,10 @@ import TransactionFilterBar from '~/components/transactions/TransactionFilterBar
 import TransactionListItem from '~/components/transactions/TransactionListItem.vue'
 import { useTransactionsController } from './useTransactionsController'
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'Transactions'
+  title: () => t('transactions.title')
 })
 
 const {
@@ -52,7 +54,7 @@ const {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-highlighted">
-          Transactions
+          {{ $t('transactions.title') }}
         </h1>
         <p class="text-xs sm:text-sm text-muted">
           Manage and track your income and expenses
@@ -63,18 +65,18 @@ const {
           icon="i-lucide-camera"
           color="neutral"
           variant="outline"
-          aria-label="Scan receipt"
+          :aria-label="$t('transactions.scanReceipt')"
           @click="triggerFileSelect"
         >
-          <span class="sr-only sm:not-sr-only">Scan Receipt</span>
+          <span class="sr-only sm:not-sr-only">{{ $t('transactions.scanReceipt') }}</span>
         </UButton>
         <UButton
           icon="i-lucide-plus"
           color="primary"
-          aria-label="Add transaction"
+          :aria-label="$t('transactions.addTransaction')"
           @click="openAddModal"
         >
-          <span class="sr-only sm:not-sr-only">Add Transaction</span>
+          <span class="sr-only sm:not-sr-only">{{ $t('transactions.addTransaction') }}</span>
         </UButton>
       </div>
     </div>
@@ -143,15 +145,15 @@ const {
         class="w-12 h-12 text-muted mb-3"
       />
       <p class="font-semibold text-highlighted">
-        No transactions found
+        {{ $t('transactions.noTransactionsFound') }}
       </p>
       <p
         class="text-sm text-muted mt-1 mb-4"
       >
-        Try adjusting your filters or add a new transaction
+        {{ $t('transactions.createFirstTransaction') }}
       </p>
       <UButton
-        label="Add Transaction"
+        :label="$t('transactions.addTransaction')"
         icon="i-lucide-plus"
         size="sm"
         @click="openAddModal"
@@ -188,21 +190,19 @@ const {
     <!-- Delete Confirmation Modal -->
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
-      title="Delete Transaction?"
+      :title="$t('transactions.deleteTransaction')"
       :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
-      Are you sure you want to delete this transaction for
-      <strong>{{ transactionToDelete?.name }}</strong>?
-      This action cannot be undone.
+      {{ $t('transactions.deleteConfirm', { name: transactionToDelete?.name }) }}
     </DeleteConfirmModal>
 
     <!-- Scanning Loading Overlay -->
     <UModal
       v-model:open="isScanning"
       :dismissible="false"
-      title="Scanning receipt image"
-      description="Parsing items and finding best category matches with Gemini AI"
+      :title="$t('transactions.scanningTitle')"
+      :description="$t('transactions.scanningDescription')"
     >
       <template #content>
         <div class="flex flex-col items-center justify-center p-8 gap-4">
@@ -211,10 +211,10 @@ const {
             class="w-12 h-12 text-primary animate-spin"
           />
           <p class="font-semibold text-highlighted">
-            Scanning receipt image...
+            {{ $t('transactions.scanningTitle') }}
           </p>
           <p class="text-sm text-muted">
-            Parsing items and finding best category matches with Gemini AI
+            {{ $t('transactions.scanningDescription') }}
           </p>
         </div>
       </template>

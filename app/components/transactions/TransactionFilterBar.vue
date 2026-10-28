@@ -30,7 +30,7 @@ defineEmits<{
       <UInput
         v-model="searchQuery"
         icon="i-lucide-search"
-        placeholder="Search transactions..."
+        :placeholder="$t('transactions.searchPlaceholder')"
         class="w-full"
       />
     </div>
@@ -42,9 +42,9 @@ defineEmits<{
         <USelect
           v-model="selectedType"
           :items="[
-            { label: 'All Types', value: 'all' },
-            { label: 'Income', value: 'income' },
-            { label: 'Spending', value: 'spending' }
+            { label: $t('transactions.allTypes'), value: 'all' },
+            { label: $t('transactions.income'), value: 'income' },
+            { label: $t('transactions.spending'), value: 'spending' }
           ]"
           class="w-full"
         />
@@ -54,7 +54,7 @@ defineEmits<{
         <USelect
           v-model="selectedCategoryId"
           :items="[
-            { label: 'All Categories', value: 'all' },
+            { label: $t('transactions.allCategories'), value: 'all' },
             ...categories.map((c) => ({ label: c.name, value: c.id }))
           ]"
           class="w-full"
@@ -67,10 +67,10 @@ defineEmits<{
         color="neutral"
         variant="ghost"
         size="sm"
-        title="Reset all filters"
+        :title="$t('common.reset')"
         @click="$emit('reset')"
       >
-        <span class="sr-only sm:not-sr-only">Reset</span>
+        <span class="sr-only sm:not-sr-only">{{ $t('common.reset') }}</span>
       </UButton>
     </div>
   </div>

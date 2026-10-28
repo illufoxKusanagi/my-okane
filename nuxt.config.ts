@@ -10,7 +10,8 @@ export default defineNuxtConfig({
     '@nuxthub/core',
     '@sentry/nuxt/module',
     'nuxt-auth-utils',
-    '@vite-pwa/nuxt'
+    '@vite-pwa/nuxt',
+    '@nuxtjs/i18n'
   ],
 
   devtools: {
@@ -108,6 +109,26 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'id',
+    locales: [
+      {
+        code: 'id',
+        name: 'Bahasa Indonesia',
+        language: 'id-ID',
+        file: 'id.json'
+      },
+      {
+        code: 'en',
+        name: 'English',
+        language: 'en-US',
+        file: 'en.json'
+      }
+    ],
+    langDir: 'locales'
   },
 
   pwa: {

@@ -36,8 +36,8 @@ const isInvalid = computed(
 <template>
   <AppModal
     v-model:open="isOpen"
-    :title="props.editingTransaction ? 'Edit Transaction' : 'Add Transaction'"
-    :submit-label="props.editingTransaction ? 'Save Changes' : 'Create'"
+    :title="props.editingTransaction ? $t('transactions.editTransaction') : $t('transactions.addTransaction')"
+    :submit-label="props.editingTransaction ? $t('common.saveChanges') : $t('common.create')"
     :loading="props.loading"
     :disabled="isInvalid"
     @submit="$emit('submit')"

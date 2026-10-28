@@ -6,8 +6,10 @@ import PocketCard from '~/components/budgets/PocketCard.vue'
 import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 import { useBudgetsController } from './useBudgetsController'
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'Budgets'
+  title: () => t('budgets.title')
 })
 
 const {
@@ -65,14 +67,14 @@ const { formatMonthLabel } = useFormatters()
 
       <div class="flex flex-col md:flex-row w-full md:w-fit items-center gap-2">
         <UButton
-          label="Create Pocket"
+          :label="$t('budgets.createPocket')"
           icon="i-lucide-plus"
           color="primary"
           class="w-full"
           @click="openCreatePocketModal"
         />
         <UButton
-          label="Set Monthly Limit"
+          :label="$t('budgets.monthlyLimit')"
           icon="i-lucide-sliders-horizontal"
           color="neutral"
           variant="outline"

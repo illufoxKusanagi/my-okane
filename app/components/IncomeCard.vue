@@ -127,14 +127,14 @@ const handleAddTransaction = async () => {
       icon="i-lucide-plus"
       class="rounded-full shadow-sm z-10"
       size="md"
-      :aria-label="`Add ${type === 'income' ? 'Income' : 'Spending'}`"
+      :aria-label="type === 'income' ? $t('dashboard.addIncome') : $t('dashboard.addSpending')"
       @click="isOpen = true"
     />
 
     <AppModal
       v-model:open="isOpen"
-      :title="`Add ${type === 'income' ? 'Income' : 'Spending'}`"
-      submit-label="Add"
+      :title="type === 'income' ? $t('dashboard.addIncome') : $t('dashboard.addSpending')"
+      :submit-label="$t('common.add')"
       :loading="isSaving"
       :disabled="isInvalid"
       @submit="handleAddTransaction"
