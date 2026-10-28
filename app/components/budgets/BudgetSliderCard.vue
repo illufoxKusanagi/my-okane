@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { formatCurrency, getProgressColor } = useFormatters()
+const { t } = useI18n()
 
 const activeLimit = computed(() =>
   props.currentView === 'month'
@@ -40,7 +41,7 @@ const clampedSpent = computed(() =>
   Math.min(activeSpent.value, activeLimit.value)
 )
 const viewLabel = computed(() =>
-  props.currentView === 'month' ? 'monthly' : 'weekly'
+  props.currentView === 'month' ? t('dashboard.monthly') : t('dashboard.weekly')
 )
 </script>
 
@@ -58,7 +59,7 @@ const viewLabel = computed(() =>
         <span
           class="text-xs font-black uppercase tracking-widest text-primary-100 dark:text-neutral-400"
         >
-          {{ viewLabel }} budget overview
+          {{ $t('dashboard.budgetOverview', { period: viewLabel }) }}
         </span>
       </div>
 
@@ -66,7 +67,7 @@ const viewLabel = computed(() =>
       <div
         class="flex items-center gap-1 p-1 rounded-full bg-white/15 dark:bg-neutral-800/80 mb-4"
         role="group"
-        aria-label="Budget period"
+        :aria-label="$t('dashboard.budgetPeriod')"
       >
         <button
           type="button"
@@ -79,7 +80,7 @@ const viewLabel = computed(() =>
           :aria-pressed="currentView === 'month'"
           @click="emit('set-view', 'month')"
         >
-          Month
+          {{ $t('dashboard.month') }}
         </button>
         <button
           type="button"
@@ -92,20 +93,24 @@ const viewLabel = computed(() =>
           :aria-pressed="currentView === 'week'"
           @click="emit('set-view', 'week')"
         >
-          Week
+          {{ $t('dashboard.week') }}
         </button>
       </div>
 
       <!-- Over Budget -->
       <template v-if="isOverBudget">
         <h2 class="text-3xl font-extrabold tracking-tight text-rose-200 dark:text-rose-300">
-          {{ formatCurrency(-activeRemaining) }} over
+          {{ formatCurrency(-activeRemaining) }} {{ $t('dashboard.over') }}
         </h2>
         <p class="text-xs text-primary-100/90 dark:text-neutral-400 mt-1">
-          spent {{ formatCurrency(activeSpent) }} of
-          {{ formatCurrency(activeLimit) }}
-          {{ viewLabel }} limit
-          {{ currentView === "week" ? "(est.)" : "" }}
+          {{
+            $t('dashboard.spentOfLimit', {
+              spent: formatCurrency(activeSpent),
+              limit: formatCurrency(activeLimit),
+              period: viewLabel,
+              est: currentView === 'week' ? $t('dashboard.est') : ''
+            })
+          }}
         </p>
       </template>
 
@@ -115,9 +120,13 @@ const viewLabel = computed(() =>
           {{ formatCurrency(activeRemaining) }}
         </h2>
         <p class="text-xs text-primary-100/90 dark:text-neutral-400 mt-1">
-          remaining of {{ formatCurrency(activeLimit) }}
-          {{ viewLabel }} limit
-          {{ currentView === "week" ? "(est.)" : "" }}
+          {{
+            $t('dashboard.remainingOfLimit', {
+              limit: formatCurrency(activeLimit),
+              period: viewLabel,
+              est: currentView === 'week' ? $t('dashboard.est') : ''
+            })
+          }}
         </p>
       </template>
 
@@ -126,10 +135,14 @@ const viewLabel = computed(() =>
         <h2
           class="text-xl font-bold text-primary-200 dark:text-neutral-400 py-2"
         >
-          No {{ currentView === "month" ? "Monthly" : "Weekly" }} Budget Set
+          {{
+            $t('dashboard.noBudgetSet', {
+              period: currentView === 'month' ? $t('dashboard.month') : $t('dashboard.week')
+            })
+          }}
         </h2>
         <UButton
-          label="Configure in Budgets"
+          :label="$t('dashboard.configureInBudgets')"
           size="xs"
           color="primary"
           variant="subtle"
@@ -145,7 +158,7 @@ const viewLabel = computed(() =>
         <div
           class="flex justify-between text-[10px] opacity-75 mb-1.5 font-semibold"
         >
-          <span>Spent: {{ formatCurrency(activeSpent) }}</span>
+          <span>{{ $t('dashboard.spentLabel', { amount: formatCurrency(activeSpent) }) }}</span>
           <span>{{ progressPct }}%</span>
         </div>
         <UProgress

@@ -29,7 +29,7 @@ const { formatCurrency } = useFormatters()
           name="i-lucide-wallet"
           class="w-5 h-5"
         />
-        <span class="text-sm font-semibold tracking-wide uppercase">Main Account Balance</span>
+        <span class="text-sm font-semibold tracking-wide uppercase">{{ $t('dashboard.mainAccountBalance') }}</span>
       </div>
       <div class="h-10 flex items-center mb-4">
         <USkeleton
@@ -48,7 +48,7 @@ const { formatCurrency } = useFormatters()
     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-sm">
       <div>
         <p class="opacity-80 text-xs">
-          This Month Income
+          {{ $t('dashboard.thisMonthIncome') }}
         </p>
         <USkeleton
           v-if="loading"
@@ -63,7 +63,7 @@ const { formatCurrency } = useFormatters()
       </div>
       <div>
         <p class="opacity-80 text-xs">
-          This Month Spent
+          {{ $t('dashboard.thisMonthSpent') }}
         </p>
         <USkeleton
           v-if="loading"

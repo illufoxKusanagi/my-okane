@@ -34,7 +34,7 @@ const progressPct = computed(() => {
             name="i-lucide-sliders-horizontal"
             class="w-5 h-5"
           />
-          <span class="text-sm font-semibold tracking-wide uppercase">Overall Monthly Limit</span>
+          <span class="text-sm font-semibold tracking-wide uppercase">{{ $t('budgets.overallMonthlyLimit') }}</span>
         </div>
         <UButton
           v-if="globalBudget"
@@ -56,16 +56,16 @@ const progressPct = computed(() => {
           "
         >
           {{ formatCurrency(globalBudget.remaining) }}
-          <span class="text-xs font-medium text-muted block mt-1">remaining of {{ formatCurrency(globalBudget.amount) }}</span>
+          <span class="text-xs font-medium text-muted block mt-1">{{ $t('budgets.remainingOf', { amount: formatCurrency(globalBudget.amount) }) }}</span>
         </h2>
       </template>
       <template v-else>
         <div class="flex flex-col items-center justify-center py-4 text-center">
           <p class="text-sm text-muted mb-2">
-            No global budget set for this month.
+            {{ $t('budgets.noGlobalBudget') }}
           </p>
           <UButton
-            label="Set Limit"
+            :label="$t('budgets.setLimit')"
             size="xs"
             @click="emit('set-budget', 0)"
           />
@@ -78,7 +78,7 @@ const progressPct = computed(() => {
       class="w-full"
     >
       <div class="flex justify-between text-xs mb-1 font-semibold">
-        <span class="text-muted">Progress</span>
+        <span class="text-muted">{{ $t('budgets.progress') }}</span>
         <span class="text-default">
           {{ progressPct }}%
         </span>

@@ -6,8 +6,10 @@ import PocketCard from '~/components/budgets/PocketCard.vue'
 import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 import { useBudgetsController } from './useBudgetsController'
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'Budgets'
+  title: () => t('budgets.title')
 })
 
 const {
@@ -65,14 +67,14 @@ const { formatMonthLabel } = useFormatters()
 
       <div class="flex flex-col md:flex-row w-full md:w-fit items-center gap-2">
         <UButton
-          label="Create Pocket"
+          :label="$t('budgets.createPocket')"
           icon="i-lucide-plus"
           color="primary"
           class="w-full"
           @click="openCreatePocketModal"
         />
         <UButton
-          label="Set Monthly Limit"
+          :label="$t('budgets.monthlyLimit')"
           icon="i-lucide-sliders-horizontal"
           color="neutral"
           variant="outline"
@@ -104,11 +106,10 @@ const { formatMonthLabel } = useFormatters()
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-xl font-extrabold text-highlighted tracking-tight">
-            Your Pockets
+            {{ $t('budgets.pockets') }}
           </h3>
           <p class="text-xs text-muted mt-1">
-            Each pocket is a category — spending pockets can have a monthly
-            limit.
+            {{ $t('budgets.subtitle') }}
           </p>
         </div>
       </div>
@@ -139,9 +140,9 @@ const { formatMonthLabel } = useFormatters()
         v-else
         class="p-8 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
       >
-        No categories yet. Create your first pocket to get started.
+        {{ $t('budgets.noPocketsFound') }}
         <UButton
-          label="Create Pocket"
+          :label="$t('budgets.createPocket')"
           icon="i-lucide-plus"
           color="primary"
           size="sm"
@@ -157,14 +158,14 @@ const { formatMonthLabel } = useFormatters()
       v-model:open="isModalOpen"
       :title="
         selectedCategoryId === null
-          ? 'Configure Overall Budget'
-          : 'Configure Pocket Budget'
+          ? $t('budgets.configureOverallBudget')
+          : $t('budgets.configurePocketLimit')
       "
-      submit-label="Save Budget"
+      :submit-label="$t('budgets.saveBudget')"
       :loading="isSaving"
       @submit="handleSaveBudget"
     >
-      <UFormField label="Budget Limit Amount">
+      <UFormField :label="$t('budgets.limitAmount')">
         <CurrencyInput
           v-model="budgetAmount"
           autofocus
@@ -175,8 +176,8 @@ const { formatMonthLabel } = useFormatters()
     <!-- Create Pocket Modal -->
     <AppModal
       v-model:open="isCreatePocketModalOpen"
-      title="Create New Pocket (Category)"
-      submit-label="Create Pocket"
+      :title="$t('budgets.createPocketTitle')"
+      :submit-label="$t('budgets.createPocket')"
       :loading="isSaving"
       :disabled="!pocketName.trim()"
       @submit="handleCreatePocket"
@@ -190,7 +191,7 @@ const { formatMonthLabel } = useFormatters()
 
       <UFormField
         v-if="pocketType === 'spending'"
-        label="Monthly Budget Limit (Optional)"
+        :label="$t('budgets.monthlyBudgetLimitOptional')"
       >
         <CurrencyInput v-model="pocketBudgetLimit" />
       </UFormField>

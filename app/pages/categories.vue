@@ -5,8 +5,10 @@ import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 import CategoryCard from '~/components/categories/CategoryCard.vue'
 import { useCategoriesController } from './useCategoriesController'
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'Categories'
+  title: () => t('categories.title')
 })
 
 const {
@@ -29,10 +31,10 @@ const {
   handleDeleteConfirm
 } = useCategoriesController()
 
-const categoryTabs = [
-  { label: 'Spending Categories', value: 'spending' },
-  { label: 'Income Categories', value: 'income' }
-]
+const categoryTabs = computed(() => [
+  { label: t('categories.spendingCategories'), value: 'spending' },
+  { label: t('categories.incomeCategories'), value: 'income' }
+])
 </script>
 
 <template>
@@ -41,19 +43,19 @@ const categoryTabs = [
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-highlighted">
-          Category Management
+          {{ $t('categories.title') }}
         </h1>
         <p class="text-xs sm:text-sm text-muted">
-          Organize your spending and income categories
+          {{ $t('categories.subtitle') }}
         </p>
       </div>
       <UButton
         icon="i-lucide-plus"
         color="primary"
-        aria-label="Add category"
+        :aria-label="$t('categories.addCategory')"
         @click="openCreateModal"
       >
-        <span class="sr-only sm:not-sr-only">Add Category</span>
+        <span class="sr-only sm:not-sr-only">{{ $t('categories.addCategory') }}</span>
       </UButton>
     </div>
 
@@ -99,15 +101,15 @@ const categoryTabs = [
         class="w-12 h-12 text-muted mb-3"
       />
       <p class="font-semibold text-highlighted">
-        No categories found
+        {{ $t('categories.noCategoriesFound') }}
       </p>
       <p
         class="text-sm text-muted mt-1 mb-4"
       >
-        Create one to start organizing your transactions
+        {{ $t('categories.createFirstCategory') }}
       </p>
       <UButton
-        label="Add Category"
+        :label="$t('categories.addCategory')"
         icon="i-lucide-plus"
         size="sm"
         @click="openCreateModal"
@@ -117,8 +119,8 @@ const categoryTabs = [
     <!-- Create/Edit Modal -->
     <AppModal
       v-model:open="isModalOpen"
-      :title="editingCategory ? 'Edit Category' : 'Create New Category'"
-      :submit-label="editingCategory ? 'Save Changes' : 'Create'"
+      :title="editingCategory ? $t('categories.editCategory') : $t('categories.createNewCategory')"
+      :submit-label="editingCategory ? $t('common.saveChanges') : $t('common.create')"
       :loading="isSaving"
       :disabled="!categoryName.trim()"
       @submit="handleSaveCategory"
@@ -134,13 +136,11 @@ const categoryTabs = [
     <!-- Delete Confirmation Modal -->
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
-      title="Delete Category?"
+      :title="$t('categories.deleteCategory')"
       :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
-      Are you sure you want to delete
-      <strong>{{ categoryToDelete?.name }}</strong>?
-      This will also delete all transactions associated with this category.
+      {{ $t('categories.deleteConfirmWarning', { name: categoryToDelete?.name }) }}
     </DeleteConfirmModal>
   </div>
 </template>

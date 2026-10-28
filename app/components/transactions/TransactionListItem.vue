@@ -96,7 +96,7 @@ const { formatDate } = useFormatters()
           size="xs"
           color="neutral"
           variant="ghost"
-          aria-label="Edit transaction"
+          :aria-label="$t('transactions.editAria')"
           @click="emit('edit')"
         />
         <UButton
@@ -104,7 +104,7 @@ const { formatDate } = useFormatters()
           size="xs"
           color="error"
           variant="ghost"
-          aria-label="Delete transaction"
+          :aria-label="$t('transactions.deleteAria')"
           @click="emit('delete')"
         />
       </div>

@@ -3,6 +3,7 @@ import type { ChartData, ChartOptions } from 'chart.js'
 
 export function useMonthlyTrend() {
   const { transactions } = useFinance()
+  const { t } = useI18n()
   const colorMode = useColorMode()
   const isDark = computed(() => colorMode.value === 'dark')
 
@@ -59,7 +60,7 @@ export function useMonthlyTrend() {
     labels: monthlyData.value.labels,
     datasets: [
       {
-        label: 'Income',
+        label: t('transactions.income'),
         data: monthlyData.value.incomeValues,
         backgroundColor: 'rgba(16, 185, 129, 0.8)', // Emerald-500
         borderRadius: 6,
@@ -67,7 +68,7 @@ export function useMonthlyTrend() {
         maxBarThickness: 16
       },
       {
-        label: 'Spending',
+        label: t('transactions.spending'),
         data: monthlyData.value.spendingValues,
         backgroundColor: 'rgba(244, 63, 94, 0.8)', // Rose-500
         borderRadius: 6,

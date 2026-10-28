@@ -33,7 +33,7 @@ const emit = defineEmits<{
           {{ category.name }}
         </p>
         <p class="text-xs text-muted capitalize">
-          {{ category.type }}
+          {{ category.type === 'spending' ? $t('categories.spending') : $t('categories.income') }}
         </p>
       </div>
     </div>
@@ -46,7 +46,7 @@ const emit = defineEmits<{
         size="xs"
         color="neutral"
         variant="ghost"
-        :aria-label="`Edit ${category.name} category`"
+        :aria-label="$t('categories.editCategoryAria', { name: category.name })"
         @click="emit('edit')"
       />
       <UButton
@@ -54,7 +54,7 @@ const emit = defineEmits<{
         size="xs"
         color="error"
         variant="ghost"
-        :aria-label="`Delete ${category.name} category`"
+        :aria-label="$t('categories.deleteCategoryAria', { name: category.name })"
         @click="emit('delete')"
       />
     </div>

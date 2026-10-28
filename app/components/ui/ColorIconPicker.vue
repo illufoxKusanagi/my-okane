@@ -36,7 +36,7 @@ const selectedIcon = computed({
     <!-- Color Selector -->
     <div v-if="showColor">
       <p class="text-sm font-medium mb-2 text-default">
-        Color Accent
+        {{ $t('categories.fields.colorAccent') }}
       </p>
       <div class="flex flex-wrap gap-2">
         <button
@@ -50,7 +50,7 @@ const selectedIcon = computed({
               : 'border-transparent opacity-85 hover:opacity-100'
           ]"
           :style="{ backgroundColor: colorHexMap[c] || '#3b82f6' }"
-          :aria-label="`Select color ${c}`"
+          :aria-label="$t('categories.fields.selectColorAria', { color: c })"
           @click="selectedColor = c"
         >
           <UIcon
@@ -65,7 +65,7 @@ const selectedIcon = computed({
     <!-- Icon Selector -->
     <div v-if="showIcon">
       <p class="text-sm font-medium mb-2 text-default">
-        Icon Selector
+        {{ $t('categories.fields.iconSelector') }}
       </p>
       <div
         class="grid grid-cols-5 gap-2 border border-default rounded-xl p-3 max-h-48 overflow-y-auto"
@@ -80,7 +80,7 @@ const selectedIcon = computed({
               ? 'border-primary text-primary bg-primary/5'
               : 'border-transparent text-muted'
           ]"
-          :aria-label="`Select icon ${ic}`"
+          :aria-label="$t('categories.fields.selectIconAria', { icon: ic })"
           @click="selectedIcon = ic"
         >
           <UIcon

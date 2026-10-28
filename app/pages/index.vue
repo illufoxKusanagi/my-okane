@@ -4,8 +4,10 @@ import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
 import BalanceCard from '~/components/budgets/BalanceCard.vue'
 
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'Dashboard'
+  title: () => t('dashboard.title')
 })
 
 const {
@@ -127,12 +129,12 @@ const weeklyRemaining = computed(
       class="grid grid-cols-1 md:grid-cols-2 gap-5"
     >
       <IncomeCard
-        label="Total Income"
+        :label="$t('dashboard.totalIncome')"
         type="income"
         :amount="totalIncome"
       />
       <IncomeCard
-        label="Total Spending"
+        :label="$t('dashboard.totalSpending')"
         type="spending"
         :amount="totalSpending"
       />
@@ -158,7 +160,7 @@ const weeklyRemaining = computed(
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-3">
         <p class="text-lg font-bold tracking-tight text-highlighted">
-          Spending by Category
+          {{ $t('dashboard.spendingByCategory') }}
         </p>
         <AddCategoryModal type="spending" />
       </div>
@@ -186,7 +188,7 @@ const weeklyRemaining = computed(
         v-else
         class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
       >
-        No spending categories created yet.
+        {{ $t('dashboard.noSpendingData') }}
       </div>
     </div>
 
@@ -194,7 +196,7 @@ const weeklyRemaining = computed(
     <div class="flex flex-col gap-3">
       <div class="flex items-center justify-between gap-3">
         <p class="text-lg font-bold tracking-tight text-highlighted">
-          Income by Category
+          {{ $t('dashboard.incomeByCategory') }}
         </p>
         <AddCategoryModal type="income" />
       </div>
@@ -222,7 +224,7 @@ const weeklyRemaining = computed(
         v-else
         class="p-6 text-center border border-dashed border-muted rounded-2xl text-muted text-sm"
       >
-        No income categories created yet.
+        {{ $t('dashboard.noIncomeData') }}
       </div>
     </div>
   </div>

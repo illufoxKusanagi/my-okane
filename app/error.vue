@@ -5,11 +5,13 @@ const props = defineProps<{
   error: NuxtError
 }>()
 
+const { t } = useI18n()
+
 const is404 = computed(() => props.error?.statusCode === 404)
 
 const errorTitle = computed(() => {
-  if (is404.value) return 'Page Not Found'
-  return props.error?.statusMessage || 'An Unexpected Error Occurred'
+  if (is404.value) return t('error.pageNotFound')
+  return props.error?.statusMessage || t('error.unexpectedError')
 })
 
 useSeoMeta({
@@ -18,9 +20,9 @@ useSeoMeta({
 
 const errorDescription = computed(() => {
   if (is404.value) {
-    return 'The page you are looking for doesn\'t exist, has been removed, or is temporarily unavailable.'
+    return t('error.pageNotFoundDesc')
   }
-  return props.error?.message || 'Something went wrong while processing your request. Please try again.'
+  return props.error?.message || t('error.unexpectedErrorDesc')
 })
 
 const handleClearError = () => {
@@ -69,7 +71,7 @@ const handleRetry = () => {
           class="w-full sm:w-auto font-medium"
           @click="handleClearError"
         >
-          Back to Dashboard
+          {{ $t('error.backToDashboard') }}
         </UButton>
         <UButton
           v-if="!is404"
@@ -80,7 +82,7 @@ const handleRetry = () => {
           class="w-full sm:w-auto"
           @click="handleRetry"
         >
-          Try Again
+          {{ $t('error.tryAgain') }}
         </UButton>
       </div>
 

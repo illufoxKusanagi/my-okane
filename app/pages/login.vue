@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+const { t } = useI18n()
+
 definePageMeta({
   layout: false
 })
 
 useSeoMeta({
-  title: 'Sign In'
+  title: () => t('auth.signInTitle')
 })
 
 const route = useRoute()
@@ -46,7 +48,7 @@ async function handleLogin() {
     await fetchSession()
     await navigateTo('/')
   } catch (err: unknown) {
-    errorMessage.value = describeApiError(err, 'Invalid email or password.')
+    errorMessage.value = describeApiError(err, t('auth.loginFailed'))
   } finally {
     loading.value = false
   }
@@ -71,10 +73,10 @@ async function handleLogin() {
         <h2
           class="text-3xl font-bold tracking-tight text-highlighted"
         >
-          Welcome Back
+          {{ $t('auth.welcomeBack') }}
         </h2>
         <p class="mt-2 text-sm text-muted">
-          Sign in to manage your finance
+          {{ $t('auth.signInSubtitle') }}
         </p>
       </div>
 
@@ -84,8 +86,8 @@ async function handleLogin() {
         color="success"
         variant="subtle"
         icon="i-lucide-circle-check"
-        title="Account Created Successfully"
-        description="Please enter your password to sign in to your new account."
+        :title="$t('auth.accountCreatedTitle')"
+        :description="$t('auth.accountCreatedDesc')"
         class="mb-6"
       />
 
@@ -95,9 +97,10 @@ async function handleLogin() {
         color="error"
         variant="subtle"
         icon="i-lucide-alert-circle"
-        title="Sign in failed"
+        :title="$t('auth.signInFailedTitle')"
         :description="errorMessage"
         class="mb-6"
+      />
       />
 
       <UCard
@@ -108,7 +111,7 @@ async function handleLogin() {
           @submit.prevent="handleLogin"
         >
           <UFormField
-            label="Email address"
+            :label="$t('auth.emailAddress')"
             name="email"
             required
             class="w-full"
@@ -126,7 +129,7 @@ async function handleLogin() {
           </UFormField>
 
           <UFormField
-            label="Password"
+            :label="$t('auth.password')"
             name="password"
             required
             class="w-full"
@@ -138,7 +141,7 @@ async function handleLogin() {
                 tabindex="0"
                 @click.stop
               >
-                Forgot password?
+                {{ $t('auth.forgotPassword') }}
               </ULink>
             </template>
 
@@ -159,7 +162,7 @@ async function handleLogin() {
                   variant="link"
                   size="sm"
                   :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  aria-label="Toggle password visibility"
+                  :aria-label="$t('auth.togglePasswordVisibility')"
                   @click="showPassword = !showPassword"
                 />
               </template>
@@ -174,18 +177,18 @@ async function handleLogin() {
             :loading="loading"
             :disabled="loading"
           >
-            Sign In
+            {{ $t('auth.signIn') }}
           </UButton>
         </form>
       </UCard>
 
       <p class="text-center text-sm text-muted">
-        Don't have an account?
+        {{ $t('auth.dontHaveAccount') }}
         <ULink
           to="/register"
           class="font-medium text-primary hover:underline transition-colors"
         >
-          Sign up for free
+          {{ $t('auth.signUpForFree') }}
         </ULink>
       </p>
     </div>

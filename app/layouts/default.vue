@@ -2,7 +2,9 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { computed, ref, watch, onMounted } from 'vue'
 import AccountSettingsModal from '~/components/account/AccountSettingsModal.vue'
+import LanguageSwitcher from '~/components/ui/LanguageSwitcher.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const open = ref(true)
 const { user, clear } = useUserSession()
@@ -41,7 +43,7 @@ const userInitials = computed(() => {
 const dropdownItems = computed(() => [
   [
     {
-      label: user.value?.name || 'Account',
+      label: user.value?.name || t('nav.account'),
       description: user.value?.email,
       avatar: { text: userInitials.value },
       type: 'label' as const
@@ -49,7 +51,7 @@ const dropdownItems = computed(() => [
   ],
   [
     {
-      label: 'Account Settings',
+      label: t('nav.accountSettings'),
       icon: 'i-lucide-user-cog',
       onSelect: () => {
         isAccountSettingsOpen.value = true
@@ -58,7 +60,7 @@ const dropdownItems = computed(() => [
   ],
   [
     {
-      label: 'Sign out',
+      label: t('nav.signOut'),
       icon: 'i-lucide-log-out',
       color: 'error' as const,
       onSelect: handleLogout
@@ -66,28 +68,28 @@ const dropdownItems = computed(() => [
   ]
 ])
 
-const items: NavigationMenuItem[] = [
+const items = computed<NavigationMenuItem[]>(() => [
   {
-    label: 'Dashboard',
+    label: t('nav.home'),
     icon: 'i-lucide-layout-dashboard',
     to: '/'
   },
   {
-    label: 'Budgets',
+    label: t('nav.budgets'),
     icon: 'i-lucide-piggy-bank',
     to: '/budgets'
   },
   {
-    label: 'Transactions',
+    label: t('nav.transactions'),
     icon: 'i-lucide-arrow-right-left',
     to: '/transactions'
   },
   {
-    label: 'Categories',
+    label: t('nav.categories'),
     icon: 'i-lucide-tag',
     to: '/categories'
   }
-]
+])
 </script>
 
 <template>
@@ -114,7 +116,7 @@ const items: NavigationMenuItem[] = [
           "
           color="neutral"
           variant="ghost"
-          aria-label="Toggle sidebar"
+          :aria-label="$t('nav.toggleSidebar')"
           @click="open = !open"
         />
       </template>
@@ -124,12 +126,13 @@ const items: NavigationMenuItem[] = [
           <h1
             class="text-lg sm:text-xl xl:text-2xl font-bold tracking-tight text-highlighted truncate"
           >
-            Hi {{ user?.name || "User" }}
+            {{ $t('dashboard.greeting', { name: user?.name || 'User' }) }}
           </h1>
         </div>
       </template>
 
       <template #right>
+        <LanguageSwitcher class="h-9 shrink-0" />
         <ColorModeButton class="h-9 shrink-0" />
 
         <UDropdownMenu
@@ -148,7 +151,7 @@ const items: NavigationMenuItem[] = [
               label: 'hidden sm:inline truncate max-w-32',
               trailingIcon: 'hidden sm:inline'
             }"
-            aria-label="User menu"
+            :aria-label="$t('nav.userMenu')"
           />
         </UDropdownMenu>
       </template>
@@ -165,18 +168,6 @@ const items: NavigationMenuItem[] = [
         <template #header>
           <div class="flex flex-row justify-between w-full">
             <div class="flex items-center gap-2.5 w-full min-w-0">
-              <!-- <UButton
-                :icon="
-                  open
-                    ? 'i-lucide-panel-left-close'
-                    : 'i-lucide-panel-left-open'
-                "
-                color="neutral"
-                variant="ghost"
-                aria-label="Toggle sidebar"
-                class="lg:hidden"
-                @click="open = !open"
-              /> -->
               <img
                 src="/pwa-192x192.png"
                 alt="My Okane"
@@ -195,7 +186,7 @@ const items: NavigationMenuItem[] = [
               "
               color="neutral"
               variant="ghost"
-              aria-label="Toggle sidebar"
+              :aria-label="$t('nav.toggleSidebar')"
               class="lg:hidden"
               @click="open = !open"
             />

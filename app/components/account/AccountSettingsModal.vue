@@ -1,31 +1,33 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AppModal from '~/components/ui/AppModal.vue'
 import ProfileTabForm from '~/components/account/ProfileTabForm.vue'
 import PasswordTabForm from '~/components/account/PasswordTabForm.vue'
 
+const { t } = useI18n()
 const isOpen = defineModel<boolean>('open', { required: true })
 
-const tabItems = [
+const tabItems = computed(() => [
   {
-    label: 'Profile',
+    label: t('account.profileTab'),
     icon: 'i-lucide-user',
     value: 'profile',
     slot: 'profile'
   },
   {
-    label: 'Security & Password',
+    label: t('account.securityTab'),
     icon: 'i-lucide-key-round',
     value: 'password',
     slot: 'password'
   }
-]
+])
 </script>
 
 <template>
   <AppModal
     v-model:open="isOpen"
-    title="Account Settings"
-    description="Manage your account profile and security credentials"
+    :title="$t('nav.accountSettings')"
+    :description="$t('account.settingsDesc')"
   >
     <UTabs
       :items="tabItems"

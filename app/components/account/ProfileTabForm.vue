@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
+const { t } = useI18n()
+
 const emit = defineEmits<{
   (e: 'success' | 'cancel'): void
 }>()
@@ -38,15 +40,15 @@ async function handleSaveProfile() {
     if (res.success) {
       await fetchSession()
       toast.add({
-        title: 'Profile Updated',
-        description: 'Your display name has been updated.',
+        title: t('account.profileUpdatedTitle'),
+        description: t('account.profileUpdatedDesc'),
         color: 'success'
       })
       emit('success')
     }
   } catch (err: unknown) {
     toast.add({
-      title: 'Update Failed',
+      title: t('account.updateFailedTitle'),
       description: describeApiError(err, 'Failed to update profile'),
       color: 'error'
     })
@@ -62,13 +64,13 @@ async function handleSaveProfile() {
     @submit.prevent="handleSaveProfile"
   >
     <UFormField
-      label="Display name"
+      :label="$t('account.displayName')"
       name="name"
       required
     >
       <UInput
         v-model="name"
-        placeholder="Your name"
+        :placeholder="$t('account.yourName')"
         icon="i-lucide-user"
         autocomplete="name"
         class="w-full"
@@ -76,7 +78,7 @@ async function handleSaveProfile() {
     </UFormField>
 
     <UFormField
-      label="Email address"
+      :label="$t('auth.emailAddress')"
       name="email"
     >
       <UInput
@@ -87,13 +89,13 @@ async function handleSaveProfile() {
         class="w-full opacity-70 cursor-not-allowed"
       />
       <p class="text-xs text-muted mt-1">
-        Email address is permanent and cannot be modified.
+        {{ $t('account.emailImmutableDesc') }}
       </p>
     </UFormField>
 
     <div class="flex justify-end gap-3 pt-4 border-t border-default mt-2">
       <UButton
-        label="Cancel"
+        :label="$t('common.cancel')"
         color="neutral"
         variant="outline"
         :disabled="isProfileLoading"
@@ -101,7 +103,7 @@ async function handleSaveProfile() {
       />
       <UButton
         type="submit"
-        label="Save Profile"
+        :label="$t('common.saveChanges')"
         color="primary"
         :loading="isProfileLoading"
         :disabled="isProfileInvalid || isProfileLoading"

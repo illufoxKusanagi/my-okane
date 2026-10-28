@@ -43,6 +43,21 @@ export function useBudgetsController() {
 
   const toast = useToast()
 
+  let t = (key: string) => {
+    const fallbackMap: Record<string, string> = {
+      'toasts.pocketCreateFailed': 'Failed to Create Pocket',
+      'toasts.budgetSaveFailed': 'Failed to Save Budget'
+    }
+    return fallbackMap[key] ?? key
+  }
+  try {
+    if (typeof useI18n === 'function') {
+      t = useI18n().t
+    }
+  } catch {
+    // Non-Nuxt / test context fallback
+  }
+
   const handleCreatePocket = async () => {
     if (!pocketName.value.trim() || isSaving.value) return
 
@@ -76,7 +91,7 @@ export function useBudgetsController() {
     } catch (error) {
       console.error('Failed to create pocket:', error)
       toast.add({
-        title: 'Failed to Create Pocket',
+        title: t('toasts.pocketCreateFailed'),
         description: describeApiError(error),
         color: 'error'
       })
@@ -124,7 +139,7 @@ export function useBudgetsController() {
     } catch (error) {
       console.error('Failed to save budget:', error)
       toast.add({
-        title: 'Failed to Save Budget',
+        title: t('toasts.budgetSaveFailed'),
         description: describeApiError(error),
         color: 'error'
       })

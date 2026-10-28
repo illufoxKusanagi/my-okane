@@ -6,6 +6,28 @@ export function useTransactionActions() {
   const { transactions, categories } = useFinanceState()
   const toast = useToast()
 
+  let t = (key: string, values?: Record<string, unknown>) => {
+    const fallbackMap: Record<string, string> = {
+      'toasts.txAdded': 'Transaction Added',
+      'toasts.txAddedDesc': `Successfully added "${values?.name}".`,
+      'toasts.txAddFailed': 'Failed to Add Transaction',
+      'toasts.txUpdated': 'Transaction Updated',
+      'toasts.txUpdatedDesc': `Successfully updated "${values?.name}".`,
+      'toasts.txUpdateFailed': 'Failed to Update Transaction',
+      'toasts.txDeleted': 'Transaction Deleted',
+      'toasts.txDeletedDesc': 'Transaction has been deleted successfully.',
+      'toasts.txDeleteFailed': 'Failed to Delete Transaction'
+    }
+    return fallbackMap[key] ?? key
+  }
+  try {
+    if (typeof useI18n === 'function') {
+      t = useI18n().t
+    }
+  } catch (error) {
+    Sentry.captureException(error)
+  }
+
   const addTransaction = async (
     name: string,
     categoryId: string,
@@ -39,8 +61,8 @@ export function useTransactionActions() {
         }
         transactions.value = [enrichedTx, ...transactions.value]
         toast.add({
-          title: 'Transaction Added',
-          description: `Successfully added "${name}".`,
+          title: t('toasts.txAdded'),
+          description: t('toasts.txAddedDesc', { name }),
           color: 'success'
         })
       }
@@ -48,7 +70,7 @@ export function useTransactionActions() {
       console.error('Failed to add transaction:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Add Transaction',
+        title: t('toasts.txAddFailed'),
         description: describeApiError(error),
         color: 'error'
       })
@@ -92,8 +114,8 @@ export function useTransactionActions() {
           t.id === id ? enrichedTx : t
         )
         toast.add({
-          title: 'Transaction Updated',
-          description: `Successfully updated "${name}".`,
+          title: t('toasts.txUpdated'),
+          description: t('toasts.txUpdatedDesc', { name }),
           color: 'success'
         })
       }
@@ -101,7 +123,7 @@ export function useTransactionActions() {
       console.error('Failed to update transaction:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Update Transaction',
+        title: t('toasts.txUpdateFailed'),
         description: describeApiError(error),
         color: 'error'
       })
@@ -123,8 +145,8 @@ export function useTransactionActions() {
       )
       if (res.success) {
         toast.add({
-          title: 'Transaction Deleted',
-          description: 'Transaction has been deleted successfully.',
+          title: t('toasts.txDeleted'),
+          description: t('toasts.txDeletedDesc'),
           color: 'success'
         })
       }
@@ -134,7 +156,7 @@ export function useTransactionActions() {
       console.error('Failed to delete transaction:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Delete Transaction',
+        title: t('toasts.txDeleteFailed'),
         description: describeApiError(error),
         color: 'error'
       })

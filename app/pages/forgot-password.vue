@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const { t } = useI18n()
+
 definePageMeta({
   layout: false
 })
 
 useSeoMeta({
-  title: 'Forgot Password'
+  title: () => t('auth.forgotPasswordTitle')
 })
 
 const email = ref('')
@@ -55,10 +57,10 @@ async function handleForgotPassword() {
         <h2
           class="text-3xl font-bold tracking-tight text-highlighted"
         >
-          Forgot Your Password?
+          {{ $t('auth.forgotPassword') }}
         </h2>
         <p class="mt-2 text-sm text-muted">
-          Enter your email and we'll send you a reset link
+          {{ $t('auth.forgotPasswordSubtitle') }}
         </p>
       </div>
 
@@ -70,8 +72,8 @@ async function handleForgotPassword() {
             color="success"
             variant="subtle"
             icon="i-lucide-circle-check"
-            title="Check your email"
-            description="If an account exists for that email, a password reset link has been sent. The link expires in 10 minutes."
+            :title="$t('auth.checkYourEmailTitle')"
+            :description="$t('auth.checkYourEmailDesc')"
             class="mb-4"
           />
         </template>
@@ -86,13 +88,13 @@ async function handleForgotPassword() {
             color="error"
             variant="subtle"
             icon="i-lucide-alert-circle"
-            title="Request failed"
+            :title="$t('auth.requestFailedTitle')"
             :description="errorMessage"
             class="mb-2"
           />
 
           <UFormField
-            label="Email address"
+            :label="$t('auth.emailAddress')"
             name="email"
             required
             class="w-full"
@@ -116,18 +118,18 @@ async function handleForgotPassword() {
             size="lg"
             :loading="loading"
           >
-            Send Reset Link
+            {{ $t('auth.sendResetLink') }}
           </UButton>
         </form>
       </UCard>
 
       <p class="text-center text-sm text-muted">
-        Remembered it?
+        {{ $t('auth.rememberedPassword') }}
         <NuxtLink
           to="/login"
           class="font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
         >
-          Back to sign in
+          {{ $t('auth.backToSignIn') }}
         </NuxtLink>
       </p>
     </div>

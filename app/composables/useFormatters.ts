@@ -1,4 +1,16 @@
 export function useFormatters() {
+  const getLocaleTag = (fallback: 'id-ID' | 'en-US'): 'id-ID' | 'en-US' => {
+    try {
+      if (typeof useI18n === 'function') {
+        const { locale } = useI18n()
+        return locale.value === 'en' ? 'en-US' : 'id-ID'
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    return fallback
+  }
+
   const formatCurrency = (val: number): string => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -10,7 +22,8 @@ export function useFormatters() {
   const formatDate = (dateStr: string | Date): string => {
     const d = new Date(dateStr)
     if (isNaN(d.getTime())) return ''
-    return d.toLocaleDateString('id-ID', {
+    const localeTag = getLocaleTag('id-ID')
+    return d.toLocaleDateString(localeTag, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -35,7 +48,8 @@ export function useFormatters() {
     const year = parts[0] ?? new Date().getFullYear()
     const month = parts[1] ?? new Date().getMonth() + 1
     const date = new Date(Date.UTC(year, month - 1, 1))
-    return date.toLocaleDateString('en-US', {
+    const localeTag = getLocaleTag('en-US')
+    return date.toLocaleDateString(localeTag, {
       month: 'long',
       year: 'numeric',
       timeZone: 'UTC'
@@ -45,7 +59,14 @@ export function useFormatters() {
   const getProgressColor = (
     spent: number,
     limit: number
-  ): 'error' | 'info' | 'success' | 'primary' | 'secondary' | 'warning' | 'neutral' => {
+  ):
+    | 'error'
+    | 'info'
+    | 'success'
+    | 'primary'
+    | 'secondary'
+    | 'warning'
+    | 'neutral' => {
     if (limit <= 0) return 'neutral'
     const pct = (spent / limit) * 100
     if (pct >= 100) return 'error'

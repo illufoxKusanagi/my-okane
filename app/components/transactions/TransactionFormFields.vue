@@ -26,10 +26,10 @@ const categoryId = defineModel<string | undefined>('categoryId')
 </script>
 
 <template>
-  <UFormField label="Transaction Name">
+  <UFormField :label="$t('transactions.fields.name')">
     <UInput
       v-model="name"
-      placeholder="e.g. Lunch at McD, Monthly Salary"
+      :placeholder="$t('transactions.fields.namePlaceholder')"
       class="w-full"
       autofocus
     />
@@ -37,35 +37,35 @@ const categoryId = defineModel<string | undefined>('categoryId')
 
   <UFormField
     v-if="showType"
-    label="Transaction Type"
+    :label="$t('transactions.fields.type')"
   >
     <USelect
       v-model="type"
       class="w-full"
       :items="[
-        { label: 'Spending', value: 'spending' },
-        { label: 'Income', value: 'income' }
+        { label: $t('transactions.spending'), value: 'spending' },
+        { label: $t('transactions.income'), value: 'income' }
       ]"
     />
   </UFormField>
 
   <UFormField
     v-if="showCategory"
-    label="Category"
+    :label="$t('transactions.fields.category')"
   >
     <USelect
       v-model="categoryId"
       class="w-full"
       :items="categories.map((c) => ({ label: c.name, value: c.id }))"
-      placeholder="Select category"
+      :placeholder="$t('transactions.fields.selectCategory')"
     />
   </UFormField>
 
-  <UFormField label="Amount">
+  <UFormField :label="$t('transactions.fields.amount')">
     <CurrencyInput v-model="amount" />
   </UFormField>
 
-  <UFormField label="Date">
+  <UFormField :label="$t('transactions.fields.date')">
     <UInput
       v-model="date"
       type="date"
@@ -73,10 +73,10 @@ const categoryId = defineModel<string | undefined>('categoryId')
     />
   </UFormField>
 
-  <UFormField label="Notes (Optional)">
+  <UFormField :label="$t('transactions.fields.notes')">
     <UTextarea
       v-model="notes"
-      placeholder="Add details, store name, or description..."
+      :placeholder="$t('transactions.fields.notesPlaceholder')"
       class="w-full"
     />
   </UFormField>

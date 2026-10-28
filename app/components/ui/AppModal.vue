@@ -14,8 +14,6 @@ const props = withDefaults(
   }>(),
   {
     description: '',
-    submitLabel: 'Save',
-    cancelLabel: 'Cancel',
     submitColor: 'primary',
     loading: false,
     disabled: false
@@ -60,14 +58,14 @@ const handleSubmit = () => {
     <template #footer>
       <slot name="actions">
         <UButton
-          :label="cancelLabel"
+          :label="cancelLabel || $t('common.cancel')"
           color="neutral"
           variant="outline"
           :disabled="loading"
           @click="handleCancel"
         />
         <UButton
-          :label="submitLabel"
+          :label="submitLabel || $t('common.save')"
           :color="submitColor"
           :loading="loading"
           :disabled="disabled || loading"

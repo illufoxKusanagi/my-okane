@@ -39,10 +39,11 @@ const {
   handleDeleteConfirm
 } = usePocketDetailsController(categoryId)
 
+const { t } = useI18n()
 const { formatMonthLabel } = useFormatters()
 
 useSeoMeta({
-  title: () => pocket.value ? `${pocket.value.name} Pocket` : 'Pocket Details'
+  title: () => pocket.value ? `${pocket.value.name} ${t('budgets.pocket')}` : t('budgets.pocketDetails')
 })
 </script>
 
@@ -56,11 +57,11 @@ useSeoMeta({
         icon="i-lucide-arrow-left"
         color="neutral"
         variant="ghost"
-        aria-label="Back to budgets"
+        :aria-label="$t('budgets.backToBudgets')"
         @click="navigateTo('/budgets')"
       />
       <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-highlighted">
-        Pocket Details
+        {{ $t('budgets.pocketDetails') }}
       </h1>
     </div>
 
@@ -108,10 +109,10 @@ useSeoMeta({
           <span
             class="text-sm font-black uppercase tracking-wider text-neutral-400"
           >
-            Transactions ({{ formatMonthLabel(currentMonth) }})
+            {{ $t('transactions.title') }} ({{ formatMonthLabel(currentMonth) }})
           </span>
           <span class="text-xs text-muted font-mono">
-            {{ pocketTransactions.length }} items
+            {{ $t('common.itemCount', { count: pocketTransactions.length }) }}
           </span>
         </div>
 
@@ -141,8 +142,7 @@ useSeoMeta({
             class="w-8 h-8 text-neutral-400 mb-2"
           />
           <p class="text-sm font-semibold text-muted">
-            No transactions in this pocket for
-            {{ formatMonthLabel(currentMonth) }}.
+            {{ $t('budgets.noTransactionsInPocket', { month: formatMonthLabel(currentMonth) }) }}
           </p>
         </div>
       </div>
@@ -158,13 +158,13 @@ useSeoMeta({
         class="w-12 h-12 text-neutral-400 mb-3"
       />
       <h3 class="text-lg font-bold text-highlighted">
-        Pocket not found
+        {{ $t('budgets.pocketNotFound') }}
       </h3>
       <p class="text-sm text-muted mt-1 mb-4">
-        This pocket might have been deleted or does not exist.
+        {{ $t('budgets.pocketNotFoundDesc') }}
       </p>
       <UButton
-        label="Back to Budgets"
+        :label="$t('budgets.backToBudgets')"
         icon="i-lucide-arrow-left"
         @click="router.push('/budgets')"
       />
@@ -173,12 +173,12 @@ useSeoMeta({
     <!-- Budget modal -->
     <AppModal
       v-model:open="isBudgetModalOpen"
-      title="Configure Pocket Limit"
-      submit-label="Save Limit"
+      :title="$t('budgets.configurePocketLimit')"
+      :submit-label="$t('budgets.saveLimit')"
       :loading="isSaving"
       @submit="handleSaveBudget"
     >
-      <UFormField label="Limit Amount">
+      <UFormField :label="$t('budgets.limitAmount')">
         <CurrencyInput
           v-model="budgetAmount"
           autofocus
@@ -189,8 +189,8 @@ useSeoMeta({
     <!-- Transaction modal -->
     <AppModal
       v-model:open="isTxModalOpen"
-      :title="editingTx ? 'Edit Transaction' : 'Add Transaction'"
-      submit-label="Save"
+      :title="editingTx ? $t('transactions.editTransaction') : $t('transactions.addTransaction')"
+      :submit-label="$t('common.save')"
       :loading="isSaving"
       :disabled="!txName.trim() || !(txAmount > 0) || !txDate"
       @submit="handleSaveTransaction"
@@ -206,12 +206,11 @@ useSeoMeta({
     <!-- Delete Transaction Confirmation -->
     <DeleteConfirmModal
       v-model:open="isDeleteConfirmOpen"
-      title="Delete Transaction?"
+      :title="$t('transactions.deleteTransaction')"
       :loading="isSaving"
       @confirm="handleDeleteConfirm"
     >
-      Are you sure you want to delete
-      <strong>{{ txToDelete?.name }}</strong>? This action cannot be undone.
+      {{ $t('transactions.deleteConfirm', { name: txToDelete?.name }) }}
     </DeleteConfirmModal>
   </div>
 </template>

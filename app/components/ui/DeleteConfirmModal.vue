@@ -28,7 +28,7 @@ const isOpen = computed({
   <AppModal
     v-model:open="isOpen"
     :title="title"
-    submit-label="Delete"
+    :submit-label="$t('common.delete')"
     submit-color="error"
     :loading="loading"
     @submit="emit('confirm')"
@@ -38,7 +38,7 @@ const isOpen = computed({
         name="i-lucide-triangle-alert"
         class="w-6 h-6"
       />
-      <span class="font-semibold">Warning: Irreversible Action</span>
+      <span class="font-semibold">{{ $t('common.warningIrreversible') }}</span>
     </div>
     <p class="text-sm text-muted">
       <slot />
