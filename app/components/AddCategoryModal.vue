@@ -52,14 +52,14 @@ const handleAddCategory = async () => {
       size="sm"
       @click="isOpen = true"
     >
-      <span class="sm:hidden">Add</span>
-      <span class="hidden sm:inline">Add {{ type === "income" ? "Income" : "Spending" }} Category</span>
+      <span class="sm:hidden">{{ $t('common.add') }}</span>
+      <span class="hidden sm:inline">{{ type === 'income' ? $t('dashboard.addIncomeCategory') : $t('dashboard.addSpendingCategory') }}</span>
     </UButton>
 
     <AppModal
       v-model:open="isOpen"
-      :title="`Add New ${type === 'income' ? 'Income' : 'Spending'} Category`"
-      submit-label="Create"
+      :title="type === 'income' ? $t('categories.newIncomeCategory') : $t('categories.newSpendingCategory')"
+      :submit-label="$t('common.create')"
       :loading="isSaving"
       :disabled="isInvalid"
       @submit="handleAddCategory"

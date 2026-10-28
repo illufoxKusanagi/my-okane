@@ -96,7 +96,7 @@ const {
       v-if="isLoading"
       class="flex flex-col gap-3"
       aria-busy="true"
-      aria-label="Loading transactions"
+      :aria-label="$t('transactions.loadingAria')"
     >
       <USkeleton
         v-for="i in 5"
@@ -125,7 +125,7 @@ const {
         class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-muted"
       >
         <p class="text-xs text-muted">
-          Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, filteredTransactions.length) }} of {{ filteredTransactions.length }} transactions
+          {{ $t('transactions.paginationShowing', { start: (currentPage - 1) * pageSize + 1, end: Math.min(currentPage * pageSize, filteredTransactions.length), total: filteredTransactions.length }) }}
         </p>
         <UPagination
           v-model:page="currentPage"

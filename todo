@@ -1,7 +1,8 @@
-[x] Move main account balance to dashboard
-[x] Add proper delimiter for rupiah money input
-[x] Increment for income/spending should be +1k, not +1
-- Add localization to support bahasa Indonesia
-- Add wallet (few account balances)
-- Paid feature for receipt scan
-- Use email and verify by otp code and make the session
+- [x] Move main account balance to dashboard
+- [x] Add proper delimiter for rupiah money input
+- [x] Increment for income/spending should be +1k, not +1
+- [x] Add localization to support bahasa Indonesia
+- [] Review what we should capture to Sentry
+- [] Add wallet (few account balances)
+- [] Paid feature for receipt scan
+- [] Use email and verify by otp code and make the session

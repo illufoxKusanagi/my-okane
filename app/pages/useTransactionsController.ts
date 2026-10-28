@@ -6,13 +6,8 @@ import * as Sentry from '@sentry/nuxt'
 
 export function useTransactionsController() {
   const {
-    transactions,
-    categories,
-    isLoading,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-    getCategories
+    transactions, categories, isLoading,
+    addTransaction, updateTransaction, deleteTransaction, getCategories
   } = useFinance()
 
   const { isScanning, scanError, scan } = useReceiptScan()
@@ -20,11 +15,24 @@ export function useTransactionsController() {
   const toast = useToast()
   const { formatCurrency, toDateInputValue } = useFormatters()
 
+  let t = (key: string) => {
+    const fallbackMap: Record<string, string> = {
+      'toasts.receiptScanFailed': 'Receipt Scan Failed',
+      'toasts.receiptScanFailedDesc': 'Failed to scan receipt.'
+    }
+    return fallbackMap[key] ?? key
+  }
+  try {
+    if (typeof useI18n === 'function') {
+      t = useI18n().t
+    }
+  } catch {
+    // Non-Nuxt / test context fallback
+  }
+
   const isMobile = ref(false)
   onMounted(() => {
-    isMobile.value
-      = window.matchMedia('(pointer: coarse)').matches
-        || window.innerWidth < 768
+    isMobile.value = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
   })
 
   const triggerFileSelect = () => {
@@ -66,28 +74,20 @@ export function useTransactionsController() {
       }
     } catch (err: unknown) {
       toast.add({
-        title: 'Receipt Scan Failed',
-        description: describeApiError(err, 'Failed to scan receipt.'),
+        title: t('toasts.receiptScanFailed'),
+        description: describeApiError(err, t('toasts.receiptScanFailedDesc')),
         color: 'error'
       })
       Sentry.captureException(err)
     } finally {
-      if (fileInput.value) {
-        fileInput.value.value = ''
-      }
+      if (fileInput.value) fileInput.value.value = ''
     }
   }
 
   const {
-    searchQuery,
-    selectedType,
-    selectedCategoryId,
-    currentPage,
-    pageSize,
-    hasActiveFilters,
-    resetFilters,
-    filteredTransactions,
-    paginatedTransactions
+    searchQuery, selectedType, selectedCategoryId,
+    currentPage, pageSize, hasActiveFilters,
+    resetFilters, filteredTransactions, paginatedTransactions
   } = useTransactionsFilter(transactions)
 
   const isModalOpen = ref(false)
@@ -110,9 +110,7 @@ export function useTransactionsController() {
 
   watch(txType, (newType) => {
     const cats = getCategories(newType)
-    if (txCategoryId.value && cats.some(c => c.id === txCategoryId.value)) {
-      return
-    }
+    if (txCategoryId.value && cats.some(c => c.id === txCategoryId.value)) return
     txCategoryId.value = cats.length > 0 ? cats[0]?.id : undefined
   })
 

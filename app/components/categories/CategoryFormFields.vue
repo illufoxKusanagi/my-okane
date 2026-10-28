@@ -30,25 +30,25 @@ const existingCategories = computed(() =>
 </script>
 
 <template>
-  <UFormField label="Category Name">
+  <UFormField :label="$t('categories.fields.name')">
     <UInput
       v-model="name"
       class="w-full"
-      placeholder="e.g. Health, Coffee, Salary"
+      :placeholder="$t('categories.fields.placeholder')"
       autofocus
     />
   </UFormField>
 
   <UFormField
     v-if="showTypeSelect"
-    label="Category Type"
+    :label="$t('categories.fields.type')"
   >
     <USelect
       v-model="type"
       class="w-full"
       :items="[
-        { label: 'Spending', value: 'spending' },
-        { label: 'Income', value: 'income' }
+        { label: $t('categories.spending'), value: 'spending' },
+        { label: $t('categories.income'), value: 'income' }
       ]"
     />
   </UFormField>
@@ -60,7 +60,7 @@ const existingCategories = computed(() =>
 
   <div v-if="showExisting && existingCategories.length > 0">
     <p class="text-xs text-muted mb-2">
-      Existing Categories
+      {{ $t('categories.existingCategories') }}
     </p>
     <div
       class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-muted/40 rounded-xl border border-muted"

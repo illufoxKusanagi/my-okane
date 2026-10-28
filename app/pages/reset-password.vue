@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+const { t } = useI18n()
+
 definePageMeta({
   layout: false
 })
 
 useSeoMeta({
-  title: 'Reset Password'
+  title: () => t('auth.resetPasswordTitle')
 })
 
 const route = useRoute()
@@ -85,10 +87,10 @@ async function handleReset() {
         <h2
           class="text-3xl font-bold tracking-tight text-highlighted"
         >
-          Set New Password
+          {{ $t('auth.setNewPassword') }}
         </h2>
         <p class="mt-2 text-sm text-muted">
-          Choose a new password for your account
+          {{ $t('auth.setNewPasswordSubtitle') }}
         </p>
       </div>
 
@@ -106,12 +108,12 @@ async function handleReset() {
           color="error"
           variant="subtle"
           icon="i-lucide-circle-alert"
-          title="Invalid link"
-          description="This password reset link is missing or malformed. Request a new one below."
+          :title="$t('auth.invalidLinkTitle')"
+          :description="$t('auth.invalidLinkDesc')"
           class="mb-4"
         />
         <UButton
-          label="Request a new link"
+          :label="$t('auth.requestNewLink')"
           color="primary"
           block
           size="lg"
@@ -127,12 +129,12 @@ async function handleReset() {
           color="success"
           variant="subtle"
           icon="i-lucide-circle-check"
-          title="Password updated"
-          description="Your password has been changed. All other sessions have been signed out."
+          :title="$t('auth.passwordUpdatedTitle')"
+          :description="$t('auth.passwordUpdatedDesc')"
           class="mb-4"
         />
         <UButton
-          label="Sign In"
+          :label="$t('auth.signIn')"
           color="primary"
           block
           size="lg"
@@ -153,13 +155,13 @@ async function handleReset() {
             color="error"
             variant="subtle"
             icon="i-lucide-alert-circle"
-            title="Reset failed"
+            :title="$t('auth.resetFailedTitle')"
             :description="errorMessage"
             class="mb-2"
           />
 
           <UFormField
-            label="New password"
+            :label="$t('auth.newPassword')"
             name="password"
             required
             class="w-full"
@@ -180,18 +182,18 @@ async function handleReset() {
                   variant="link"
                   size="sm"
                   :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  aria-label="Toggle password visibility"
+                  :aria-label="$t('auth.togglePasswordVisibility')"
                   @click="showPassword = !showPassword"
                 />
               </template>
             </UInput>
           </UFormField>
           <p class="text-xs text-muted -mt-4">
-            Must be at least 8 characters.
+            {{ $t('auth.min8Chars') }}
           </p>
 
           <UFormField
-            label="Confirm password"
+            :label="$t('auth.confirmPassword')"
             name="confirmPassword"
             required
             class="w-full"
@@ -211,7 +213,7 @@ async function handleReset() {
             v-if="passwordMismatch()"
             class="text-xs text-rose-600 dark:text-rose-400 -mt-4"
           >
-            Passwords do not match.
+            {{ $t('auth.passwordMismatch') }}
           </p>
 
           <UButton
@@ -222,7 +224,7 @@ async function handleReset() {
             :loading="loading"
             :disabled="isInvalid()"
           >
-            Reset Password
+            {{ $t('auth.resetPasswordBtn') }}
           </UButton>
         </form>
       </UCard>
@@ -232,7 +234,7 @@ async function handleReset() {
           to="/login"
           class="font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
         >
-          Back to sign in
+          {{ $t('auth.backToSignIn') }}
         </NuxtLink>
       </p>
     </div>

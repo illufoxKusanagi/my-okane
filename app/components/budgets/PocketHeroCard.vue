@@ -57,7 +57,7 @@ const { formatCurrency } = useFormatters()
       {{ pocket.name }}
     </h2>
     <p class="text-xs uppercase tracking-wider opacity-85 mb-5">
-      {{ pocket.type }} Pocket
+      {{ pocket.type === 'spending' ? $t('budgets.spendingPocket') : $t('budgets.incomePocket') }}
     </p>
 
     <!-- Main Balance -->
@@ -72,7 +72,7 @@ const { formatCurrency } = useFormatters()
           {{ formatCurrency(pocket.remaining) }}
         </h1>
         <p class="text-xs opacity-80 mt-1">
-          Remaining Budget
+          {{ $t('budgets.remainingBudget') }}
         </p>
       </template>
       <template v-else>
@@ -80,7 +80,7 @@ const { formatCurrency } = useFormatters()
           {{ formatCurrency(pocket.earned) }}
         </h1>
         <p class="text-xs opacity-80 mt-1">
-          Total Earned
+          {{ $t('budgets.totalEarned') }}
         </p>
       </template>
     </div>
@@ -90,7 +90,7 @@ const { formatCurrency } = useFormatters()
       class="flex flex-wrap items-center justify-center gap-3 mt-2 w-full max-w-sm pt-4 border-t border-white/10"
     >
       <UButton
-        :label="pocket.type === 'spending' ? 'Deposit / Spend' : 'Add Income'"
+        :label="pocket.type === 'spending' ? $t('dashboard.addSpending') : $t('dashboard.addIncome')"
         icon="i-lucide-plus"
         size="sm"
         color="neutral"
@@ -99,7 +99,7 @@ const { formatCurrency } = useFormatters()
       />
       <UButton
         v-if="pocket.type === 'spending'"
-        label="Set Limit"
+        :label="$t('budgets.setLimit')"
         icon="i-lucide-sliders-horizontal"
         size="sm"
         variant="outline"
@@ -108,7 +108,7 @@ const { formatCurrency } = useFormatters()
       />
       <UButton
         v-if="pocket.type === 'spending' && pocket.budgetId"
-        label="Reset Limit"
+        :label="$t('budgets.resetLimit')"
         icon="i-lucide-rotate-ccw"
         size="sm"
         variant="outline"

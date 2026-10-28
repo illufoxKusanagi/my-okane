@@ -43,7 +43,7 @@ const userInitials = computed(() => {
 const dropdownItems = computed(() => [
   [
     {
-      label: user.value?.name || 'Account',
+      label: user.value?.name || t('nav.account'),
       description: user.value?.email,
       avatar: { text: userInitials.value },
       type: 'label' as const
@@ -116,7 +116,7 @@ const items = computed<NavigationMenuItem[]>(() => [
           "
           color="neutral"
           variant="ghost"
-          aria-label="Toggle sidebar"
+          :aria-label="$t('nav.toggleSidebar')"
           @click="open = !open"
         />
       </template>
@@ -151,7 +151,7 @@ const items = computed<NavigationMenuItem[]>(() => [
               label: 'hidden sm:inline truncate max-w-32',
               trailingIcon: 'hidden sm:inline'
             }"
-            aria-label="User menu"
+            :aria-label="$t('nav.userMenu')"
           />
         </UDropdownMenu>
       </template>
@@ -186,7 +186,7 @@ const items = computed<NavigationMenuItem[]>(() => [
               "
               color="neutral"
               variant="ghost"
-              aria-label="Toggle sidebar"
+              :aria-label="$t('nav.toggleSidebar')"
               class="lg:hidden"
               @click="open = !open"
             />

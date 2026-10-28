@@ -15,19 +15,19 @@ const { formatCurrency } = useFormatters()
   >
     <div>
       <p class="text-xs text-muted">
-        Budget Limit
+        {{ $t('budgets.budgetLimit') }}
       </p>
       <p class="text-lg font-black text-default">
         {{
           props.budgetAmount > 0
             ? formatCurrency(props.budgetAmount)
-            : "No Limit Set"
+            : $t('budgets.noLimitSet')
         }}
       </p>
     </div>
     <div>
       <p class="text-xs text-muted">
-        {{ props.type === "spending" ? "Total Spent" : "Total Income" }}
+        {{ props.type === 'spending' ? $t('budgets.totalSpent') : $t('budgets.totalEarned') }}
       </p>
       <p
         :class="[
@@ -36,7 +36,7 @@ const { formatCurrency } = useFormatters()
         ]"
       >
         {{
-          props.type === "spending"
+          props.type === 'spending'
             ? formatCurrency(props.spent)
             : formatCurrency(props.earned)
         }}

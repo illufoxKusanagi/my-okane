@@ -6,6 +6,28 @@ export function useCategoryActions() {
   const { transactions, categories } = useFinanceState()
   const toast = useToast()
 
+  let t = (key: string, values?: Record<string, unknown>) => {
+    const fallbackMap: Record<string, string> = {
+      'toasts.catAdded': 'Category Added',
+      'toasts.catAddedDesc': `Successfully added "${values?.name}".`,
+      'toasts.catAddFailed': 'Failed to Add Category',
+      'toasts.catDeleted': 'Category Deleted',
+      'toasts.catDeletedDesc': 'Category has been deleted successfully.',
+      'toasts.catDeleteFailed': 'Failed to Delete Category',
+      'toasts.catUpdated': 'Category Updated',
+      'toasts.catUpdatedDesc': `Successfully updated "${values?.name}".`,
+      'toasts.catUpdateFailed': 'Failed to Update Category'
+    }
+    return fallbackMap[key] ?? key
+  }
+  try {
+    if (typeof useI18n === 'function') {
+      t = useI18n().t
+    }
+  } catch (error) {
+    Sentry.captureException(error)
+  }
+
   const addCategory = async (
     name: string,
     type: 'income' | 'spending',
@@ -23,8 +45,8 @@ export function useCategoryActions() {
       if (res.success && res.data) {
         categories.value = [...categories.value, res.data]
         toast.add({
-          title: 'Category Added',
-          description: `Successfully added "${name}".`,
+          title: t('toasts.catAdded'),
+          description: t('toasts.catAddedDesc', { name }),
           color: 'success'
         })
         return res.data
@@ -33,7 +55,7 @@ export function useCategoryActions() {
       console.error('Failed to add category:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Add Category',
+        title: t('toasts.catAddFailed'),
         description: describeApiError(error),
         color: 'error'
       })
@@ -55,8 +77,8 @@ export function useCategoryActions() {
       })
       if (res.success) {
         toast.add({
-          title: 'Category Deleted',
-          description: 'Category has been deleted successfully.',
+          title: t('toasts.catDeleted'),
+          description: t('toasts.catDeletedDesc'),
           color: 'success'
         })
       }
@@ -67,7 +89,7 @@ export function useCategoryActions() {
       console.error('Failed to delete category:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Delete Category',
+        title: t('toasts.catDeleteFailed'),
         description: describeApiError(error),
         color: 'error'
       })
@@ -107,8 +129,8 @@ export function useCategoryActions() {
           return t
         })
         toast.add({
-          title: 'Category Updated',
-          description: `Successfully updated "${name}".`,
+          title: t('toasts.catUpdated'),
+          description: t('toasts.catUpdatedDesc', { name }),
           color: 'success'
         })
       }
@@ -116,7 +138,7 @@ export function useCategoryActions() {
       console.error('Failed to update category:', error)
       Sentry.captureException(error)
       toast.add({
-        title: 'Failed to Update Category',
+        title: t('toasts.catUpdateFailed'),
         description: describeApiError(error),
         color: 'error'
       })

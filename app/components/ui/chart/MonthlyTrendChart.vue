@@ -31,10 +31,10 @@ const { colorMode, chartData, chartOptions } = useMonthlyTrend()
     <template #header>
       <div class="flex flex-col gap-1">
         <p class="font-semibold text-base text-highlighted">
-          Cash Flow Trend
+          {{ $t('dashboard.cashFlowTrend') }}
         </p>
         <p class="text-sm text-muted">
-          Comparison of income vs spending for the last 6 months
+          {{ $t('dashboard.cashFlowComparison') }}
         </p>
       </div>
     </template>

@@ -48,7 +48,7 @@ const badgeClass = computed(() => {
       </p>
     </div>
     <div class="text-xs text-dimmed font-medium">
-      {{ transactions.length }} trans.
+      {{ $t('dashboard.transactionCount', { count: transactions.length }) }}
     </div>
   </div>
 </template>

@@ -16,10 +16,10 @@
         <h2
           class="text-3xl font-bold tracking-tight text-highlighted"
         >
-          Create an Account
+          {{ $t('auth.createAccount') }}
         </h2>
         <p class="mt-2 text-sm text-muted">
-          Start tracking your transactions securely
+          {{ $t('auth.registerSubtitle') }}
         </p>
       </div>
 
@@ -33,13 +33,13 @@
             color="error"
             variant="soft"
             icon="i-lucide-alert-circle"
-            title="Registration Failed"
+            :title="$t('auth.registrationFailedTitle')"
             :description="errorMessage"
             class="mb-4"
           />
 
           <UFormField
-            label="Full Name"
+            :label="$t('auth.fullName')"
             name="name"
             required
             class="w-full"
@@ -57,7 +57,7 @@
           </UFormField>
 
           <UFormField
-            label="Email address"
+            :label="$t('auth.emailAddress')"
             name="email"
             required
             class="w-full"
@@ -75,7 +75,7 @@
           </UFormField>
 
           <UFormField
-            label="Password"
+            :label="$t('auth.password')"
             name="password"
             required
             class="w-full"
@@ -96,14 +96,14 @@
                   variant="link"
                   size="sm"
                   :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                  aria-label="Toggle password visibility"
+                  :aria-label="$t('auth.togglePasswordVisibility')"
                   @click="showPassword = !showPassword"
                 />
               </template>
             </UInput>
           </UFormField>
           <p class="text-xs text-muted -mt-4">
-            Must be at least 8 characters.
+            {{ $t('auth.min8Chars') }}
           </p>
 
           <UButton
@@ -114,18 +114,18 @@
             :loading="loading"
             :disabled="loading"
           >
-            Create Account
+            {{ $t('auth.createAccountBtn') }}
           </UButton>
         </form>
       </UCard>
 
       <p class="text-center text-sm text-muted">
-        Already have an account?
+        {{ $t('auth.alreadyHaveAccount') }}
         <NuxtLink
           to="/login"
           class="font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
         >
-          Sign in instead
+          {{ $t('auth.signInInstead') }}
         </NuxtLink>
       </p>
     </div>
@@ -133,12 +133,14 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
+
 definePageMeta({
   layout: false
 })
 
 useSeoMeta({
-  title: 'Sign Up'
+  title: () => t('auth.signUpTitle')
 })
 
 const name = ref('')
@@ -172,7 +174,7 @@ async function handleRegister() {
       }
     })
   } catch (err: unknown) {
-    errorMessage.value = describeApiError(err, 'Registration failed. Please check your inputs.')
+    errorMessage.value = describeApiError(err, t('auth.registrationFailed'))
   } finally {
     loading.value = false
   }

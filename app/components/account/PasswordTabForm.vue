@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+const { t } = useI18n()
+
 const emit = defineEmits<{
   (e: 'success' | 'cancel'): void
 }>()
@@ -58,8 +60,8 @@ async function handleChangePassword() {
 
     if (res.success) {
       toast.add({
-        title: 'Password Changed',
-        description: 'Your password has been successfully updated.',
+        title: t('account.passwordChangedTitle'),
+        description: t('account.passwordChangedDesc'),
         color: 'success'
       })
       resetForm()
@@ -83,12 +85,12 @@ async function handleChangePassword() {
       color="error"
       variant="subtle"
       icon="i-lucide-alert-circle"
-      title="Password update failed"
+      :title="$t('account.passwordUpdateFailedTitle')"
       :description="passwordError"
     />
 
     <UFormField
-      label="Current password"
+      :label="$t('account.currentPassword')"
       name="currentPassword"
       required
     >
@@ -106,7 +108,7 @@ async function handleChangePassword() {
             variant="link"
             size="sm"
             :icon="showCurrentPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-            aria-label="Toggle current password visibility"
+            :aria-label="$t('auth.togglePasswordVisibility')"
             @click="showCurrentPassword = !showCurrentPassword"
           />
         </template>
@@ -114,7 +116,7 @@ async function handleChangePassword() {
     </UFormField>
 
     <UFormField
-      label="New password"
+      :label="$t('account.newPassword')"
       name="newPassword"
       required
     >
@@ -132,18 +134,18 @@ async function handleChangePassword() {
             variant="link"
             size="sm"
             :icon="showNewPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-            aria-label="Toggle new password visibility"
+            :aria-label="$t('auth.togglePasswordVisibility')"
             @click="showNewPassword = !showNewPassword"
           />
         </template>
       </UInput>
       <p class="text-xs text-muted mt-1">
-        Must be at least 8 characters.
+        {{ $t('auth.min8Chars') }}
       </p>
     </UFormField>
 
     <UFormField
-      label="Confirm new password"
+      :label="$t('account.confirmNewPassword')"
       name="confirmPassword"
       required
     >
@@ -161,7 +163,7 @@ async function handleChangePassword() {
             variant="link"
             size="sm"
             :icon="showConfirmPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-            aria-label="Toggle confirm password visibility"
+            :aria-label="$t('auth.togglePasswordVisibility')"
             @click="showConfirmPassword = !showConfirmPassword"
           />
         </template>
@@ -170,13 +172,13 @@ async function handleChangePassword() {
         v-if="passwordMismatch"
         class="text-xs text-error mt-1"
       >
-        Passwords do not match.
+        {{ $t('auth.passwordMismatch') }}
       </p>
     </UFormField>
 
     <div class="flex justify-end gap-3 pt-4 border-t border-default mt-2">
       <UButton
-        label="Cancel"
+        :label="$t('common.cancel')"
         color="neutral"
         variant="outline"
         :disabled="isPasswordLoading"
@@ -184,7 +186,7 @@ async function handleChangePassword() {
       />
       <UButton
         type="submit"
-        label="Update Password"
+        :label="$t('account.updatePasswordBtn')"
         color="primary"
         :loading="isPasswordLoading"
         :disabled="isPasswordInvalid || isPasswordLoading"
