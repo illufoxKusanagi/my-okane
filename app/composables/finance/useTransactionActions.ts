@@ -34,7 +34,8 @@ export function useTransactionActions() {
     amount: number,
     type: 'income' | 'spending',
     notes?: string | null,
-    date?: string | Date
+    date?: string | Date,
+    walletId?: string | null
   ) => {
     try {
       const res = await $fetch<{ success: boolean, data: Transaction }>(
@@ -47,7 +48,8 @@ export function useTransactionActions() {
             amount,
             type,
             notes,
-            transactionDate: date
+            transactionDate: date,
+            walletId: walletId || undefined
           }
         }
       )
@@ -85,7 +87,8 @@ export function useTransactionActions() {
     amount: number,
     type: 'income' | 'spending',
     notes?: string | null,
-    date?: string | Date
+    date?: string | Date,
+    walletId?: string | null
   ) => {
     try {
       const res = await $fetch<{ success: boolean, data: Transaction }>(
@@ -98,7 +101,8 @@ export function useTransactionActions() {
             amount,
             type,
             notes,
-            transactionDate: date
+            transactionDate: date,
+            walletId: walletId || undefined
           }
         }
       )

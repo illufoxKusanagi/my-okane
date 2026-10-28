@@ -173,6 +173,25 @@
     "backToDashboard": "Back to Dashboard",
     "tryAgain": "Try Again"
   },
+  "wallets": {
+    "title": "Accounts & Wallets", "netWorth": "Total Net Worth", "addAccount": "Add Account",
+    "transfer": "Transfer", "editAccount": "Edit Account", "deleteAccount": "Delete Account",
+    "deleteAccountConfirm": "Are you sure you want to delete {name}? Transactions linked to this account will remain in your history.",
+    "setAsDefault": "Set as Default", "default": "Default", "balance": "Balance",
+    "accountNumber": "Account / Card Number (Last 4 digits)", "accountNumberPlaceholder": "e.g. 4829",
+    "accountNumberHint": "Must be exactly 4 digits", "defaultAccountDesc": "Primary account for quick transactions",
+    "name": "Account Name", "namePlaceholder": "e.g. BCA Debit, GoPay, Emergency Fund",
+    "type": "Account Type", "initialBalance": "Initial Balance", "color": "Card Theme Color",
+    "sourceAccount": "From Account", "targetAccount": "To Account", "transferAmount": "Transfer Amount",
+    "transferNotes": "Transfer Notes (Optional)", "transferNotesPlaceholder": "e.g. Savings allocation",
+    "transferSuccess": "Transfer successful", "createTitle": "Add New Banking Card / Account",
+    "editTitle": "Edit Banking Card / Account", "transferTitle": "Transfer Between Accounts",
+    "types": {
+      "bank": "Bank Account", "cash": "Cash Wallet", "ewallet": "E-Wallet",
+      "savings": "Savings", "credit": "Credit Card"
+    },
+    "allAccounts": "All Accounts", "noAccounts": "No accounts found. Create your first card."
+  },
   "toasts": {
     "txAdded": "Transaction Added",
     "txAddedDesc": "Successfully added \"{name}\".",
@@ -195,6 +214,10 @@
     "pocketCreateFailed": "Failed to Create Pocket",
     "budgetSaveFailed": "Failed to Save Budget",
     "receiptScanFailed": "Receipt Scan Failed",
-    "receiptScanFailedDesc": "Failed to scan receipt."
+    "receiptScanFailedDesc": "Failed to scan receipt.",
+    "walletCreated": "Account Created", "walletCreatedDesc": "Successfully created \"{name}\".", "walletCreateFailed": "Failed to Create Account",
+    "walletUpdated": "Account Updated", "walletUpdatedDesc": "Successfully updated \"{name}\".", "walletUpdateFailed": "Failed to Update Account",
+    "walletDeleted": "Account Deleted", "walletDeletedDesc": "Account has been deleted successfully.", "walletDeleteFailed": "Failed to Delete Account",
+    "transferCompleted": "Transfer Completed", "transferCompletedDesc": "Successfully transferred {amount}.", "transferFailed": "Transfer Failed"
   }
 }

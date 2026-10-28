@@ -33,6 +33,7 @@ const {
   txType,
   txAmount,
   txCategoryId,
+  txWalletId,
   txNotes,
   txDate,
   isDeleteConfirmOpen,
@@ -179,6 +180,7 @@ const {
       v-model:type="txType"
       v-model:amount="txAmount"
       v-model:category-id="txCategoryId"
+      v-model:wallet-id="txWalletId"
       v-model:notes="txNotes"
       v-model:date="txDate"
       :editing-transaction="editingTransaction"

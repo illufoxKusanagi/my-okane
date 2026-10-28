@@ -26,6 +26,8 @@ export default defineEventHandler(async (event) => {
         notes: transactions.notes,
         transactionDate: transactions.transactionDate,
         categoryId: transactions.categoryId,
+        walletId: transactions.walletId,
+        transferWalletId: transactions.transferWalletId,
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColor: categories.color,

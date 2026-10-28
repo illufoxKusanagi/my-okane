@@ -27,6 +27,21 @@ useHead({
     lang: 'en'
   }
 })
+
+if (import.meta.dev && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const reg of registrations) {
+      reg.unregister()
+    }
+  })
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        caches.delete(name)
+      }
+    })
+  }
+}
 </script>
 
 <template>
