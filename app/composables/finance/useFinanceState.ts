@@ -1,6 +1,5 @@
 import { watch, computed } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
-import * as Sentry from '@sentry/nuxt'
 import type { Transaction, Category } from './types'
 
 export interface FinanceState {
@@ -16,7 +15,10 @@ let inFlightFetch: Promise<void> | null = null
 let isSessionWatcherActive = false
 
 export function useFinanceState(): FinanceState {
-  const transactions = useState<Transaction[]>('finance:transactions', () => [])
+  const transactions = useState<Transaction[]>(
+    'finance:transactions',
+    () => []
+  )
   const categories = useState<Category[]>('finance:categories', () => [])
   const isInitialized = useState<boolean>('finance:isInitialized', () => false)
 
@@ -35,7 +37,6 @@ export function useFinanceState(): FinanceState {
         isInitialized.value = true
       } catch (error) {
         console.error('Failed to fetch finance data:', error)
-        Sentry.captureException(error)
       } finally {
         inFlightFetch = null
       }
@@ -53,7 +54,14 @@ export function useFinanceState(): FinanceState {
 
   const isLoading = computed(() => !isInitialized.value)
 
-  return { transactions, categories, isInitialized, isLoading, fetchAll, reset }
+  return {
+    transactions,
+    categories,
+    isInitialized,
+    isLoading,
+    fetchAll,
+    reset
+  }
 }
 
 /**

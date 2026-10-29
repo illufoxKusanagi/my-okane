@@ -70,13 +70,11 @@ async function handleLogin() {
             class="h-10 w-10 text-primary-500"
           />
         </div>
-        <h2
-          class="text-3xl font-bold tracking-tight text-highlighted"
-        >
-          {{ $t('auth.welcomeBack') }}
+        <h2 class="text-3xl font-bold tracking-tight text-highlighted">
+          {{ $t("auth.welcomeBack") }}
         </h2>
         <p class="mt-2 text-sm text-muted">
-          {{ $t('auth.signInSubtitle') }}
+          {{ $t("auth.signInSubtitle") }}
         </p>
       </div>
 
@@ -100,7 +98,6 @@ async function handleLogin() {
         :title="$t('auth.signInFailedTitle')"
         :description="errorMessage"
         class="mb-6"
-      />
       />
 
       <UCard
@@ -141,7 +138,7 @@ async function handleLogin() {
                 tabindex="0"
                 @click.stop
               >
-                {{ $t('auth.forgotPassword') }}
+                {{ $t("auth.forgotPassword") }}
               </ULink>
             </template>
 
@@ -177,18 +174,18 @@ async function handleLogin() {
             :loading="loading"
             :disabled="loading"
           >
-            {{ $t('auth.signIn') }}
+            {{ $t("auth.signIn") }}
           </UButton>
         </form>
       </UCard>
 
       <p class="text-center text-sm text-muted">
-        {{ $t('auth.dontHaveAccount') }}
+        {{ $t("auth.dontHaveAccount") }}
         <ULink
           to="/register"
           class="font-medium text-primary hover:underline transition-colors"
         >
-          {{ $t('auth.signUpForFree') }}
+          {{ $t("auth.signUpForFree") }}
         </ULink>
       </p>
     </div>

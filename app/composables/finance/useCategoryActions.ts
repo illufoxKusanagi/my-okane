@@ -53,7 +53,6 @@ export function useCategoryActions() {
       }
     } catch (error) {
       console.error('Failed to add category:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.catAddFailed'),
         description: describeApiError(error),
@@ -87,7 +86,6 @@ export function useCategoryActions() {
       categories.value = previousCategories
       transactions.value = previousTransactions
       console.error('Failed to delete category:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.catDeleteFailed'),
         description: describeApiError(error),
@@ -136,7 +134,6 @@ export function useCategoryActions() {
       }
     } catch (error) {
       console.error('Failed to update category:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.catUpdateFailed'),
         description: describeApiError(error),

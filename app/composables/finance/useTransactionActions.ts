@@ -70,7 +70,6 @@ export function useTransactionActions() {
       }
     } catch (error) {
       console.error('Failed to add transaction:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.txAddFailed'),
         description: describeApiError(error),
@@ -125,7 +124,6 @@ export function useTransactionActions() {
       }
     } catch (error) {
       console.error('Failed to update transaction:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.txUpdateFailed'),
         description: describeApiError(error),
@@ -158,7 +156,6 @@ export function useTransactionActions() {
       // Rollback local state on network / server failure
       transactions.value = previousTransactions
       console.error('Failed to delete transaction:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.txDeleteFailed'),
         description: describeApiError(error),

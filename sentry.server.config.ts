@@ -1,25 +1,22 @@
 import * as Sentry from '@sentry/nuxt'
-import { scrubResetTokens, scrubResetTokenBreadcrumb } from './sentry.scrub'
+import { scrubResetTokenBreadcrumb } from './sentry.scrub'
+import { SENTRY_IGNORE_ERRORS, buildBeforeSend } from './sentry.shared'
 
 if (process.env.NODE_ENV !== 'test') {
   Sentry.init({
     dsn: process.env.NUXT_PUBLIC_SENTRY_DSN,
-    // We recommend adjusting this value in production, or using tracesSampler
-    // for finer control
-    tracesSampleRate: 1.0,
-
-    // Enable logs to be sent to Sentry
-    enableLogs: true,
+    sampleRate: 1.0,
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
+    environment: process.env.NODE_ENV,
+    enableLogs: false,
+    ignoreErrors: SENTRY_IGNORE_ERRORS,
 
     dataCollection: {
       userInfo: false,
       httpBodies: []
     },
 
-    // Password-reset tokens must never leak via captured URLs/messages.
-    beforeSend(event) {
-      return scrubResetTokens(event)
-    },
+    beforeSend: buildBeforeSend(),
     beforeBreadcrumb(breadcrumb) {
       return scrubResetTokenBreadcrumb(breadcrumb)
     },
