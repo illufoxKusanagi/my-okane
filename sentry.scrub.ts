@@ -5,9 +5,12 @@
  * which Sentry captures in navigation breadcrumbs and requests — scrub it everywhere.
  */
 const TOKEN_PARAM = /(^|[?&#])(token=)[^&\s"'<>#]+/gi
+const BEARER_PATTERN = /Bearer\s+[A-Za-z0-9._~+/-]+=*/gi
 
 function scrubString(value: string): string {
-  return value.replace(TOKEN_PARAM, '$1$2[redacted]')
+  return value
+    .replace(TOKEN_PARAM, '$1$2[redacted]')
+    .replace(BEARER_PATTERN, 'Bearer [redacted]')
 }
 
 function scrubDataRecord(record: Record<string, unknown> | undefined): void {
@@ -55,7 +58,9 @@ export function scrubResetTokens<T extends ScrubbableEvent>(payload: T): T {
     if (req.headers && typeof req.headers === 'object') {
       const headers = req.headers as Record<string, unknown>
       for (const [header, val] of Object.entries(headers)) {
-        if (typeof val === 'string') {
+        if (/^(authorization|cookie|set-cookie)$/i.test(header)) {
+          headers[header] = '[redacted]'
+        } else if (typeof val === 'string') {
           headers[header] = scrubString(val)
         }
       }

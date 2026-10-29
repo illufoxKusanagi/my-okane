@@ -1,5 +1,4 @@
 import { ref, computed } from 'vue'
-import * as Sentry from '@sentry/nuxt'
 import type {
   WalletWithBalance,
   CreateWalletPayload,
@@ -11,7 +10,10 @@ let isWalletSessionWatcherActive = false
 
 export function useWallets() {
   const wallets = useState<WalletWithBalance[]>('user_wallets', () => [])
-  const selectedWalletId = useState<string | 'all'>('selected_wallet_id', () => 'all')
+  const selectedWalletId = useState<string | 'all'>(
+    'selected_wallet_id',
+    () => 'all'
+  )
   const isLoading = ref(false)
   const isInitialized = useState<boolean>('wallets:isInitialized', () => false)
 
@@ -20,13 +22,17 @@ export function useWallets() {
 
   let t = (key: string, values?: Record<string, unknown>) => {
     const fallbackMap: Record<string, string> = {
-      'toasts.walletCreated': 'Account Created', 'toasts.walletCreatedDesc': `Successfully created "${values?.name}".`,
+      'toasts.walletCreated': 'Account Created',
+      'toasts.walletCreatedDesc': `Successfully created "${values?.name}".`,
       'toasts.walletCreateFailed': 'Failed to Create Account',
-      'toasts.walletUpdated': 'Account Updated', 'toasts.walletUpdatedDesc': `Successfully updated "${values?.name}".`,
+      'toasts.walletUpdated': 'Account Updated',
+      'toasts.walletUpdatedDesc': `Successfully updated "${values?.name}".`,
       'toasts.walletUpdateFailed': 'Failed to Update Account',
-      'toasts.walletDeleted': 'Account Deleted', 'toasts.walletDeletedDesc': 'Account has been deleted successfully.',
+      'toasts.walletDeleted': 'Account Deleted',
+      'toasts.walletDeletedDesc': 'Account has been deleted successfully.',
       'toasts.walletDeleteFailed': 'Failed to Delete Account',
-      'toasts.transferCompleted': 'Transfer Completed', 'toasts.transferCompletedDesc': `Successfully transferred ${values?.amount}.`,
+      'toasts.transferCompleted': 'Transfer Completed',
+      'toasts.transferCompletedDesc': `Successfully transferred ${values?.amount}.`,
       'toasts.transferFailed': 'Transfer Failed'
     }
     return fallbackMap[key] ?? key
@@ -41,14 +47,15 @@ export function useWallets() {
     if (isInitialized.value && !force) return
     isLoading.value = true
     try {
-      const res = await $fetch<{ success: boolean, data: WalletWithBalance[] }>('/api/wallets')
+      const res = await $fetch<{ success: boolean, data: WalletWithBalance[] }>(
+        '/api/wallets'
+      )
       if (res.success && res.data) {
         wallets.value = res.data
         isInitialized.value = true
       }
     } catch (error) {
       console.error('Failed to fetch wallets:', error)
-      Sentry.captureException(error)
     } finally {
       isLoading.value = false
     }
@@ -57,13 +64,19 @@ export function useWallets() {
   const createWallet = async (payload: CreateWalletPayload) => {
     isLoading.value = true
     try {
-      const res = await $fetch<{ success: boolean, data: WalletWithBalance }>('/api/wallets', {
-        method: 'POST',
-        body: payload
-      })
+      const res = await $fetch<{ success: boolean, data: WalletWithBalance }>(
+        '/api/wallets',
+        {
+          method: 'POST',
+          body: payload
+        }
+      )
       if (res.success && res.data) {
         if (res.data.isDefault) {
-          wallets.value = wallets.value.map(w => ({ ...w, isDefault: false }))
+          wallets.value = wallets.value.map(w => ({
+            ...w,
+            isDefault: false
+          }))
         }
         wallets.value = [res.data, ...wallets.value]
         toast.add({
@@ -75,7 +88,6 @@ export function useWallets() {
       }
     } catch (error) {
       console.error('Failed to create wallet:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.walletCreateFailed'),
         description: describeApiError(error),
@@ -90,15 +102,22 @@ export function useWallets() {
   const updateWallet = async (id: string, payload: UpdateWalletPayload) => {
     isLoading.value = true
     try {
-      const res = await $fetch<{ success: boolean, data: WalletWithBalance }>(`/api/wallets/${id}`, {
-        method: 'PUT',
-        body: payload
-      })
+      const res = await $fetch<{ success: boolean, data: WalletWithBalance }>(
+        `/api/wallets/${id}`,
+        {
+          method: 'PUT',
+          body: payload
+        }
+      )
       if (res.success && res.data) {
         if (res.data.isDefault) {
-          wallets.value = wallets.value.map(w => w.id === id ? res.data : { ...w, isDefault: false })
+          wallets.value = wallets.value.map(w =>
+            w.id === id ? res.data : { ...w, isDefault: false }
+          )
         } else {
-          wallets.value = wallets.value.map(w => w.id === id ? res.data : w)
+          wallets.value = wallets.value.map(w =>
+            w.id === id ? res.data : w
+          )
         }
         await fetchWallets(true)
         toast.add({
@@ -110,7 +129,6 @@ export function useWallets() {
       }
     } catch (error) {
       console.error('Failed to update wallet:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.walletUpdateFailed'),
         description: describeApiError(error),
@@ -140,7 +158,6 @@ export function useWallets() {
       }
     } catch (error) {
       console.error('Failed to delete wallet:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.walletDeleteFailed'),
         description: describeApiError(error),
@@ -187,7 +204,6 @@ export function useWallets() {
         target.balance -= payload.amount
       }
       console.error('Failed to transfer funds:', error)
-      Sentry.captureException(error)
       toast.add({
         title: t('toasts.transferFailed'),
         description: describeApiError(error),
@@ -203,8 +219,8 @@ export function useWallets() {
     wallets.value.reduce((sum, w) => sum + (w.balance || 0), 0)
   )
 
-  const defaultWallet = computed(() =>
-    wallets.value.find(w => w.isDefault) || wallets.value[0] || null
+  const defaultWallet = computed(
+    () => wallets.value.find(w => w.isDefault) || wallets.value[0] || null
   )
 
   const selectedWallet = computed(() =>
