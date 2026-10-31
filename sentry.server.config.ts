@@ -8,11 +8,12 @@ if (process.env.NODE_ENV !== 'test') {
     sampleRate: 1.0,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
     environment: process.env.NODE_ENV,
-    enableLogs: false,
     ignoreErrors: SENTRY_IGNORE_ERRORS,
 
     dataCollection: {
       userInfo: false,
+      cookies: false,
+      httpHeaders: false,
       httpBodies: []
     },
 

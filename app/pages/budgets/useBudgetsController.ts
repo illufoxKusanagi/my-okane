@@ -1,12 +1,7 @@
 import { ref, computed } from 'vue'
 
 export function useBudgetsController() {
-  // Local-time month string (YYYY-MM); toISOString() would report the
-  // previous month for negative-UTC-offset users early in the month.
-  const now = new Date()
-  const currentMonth = ref(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  )
+  const { currentPeriod: currentMonth, prevPeriod: prevMonth, nextPeriod: nextMonth } = usePeriod()
 
   const {
     data: budgetData,
@@ -98,22 +93,6 @@ export function useBudgetsController() {
     } finally {
       isSaving.value = false
     }
-  }
-
-  const prevMonth = () => {
-    const parts = currentMonth.value.split('-').map(Number)
-    const year = parts[0] ?? new Date().getFullYear()
-    const month = parts[1] ?? new Date().getMonth() + 1
-    const date = new Date(Date.UTC(year, month - 2, 1))
-    currentMonth.value = date.toISOString().slice(0, 7)
-  }
-
-  const nextMonth = () => {
-    const parts = currentMonth.value.split('-').map(Number)
-    const year = parts[0] ?? new Date().getFullYear()
-    const month = parts[1] ?? new Date().getMonth() + 1
-    const date = new Date(Date.UTC(year, month, 1))
-    currentMonth.value = date.toISOString().slice(0, 7)
   }
 
   const openBudgetModal = (categoryId: string | null, currentAmount = 0) => {

@@ -68,7 +68,7 @@ export default defineNuxtConfig({
         'Permissions-Policy': 'camera=(self), microphone=(), geolocation=()',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'Content-Security-Policy':
-          'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io; object-src \'none\'; base-uri \'self\'; form-action \'self\';'
+          'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'wasm-unsafe-eval\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: blob:; connect-src \'self\' https://generativelanguage.googleapis.com https://*.sentry.io https://*.ingest.sentry.io; object-src \'none\'; base-uri \'self\'; form-action \'self\'; worker-src \'self\' blob:;'
       }
     }
   },

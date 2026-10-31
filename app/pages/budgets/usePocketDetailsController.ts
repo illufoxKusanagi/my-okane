@@ -1,12 +1,9 @@
 import { ref, computed } from 'vue'
 import type { Transaction } from '~/composables/useFinance'
+import { isDateInPeriod } from '~~/shared/utils/period'
 
 export function usePocketDetailsController(categoryId: string) {
-  // Local-time month string; toISOString() would use UTC month.
-  const now = new Date()
-  const currentMonth = ref(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  )
+  const { currentPeriod: currentMonth, periodStartDay } = usePeriod()
 
   const {
     data: budgetData,
@@ -28,11 +25,8 @@ export function usePocketDetailsController(categoryId: string) {
 
   const pocketTransactions = computed(() => {
     return transactions.value.filter((t) => {
-      if (t.categoryId !== categoryId) return false
-
-      const tDate = new Date(t.transactionDate)
-      const yyyymm = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`
-      return yyyymm === currentMonth.value
+      if (t.categoryId !== categoryId || t.transferWalletId) return false
+      return isDateInPeriod(t.transactionDate, currentMonth.value, periodStartDay.value)
     })
   })
 

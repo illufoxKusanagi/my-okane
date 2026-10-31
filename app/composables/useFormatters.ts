@@ -1,3 +1,5 @@
+import { formatPeriodLabel } from '~~/shared/utils/period'
+
 export function useFormatters() {
   const getLocaleTag = (fallback: 'id-ID' | 'en-US'): 'id-ID' | 'en-US' => {
     try {
@@ -43,17 +45,18 @@ export function useFormatters() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  const formatMonthLabel = (monthStr: string): string => {
-    const parts = monthStr.split('-').map(Number)
-    const year = parts[0] ?? new Date().getFullYear()
-    const month = parts[1] ?? new Date().getMonth() + 1
-    const date = new Date(Date.UTC(year, month - 1, 1))
-    const localeTag = getLocaleTag('en-US')
-    return date.toLocaleDateString(localeTag, {
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC'
-    })
+  const formatMonthLabel = (monthStr: string, startDay?: number): string => {
+    let effectiveStartDay = startDay
+    if (effectiveStartDay === undefined) {
+      try {
+        if (typeof usePeriod === 'function') {
+          effectiveStartDay = usePeriod().periodStartDay.value
+        }
+      } catch {
+        effectiveStartDay = 1
+      }
+    }
+    return formatPeriodLabel(monthStr, effectiveStartDay ?? 1, getLocaleTag('en-US'))
   }
 
   const getProgressColor = (

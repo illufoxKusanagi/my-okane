@@ -47,7 +47,8 @@
     "totalSpent": "Total Spent",
     "categoryBreakdown": "Category Breakdown",
     "basedOnTransactions": "Based on your recorded transactions",
-    "transactionCount": "{count} trans."
+    "transactionCount": "{count} trans.",
+    "cutoffDayBadge": "Cycle: Day {day}"
   },
   "transactions": {
     "title": "Transactions", "scanReceipt": "Scan Receipt",
@@ -161,6 +162,11 @@
     "passwordsDoNotMatch": "Passwords do not match.",
     "profileUpdatedTitle": "Profile Updated", "profileUpdatedDesc": "Your display name has been updated.",
     "updateFailedTitle": "Update Failed",
+    "periodStartDay": "Monthly Recap Start Day",
+    "periodStartDayDesc": "Transactions are grouped from this day each month to the day before next month (e.g. 21 Oct – 20 Nov).",
+    "dayOfEveryMonth": "Day {day} of every month",
+    "periodUpdatedTitle": "Recap Period Updated",
+    "periodUpdatedDesc": "Monthly recap now starts on day {day}.",
     "passwordChangedTitle": "Password Changed", "passwordChangedDesc": "Your password has been successfully updated.",
     "passwordUpdateFailedTitle": "Password update failed",
     "confirmNewPassword": "Confirm new password", "updatePasswordBtn": "Update Password"

@@ -86,7 +86,8 @@ export default defineEventHandler(async (event) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        credentialsVersion: user.credentialsVersion ?? 0
+        credentialsVersion: user.credentialsVersion ?? 0,
+        periodStartDay: user.periodStartDay ?? 1
       }
     } as unknown as Parameters<typeof setUserSession>[1])
 
@@ -99,7 +100,8 @@ export default defineEventHandler(async (event) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        periodStartDay: user.periodStartDay ?? 1
       }
     }
   } catch (error: unknown) {

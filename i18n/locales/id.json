@@ -47,7 +47,8 @@
     "totalSpent": "Total Pengeluaran",
     "categoryBreakdown": "Rincian Kategori",
     "basedOnTransactions": "Berdasarkan transaksi yang tercatat",
-    "transactionCount": "{count} trans."
+    "transactionCount": "{count} trans.",
+    "cutoffDayBadge": "Siklus: Tgl {day}"
   },
   "transactions": {
     "title": "Transaksi", "scanReceipt": "Pindai Struk",
@@ -161,6 +162,11 @@
     "passwordsDoNotMatch": "Kata sandi tidak cocok.",
     "profileUpdatedTitle": "Profil Diperbarui", "profileUpdatedDesc": "Nama tampilan Anda telah diperbarui.",
     "updateFailedTitle": "Gagal Memperbarui",
+    "periodStartDay": "Tanggal Mulai Siklus Bulanan",
+    "periodStartDayDesc": "Transaksi dikelompokkan mulai tanggal ini setiap bulan hingga sehari sebelum bulan berikutnya (cth. 21 Okt – 20 Nov).",
+    "dayOfEveryMonth": "Tanggal {day} setiap bulan",
+    "periodUpdatedTitle": "Periode Rekap Diperbarui",
+    "periodUpdatedDesc": "Rekap bulanan kini dimulai pada tanggal {day}.",
     "passwordChangedTitle": "Kata Sandi Diubah", "passwordChangedDesc": "Kata sandi Anda berhasil diperbarui.",
     "passwordUpdateFailedTitle": "Gagal memperbarui kata sandi",
     "confirmNewPassword": "Konfirmasi kata sandi baru", "updatePasswordBtn": "Perbarui Kata Sandi"

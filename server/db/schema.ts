@@ -14,6 +14,7 @@ export const users = sqliteTable('users', {
     mode: 'timestamp'
   }),
   credentialsVersion: integer('credentials_version').notNull().default(0),
+  periodStartDay: integer('period_start_day').notNull().default(1),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(unixepoch())`)
     .notNull()

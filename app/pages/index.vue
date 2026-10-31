@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import BalanceCard from '~/components/budgets/BalanceCard.vue'
+import PeriodHeaderBar from '~/components/budgets/PeriodHeaderBar.vue'
 import MonthlySpendingCard from '~/components/ui/chart/MonthlySpendingCard.vue'
 import MonthlyTrendChart from '~/components/ui/chart/MonthlyTrendChart.vue'
 import WalletDeck from '~/components/wallets/WalletDeck.vue'
@@ -21,6 +22,7 @@ const {
   getCategories
 } = useFinance()
 const { wallets, totalNetWorth, fetchWallets } = useWallets()
+const { currentPeriod } = usePeriod()
 
 const totalIncome = computed(() => getTotalIncome())
 const totalSpending = computed(() => getTotalSpending())
@@ -34,15 +36,9 @@ const incomeCategories = computed(() => getCategories('income'))
 
 const currentView = ref<'month' | 'week'>('month')
 
-// Local-time month string; toISOString() would use UTC and can pick the
-// wrong month for negative-offset timezones early in the month.
-const _now = new Date()
-const currentMonthStr = ref(
-  `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}`
-)
 const { data: budgetData, status: budgetStatus, refresh: refreshBudgets }
   = useFetch('/api/budgets', {
-    query: { month: currentMonthStr.value }
+    query: { month: currentPeriod }
   })
 
 onMounted(() => {
@@ -103,6 +99,8 @@ const weeklyRemaining = computed(
   <div
     class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
   >
+    <PeriodHeaderBar />
+
     <!-- Hero Financial Overview: Balance Card & Budget Slider / Skeletons -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <BalanceCard
