@@ -1,5 +1,6 @@
 import type { Transaction, CategoryData } from './types'
 import { useFinanceState } from './useFinanceState'
+import { isDateInPeriod } from '~~/shared/utils/period'
 
 const colors = [
   'hsl(220 70% 50%)',
@@ -59,26 +60,48 @@ function aggregateByCategory(
 export function useFinanceSelectors() {
   const { transactions } = useFinanceState()
 
+  const getActivePeriodTransactions = (): Transaction[] => {
+    let currentPeriod: string | null = null
+    let periodStartDay = 1
+
+    try {
+      if (typeof usePeriod === 'function') {
+        const period = usePeriod()
+        currentPeriod = period.currentPeriod.value
+        periodStartDay = period.periodStartDay.value
+      }
+    } catch {
+      // Fallback outside Nuxt setup/test context
+    }
+
+    return transactions.value.filter((t) => {
+      if (t.transferWalletId) return false
+      if (!currentPeriod) return true
+      return isDateInPeriod(t.transactionDate, currentPeriod, periodStartDay)
+    })
+  }
+
   const getSpendingByCategory = (): CategoryData[] =>
-    aggregateByCategory(transactions.value, 'spending')
+    aggregateByCategory(getActivePeriodTransactions(), 'spending')
 
   const getIncomeByCategory = (): CategoryData[] =>
-    aggregateByCategory(transactions.value, 'income')
+    aggregateByCategory(getActivePeriodTransactions(), 'income')
 
   const getTotalSpending = () =>
-    transactions.value
+    getActivePeriodTransactions()
       .filter(t => t.type === 'spending')
       .reduce((sum, t) => sum + t.amount, 0)
 
   const getTotalIncome = () =>
-    transactions.value
+    getActivePeriodTransactions()
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0)
 
   const getTransactionsByCategory = (categoryName: string) =>
-    transactions.value.filter(t => t.categoryName === categoryName)
+    getActivePeriodTransactions().filter(t => t.categoryName === categoryName)
 
   return {
+    getActivePeriodTransactions,
     getSpendingByCategory,
     getIncomeByCategory,
     getTotalSpending,

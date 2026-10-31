@@ -1,24 +1,28 @@
 import { computed } from 'vue'
 import type { ChartData, ChartOptions } from 'chart.js'
+import {
+  getPeriodKeyForDate,
+  getPeriodRange,
+  shiftPeriodKey
+} from '~~/shared/utils/period'
 
 export function useMonthlyTrend() {
   const { transactions } = useFinance()
-  const { t } = useI18n()
+  const { currentPeriod, periodStartDay } = usePeriod()
+  const { t, locale } = useI18n()
   const colorMode = useColorMode()
   const isDark = computed(() => colorMode.value === 'dark')
 
   const monthlyData = computed(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ]
-    const now = new Date()
-
+    const localeTag = locale.value === 'en' ? 'en-US' : 'id-ID'
     const monthSlots: { key: string, label: string }[] = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const label = months[d.getMonth()] || 'Jan'
+
+    for (let i = -5; i <= 0; i++) {
+      const key = shiftPeriodKey(currentPeriod.value, i)
+      const { start } = getPeriodRange(key, periodStartDay.value)
+      const label = periodStartDay.value === 1
+        ? start.toLocaleDateString(localeTag, { month: 'short', timeZone: 'UTC' })
+        : start.toLocaleDateString(localeTag, { day: 'numeric', month: 'short', timeZone: 'UTC' })
       monthSlots.push({ key, label })
     }
 
@@ -28,9 +32,10 @@ export function useMonthlyTrend() {
     })
 
     transactions.value.forEach((t) => {
+      if (t.transferWalletId) return
       const d = new Date(t.transactionDate || new Date())
       if (!isNaN(d.getTime())) {
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        const key = getPeriodKeyForDate(d, periodStartDay.value)
         if (statsMap.has(key)) {
           const stats = statsMap.get(key)!
           if (t.type === 'income') {

@@ -1,18 +1,26 @@
-import { budgets, categories, transactions } from '~~/server/db/schema'
+import { budgets, categories, transactions, users } from '~~/server/db/schema'
 import { db } from '~~/server/db'
-import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, eq, gte, isNotNull, isNull, lte, sql } from 'drizzle-orm'
 import { throwSafeServerError } from '~~/server/utils/safeError'
+import { clampPeriodStartDay, getPeriodKeyForDate, getPeriodRange } from '~~/shared/utils/period'
 
 export default defineEventHandler(async (event) => {
   try {
     const userId = await getAuthUserId(event)
     const query = getQuery(event)
 
+    const userRow = await db
+      .select({ periodStartDay: users.periodStartDay })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+    const periodStartDay = clampPeriodStartDay(userRow[0]?.periodStartDay)
+
     const rawMonth = typeof query.month === 'string' ? query.month : ''
     const isValidMonth = /^\d{4}-\d{2}$/.test(rawMonth)
-    const now = new Date()
-    const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const fallbackMonth = getPeriodKeyForDate(new Date(), periodStartDay)
     const month = isValidMonth ? rawMonth : fallbackMonth
+    const { start: periodStart, end: periodEnd } = getPeriodRange(month, periodStartDay)
 
     const globalBudgetResult = await db
       .select()
@@ -36,7 +44,8 @@ export default defineEventHandler(async (event) => {
           eq(transactions.userId, userId),
           eq(transactions.type, 'spending'),
           isNull(transactions.transferWalletId),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
+          gte(transactions.transactionDate, periodStart),
+          lte(transactions.transactionDate, periodEnd)
         )
       )
     const totalSpending = Number(totalSpendingResult[0]?.total || 0)
@@ -49,7 +58,8 @@ export default defineEventHandler(async (event) => {
           eq(transactions.userId, userId),
           eq(transactions.type, 'income'),
           isNull(transactions.transferWalletId),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
+          gte(transactions.transactionDate, periodStart),
+          lte(transactions.transactionDate, periodEnd)
         )
       )
     const totalIncome = Number(totalIncomeResult[0]?.total || 0)
@@ -105,7 +115,8 @@ export default defineEventHandler(async (event) => {
         and(
           eq(transactions.userId, userId),
           isNull(transactions.transferWalletId),
-          sql`strftime('%Y-%m', datetime(${transactions.transactionDate}, 'unixepoch')) = ${month}`
+          gte(transactions.transactionDate, periodStart),
+          lte(transactions.transactionDate, periodEnd)
         )
       )
       .groupBy(transactions.categoryId)
@@ -134,6 +145,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       month,
+      periodStartDay,
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
       globalBudget: globalBudget
         ? {
             id: globalBudget.id,

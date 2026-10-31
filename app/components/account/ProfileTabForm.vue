@@ -11,30 +11,47 @@ const { user, fetch: fetchSession } = useUserSession()
 const toast = useToast()
 
 const name = ref(user.value?.name || '')
+const periodStartDay = ref(user.value?.periodStartDay ?? 1)
 const isProfileLoading = ref(false)
 
 watch(
-  () => user.value?.name,
-  (newName) => {
-    if (newName) {
-      name.value = newName
+  () => user.value,
+  (newUser) => {
+    if (newUser?.name) {
+      name.value = newUser.name
+    }
+    if (newUser?.periodStartDay !== undefined) {
+      periodStartDay.value = newUser.periodStartDay
     }
   },
   { immediate: true }
 )
 
-const isProfileInvalid = computed(
-  () => !name.value.trim() || name.value.trim() === user.value?.name
+const periodStartDayOptions = computed(() =>
+  Array.from({ length: 28 }, (_, i) => ({
+    label: t('account.dayOfEveryMonth', { day: i + 1 }),
+    value: i + 1
+  }))
 )
+
+const isProfileInvalid = computed(() => {
+  const isNameEmpty = !name.value.trim()
+  const hasNameChanged = name.value.trim() !== user.value?.name
+  const hasPeriodChanged = Number(periodStartDay.value) !== (user.value?.periodStartDay ?? 1)
+  return isNameEmpty || (!hasNameChanged && !hasPeriodChanged)
+})
 
 async function handleSaveProfile() {
   if (isProfileInvalid.value || isProfileLoading.value) return
   isProfileLoading.value = true
 
   try {
-    const res = await $fetch<{ success: boolean, user: { name: string } }>('/api/auth/profile', {
+    const res = await $fetch<{ success: boolean, user: { name: string, periodStartDay: number } }>('/api/auth/profile', {
       method: 'PUT',
-      body: { name: name.value.trim() }
+      body: {
+        name: name.value.trim(),
+        periodStartDay: Number(periodStartDay.value)
+      }
     })
 
     if (res.success) {
@@ -91,6 +108,19 @@ async function handleSaveProfile() {
       <p class="text-xs text-muted mt-1">
         {{ $t('account.emailImmutableDesc') }}
       </p>
+    </UFormField>
+
+    <UFormField
+      :label="$t('account.periodStartDay')"
+      name="periodStartDay"
+      :description="$t('account.periodStartDayDesc')"
+    >
+      <USelect
+        v-model="periodStartDay"
+        :items="periodStartDayOptions"
+        icon="i-lucide-calendar"
+        class="w-full"
+      />
     </UFormField>
 
     <div class="flex justify-end gap-3 pt-4 border-t border-default mt-2">

@@ -3,6 +3,7 @@ import AppModal from '~/components/ui/AppModal.vue'
 import CategoryFormFields from '~/components/categories/CategoryFormFields.vue'
 import MonthlyLimitCard from '~/components/budgets/MonthlyLimitCard.vue'
 import PocketCard from '~/components/budgets/PocketCard.vue'
+import PeriodHeaderBar from '~/components/budgets/PeriodHeaderBar.vue'
 import CurrencyInput from '~/components/ui/CurrencyInput.vue'
 import { useBudgetsController } from './useBudgetsController'
 
@@ -13,7 +14,6 @@ useSeoMeta({
 })
 
 const {
-  currentMonth,
   budgetData,
   pending,
   isSaving,
@@ -28,44 +28,18 @@ const {
   pocketBudgetLimit,
   openCreatePocketModal,
   handleCreatePocket,
-  prevMonth,
-  nextMonth,
   openBudgetModal,
   handleSaveBudget
 } = useBudgetsController()
-
-const { formatMonthLabel } = useFormatters()
 </script>
 
 <template>
   <div
     class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-12 sm:pb-8"
   >
-    <!-- Month Selection Header -->
-    <div
-      class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-elevated/70 border border-muted/50 p-5 rounded-2xl shadow-sm backdrop-blur-md"
-    >
-      <div class="flex items-center gap-3">
-        <UButton
-          icon="i-lucide-chevron-left"
-          color="neutral"
-          variant="ghost"
-          aria-label="Previous month"
-          @click="prevMonth"
-        />
-        <span class="text-lg font-bold text-highlighted min-w-44 text-center">
-          {{ formatMonthLabel(currentMonth) }}
-        </span>
-        <UButton
-          icon="i-lucide-chevron-right"
-          color="neutral"
-          variant="ghost"
-          aria-label="Next month"
-          @click="nextMonth"
-        />
-      </div>
-
-      <div class="flex flex-col md:flex-row w-full md:w-fit items-center gap-2">
+    <!-- Period Navigation Header -->
+    <PeriodHeaderBar>
+      <template #actions>
         <UButton
           :label="$t('budgets.createPocket')"
           icon="i-lucide-plus"
@@ -81,8 +55,8 @@ const { formatMonthLabel } = useFormatters()
           class="w-full text-center items-center"
           @click="openBudgetModal(null, budgetData?.globalBudget?.amount)"
         />
-      </div>
-    </div>
+      </template>
+    </PeriodHeaderBar>
 
     <!-- Stats Overview Cards / Skeletons (Bank Jago-style) -->
     <div

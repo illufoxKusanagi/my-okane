@@ -1,8 +1,9 @@
 declare module '#auth-utils' {
   interface User {
-    id: number
+    id: string
     name: string
     email: string
+    periodStartDay?: number
   }
   interface UserSession {
     user: User

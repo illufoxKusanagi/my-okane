@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const { getSpendingByCategory } = useFinance()
-const { t, locale } = useI18n()
+const { periodLabel } = usePeriod()
+const { t } = useI18n()
 
 const spendingData = computed(() => getSpendingByCategory())
 
 const currentMonthDescription = computed(() => {
-  const localeTag = locale.value === 'en' ? 'en-US' : 'id-ID'
-  const monthStr = new Date().toLocaleDateString(localeTag, { month: 'long', year: 'numeric' })
-  return t('dashboard.expensesForMonth', { month: monthStr })
+  return t('dashboard.expensesForMonth', { month: periodLabel.value })
 })
 </script>
 
